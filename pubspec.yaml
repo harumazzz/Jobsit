@@ -1,0 +1,32 @@
+name: jobsit
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+environment:
+  sdk: ^3.7.2
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  get_it: ^8.0.3
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+  dart_either: ^2.0.0
+  equatable: ^2.0.7
+  freezed_annotation: ^3.0.0
+  dio: ^5.8.0+1
+  json_annotation: ^4.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  riverpod_generator: ^2.6.5
+  build_runner: ^2.4.15
+  custom_lint: ^0.7.5
+  dart_format: ^0.0.4
+  freezed: ^3.0.6
+  riverpod_lint: ^2.6.5
+  json_serializable: ^6.9.5
+flutter:
+  uses-material-design: true
