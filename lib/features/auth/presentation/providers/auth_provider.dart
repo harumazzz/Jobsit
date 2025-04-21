@@ -22,7 +22,7 @@ sealed class AuthState with _$AuthState {
 }
 
 @riverpod
-class AuthProvider extends _$AuthProvider {
+class AuthController extends _$AuthController {
   @override
   AuthState build() {
     return const AuthState.initial();
@@ -60,7 +60,7 @@ class AuthProvider extends _$AuthProvider {
     );
     state = result.fold(
       ifRight: AuthState.authorized,
-      ifLeft: (r) => AuthState.error(r.message),
+      ifLeft: (e) => AuthState.error(e.message),
     );
   }
 }

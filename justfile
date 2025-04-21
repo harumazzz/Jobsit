@@ -17,6 +17,8 @@ format:
 clean:
     flutter clean
 backend:
-    java -jar "C:\Users\Admin\Documents\GitHub\jobsit\backend\jobsit.jar"
+    java -jar "C:\Users\Admin\Documents\GitHub\Project\Jobsit\backend\jobsit.jar"
 fix:
     dart fix --apply
+test:
+    flutter test

@@ -7,7 +7,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
-import '../../../../core/network/dio_provider.dart';
+import '../../../../core/network/api_constant.dart';
+import '../../../../core/network/dio_client.dart';
 import '../models/user_model.dart';
 
 part 'auth_remote_data_source.g.dart';
@@ -36,10 +37,10 @@ final class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   ) async {
     try {
       final response = await _dio.post(
-        'candidate',
+        ApiConstant.registerEndpoint,
         data: {'userCreationDTO': request.toJson()},
       );
-      if (response.statusCode != HttpStatus.created) {
+      if (response.statusCode == HttpStatus.created) {
         final result = UserCreationResponse.fromJson(response.data['userDTO']);
         return Right(result);
       } else {
@@ -55,8 +56,11 @@ final class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<Either<Failure, UserResponse>> loginUser(LogInRequest request) async {
     try {
-      final response = await _dio.post('login', data: request.toJson());
-      if (response.statusCode != HttpStatus.created) {
+      final response = await _dio.post(
+        ApiConstant.loginEndpoint,
+        data: request.toJson(),
+      );
+      if (response.statusCode == HttpStatus.created) {
         final result = UserResponse.fromJson(response.data);
         return Right(result);
       } else {
