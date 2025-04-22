@@ -1,11 +1,16 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'injection_container.dart';
 import 'shared/routes/app_router.dart';
+import 'shared/theme/app_theme.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  AppTheme.applyOverlay();
   InjectionContainer.injectDependencies();
   runApp(const ProviderScope(child: MainApp()));
 }
@@ -18,7 +23,11 @@ class MainApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Jobsit IT',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      theme: AppTheme.theme,
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        multitouchDragStrategy: MultitouchDragStrategy.sumAllPointers,
+        scrollbars: false,
+      ),
       routerConfig: AppRouter.config,
     );
   }
