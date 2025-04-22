@@ -259,6 +259,70 @@ $UserCopyWith<$Res> get user {
 /// @nodoc
 
 
+class AuthVerified implements AuthState {
+  const AuthVerified();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthVerified);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'AuthState.verified()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class AuthSendedMail implements AuthState {
+  const AuthSendedMail();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthSendedMail);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'AuthState.sendedMail()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
 class AuthError implements AuthState {
   const AuthError(this.message);
   

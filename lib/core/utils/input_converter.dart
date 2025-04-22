@@ -53,4 +53,14 @@ class InputConverter extends Equatable {
     }
     return null;
   }
+
+  static String? validateOtp(String? input) {
+    if (input == null || input.isEmpty) {
+      return 'Please enter an OTP';
+    }
+    if (!RegExp(r'^\d{6}$').hasMatch(input)) {
+      return 'Please enter a valid 6-digit OTP';
+    }
+    return null;
+  }
 }

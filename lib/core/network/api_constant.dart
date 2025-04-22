@@ -11,4 +11,8 @@ class ApiConstant extends Equatable {
   static const String loginEndpoint = '/login';
 
   static const String registerEndpoint = '/candidate';
+
+  static const String sendOtpEndpoint = '/active-user';
+
+  static const String verifyOtpEndpoint = '/active';
 }

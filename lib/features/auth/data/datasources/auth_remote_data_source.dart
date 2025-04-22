@@ -23,6 +23,10 @@ abstract class AuthRemoteDataSource {
   Future<Either<Failure, UserCreationResponse>> registerUser(UserCreationRequest request);
 
   Future<Either<Failure, UserResponse>> loginUser(LogInRequest request);
+
+  Future<Either<Failure, Success>> sendMail(String email);
+
+  Future<Either<Failure, Success>> verifyOTP(String otp);
 }
 
 final class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -53,6 +57,38 @@ final class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (response.statusCode == HttpStatus.created) {
         final result = UserResponse.fromJson(response.data);
         return Right(result);
+      } else {
+        throw ServerException(response.data['message']);
+      }
+    } on DioException catch (e) {
+      throw ServerException(e.response?.data['message']);
+    } catch (e) {
+      throw SystemException(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Success>> sendMail(String email) async {
+    try {
+      final response = await _dio.post(ApiConstant.sendOtpEndpoint, queryParameters: {'email': email});
+      if (response.statusCode == HttpStatus.ok) {
+        return const Right(Success());
+      } else {
+        throw ServerException(response.data['message']);
+      }
+    } on DioException catch (e) {
+      throw ServerException(e.response?.data['message']);
+    } catch (e) {
+      throw SystemException(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Success>> verifyOTP(String otp) async {
+    try {
+      final response = await _dio.post(ApiConstant.verifyOtpEndpoint, queryParameters: {'otp': otp});
+      if (response.statusCode == HttpStatus.ok) {
+        return const Right(Success());
       } else {
         throw ServerException(response.data['message']);
       }

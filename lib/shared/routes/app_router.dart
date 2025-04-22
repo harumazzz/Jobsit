@@ -17,7 +17,18 @@ class AppRouter extends Equatable {
       GoRoute(path: '/register', name: 'register', builder: (_, _) => const RegisterPage()),
       GoRoute(path: '/home', name: 'home', builder: (_, _) => const HomePage()),
       GoRoute(path: '/forgot_password', name: 'forgot_password', builder: (_, _) => const ForgotPasswordPage()),
-      GoRoute(path: '/otp_verification', name: 'otp_verification', builder: (_, _) => const OtpVerificationPage()),
+      GoRoute(
+        path: '/otp_verification',
+        name: 'otp_verification',
+        builder: (_, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          assert(extra != null, 'Extra data is required for OTP verification');
+          assert(extra!['email'] != null, 'Email is required in extra data for OTP verification');
+          final email = extra?['email'] as String;
+          return OtpVerificationPage(email: email);
+        },
+      ),
+      GoRoute(path: '/otp_verified', name: 'otp_verified', builder: (_, _) => const OtpVerifiedPage()),
     ],
   );
 

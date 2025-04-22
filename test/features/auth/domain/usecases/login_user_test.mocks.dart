@@ -88,4 +88,34 @@ class MockAuthRepository extends _i1.Mock implements _i2.AuthRepository {
             ),
           )
           as _i3.Future<_i4.Either<_i5.Failure, _i6.User>>);
+
+  @override
+  _i3.Future<_i4.Either<_i5.Failure, _i5.Success>> sendMail({
+    required String? email,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#sendMail, [], {#email: email}),
+            returnValue: _i3.Future<_i4.Either<_i5.Failure, _i5.Success>>.value(
+              _i7.dummyValue<_i4.Either<_i5.Failure, _i5.Success>>(
+                this,
+                Invocation.method(#sendMail, [], {#email: email}),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, _i5.Success>>);
+
+  @override
+  _i3.Future<_i4.Either<_i5.Failure, _i5.Success>> verifyOtp({
+    required String? otp,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#verifyOtp, [], {#otp: otp}),
+            returnValue: _i3.Future<_i4.Either<_i5.Failure, _i5.Success>>.value(
+              _i7.dummyValue<_i4.Either<_i5.Failure, _i5.Success>>(
+                this,
+                Invocation.method(#verifyOtp, [], {#otp: otp}),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, _i5.Success>>);
 }

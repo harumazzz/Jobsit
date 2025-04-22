@@ -92,6 +92,35 @@ void main() {
         expect(result, equals('Please enter a name'));
       });
     });
+    group('Validate Otp', () {
+      test('should return null for a valid OTP', () {
+        const validOtp = '123456';
+        final result = InputConverter.validateOtp(validOtp);
+        expect(result, isNull);
+      });
+      test('should return error message for null input', () {
+        const String? nullInput = null;
+        final result = InputConverter.validateOtp(nullInput);
+        expect(result, equals('Please enter an OTP'));
+      });
+      test('should return error message for empty input', () {
+        const emptyInput = '';
+        final result = InputConverter.validateOtp(emptyInput);
+        expect(result, equals('Please enter an OTP'));
+      });
+      test('should return error message for non-6-digit OTP', () {
+        const shortOtp = '12345';
+        const longOtp = '1234567';
+        const nonDigitOtp = '12345abc';
+        final result1 = InputConverter.validateOtp(shortOtp);
+        final result2 = InputConverter.validateOtp(longOtp);
+        final result3 = InputConverter.validateOtp(nonDigitOtp);
+        const expectedError = 'Please enter a valid 6-digit OTP';
+        expect(result1, equals(expectedError));
+        expect(result2, equals(expectedError));
+        expect(result3, equals(expectedError));
+      });
+    });
     group('Validate Phone', () {
       test('should return null for a valid 10-digit phone number', () {
         const validPhone = '1234567890';

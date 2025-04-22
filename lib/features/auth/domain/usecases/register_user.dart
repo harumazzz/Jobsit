@@ -35,9 +35,7 @@ class RegisterUser implements UseCase<RegisteredUser, RegisterUserParams> {
   final AuthRepository _authRepository;
 
   @override
-  Future<Either<Failure, RegisteredUser>> call(
-    RegisterUserParams params,
-  ) async {
+  Future<Either<Failure, RegisteredUser>> call(RegisterUserParams params) async {
     if (params.password.length < 5) {
       return const Left(ShortPasswordFailure('Password is too short'));
     }
@@ -48,6 +46,45 @@ class RegisterUser implements UseCase<RegisteredUser, RegisterUserParams> {
       lastName: params.lastName,
       phone: params.phone,
     );
+    return result;
+  }
+}
+
+@riverpod
+SendMail sendMail(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return SendMail(authRepository);
+}
+
+class SendMail implements UseCase<Success, String> {
+  const SendMail(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, Success>> call(String email) async {
+    if (email.isEmpty) {
+      return const Left(ServerFailure('Email cannot be empty'));
+    }
+    final result = await _authRepository.sendMail(email: email);
+    return result;
+  }
+}
+
+@riverpod
+VerifyOTP verifyOTP(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return VerifyOTP(authRepository);
+}
+
+class VerifyOTP implements UseCase<Success, String> {
+  const VerifyOTP(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, Success>> call(String otp) async {
+    final result = await _authRepository.verifyOtp(otp: otp);
     return result;
   }
 }

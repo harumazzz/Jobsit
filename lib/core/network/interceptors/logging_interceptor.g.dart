@@ -7,11 +7,11 @@ part of 'logging_interceptor.dart';
 // **************************************************************************
 
 String _$loggingInterceptorHash() =>
-    r'56b31fb9f5ecd35a8cd929f3eb0b581740b2e5db';
+    r'23fab90b860b3d1c68037876ae90bed62cda12e3';
 
 /// See also [loggingInterceptor].
 @ProviderFor(loggingInterceptor)
-final loggingInterceptorProvider = AutoDisposeProvider<Interceptor>.internal(
+final loggingInterceptorProvider = Provider<Interceptor>.internal(
   loggingInterceptor,
   name: r'loggingInterceptorProvider',
   debugGetCreateSourceHash:
@@ -24,6 +24,6 @@ final loggingInterceptorProvider = AutoDisposeProvider<Interceptor>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef LoggingInterceptorRef = AutoDisposeProviderRef<Interceptor>;
+typedef LoggingInterceptorRef = ProviderRef<Interceptor>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

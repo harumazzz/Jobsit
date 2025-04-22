@@ -40,4 +40,16 @@ class AuthRepositoryImpl implements AuthRepository {
     final result = await _authRemoteDataSource.loginUser(LogInRequest(email: email, password: password));
     return result.fold(ifLeft: Left.new, ifRight: (e) => Right(e.toEntity()));
   }
+
+  @override
+  Future<Either<Failure, Success>> sendMail({required String email}) async {
+    final result = await _authRemoteDataSource.sendMail(email);
+    return result.fold(ifLeft: Left.new, ifRight: (e) => const Right(Success()));
+  }
+
+  @override
+  Future<Either<Failure, Success>> verifyOtp({required String otp}) async {
+    final result = await _authRemoteDataSource.verifyOTP(otp);
+    return result.fold(ifLeft: Left.new, ifRight: (e) => const Right(Success()));
+  }
 }

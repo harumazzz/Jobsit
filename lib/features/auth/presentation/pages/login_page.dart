@@ -52,7 +52,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(authControllerProvider);
-    ref.listen<AuthState>(authControllerProvider, (previous, next) {
+    ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       switch (next) {
         case AuthError _:
           ScaffoldMessenger.of(context).showSnackBar(

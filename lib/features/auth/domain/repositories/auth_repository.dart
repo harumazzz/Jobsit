@@ -12,8 +12,9 @@ abstract class AuthRepository {
     required String phone,
   });
 
-  Future<Either<Failure, User>> loginUser({
-    required String email,
-    required String password,
-  });
+  Future<Either<Failure, User>> loginUser({required String email, required String password});
+
+  Future<Either<Failure, Success>> sendMail({required String email});
+
+  Future<Either<Failure, Success>> verifyOtp({required String otp});
 }

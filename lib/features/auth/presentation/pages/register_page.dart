@@ -69,7 +69,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(authControllerProvider);
-    ref.listen<AuthState>(authControllerProvider, (previous, next) {
+    ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       switch (next) {
         case AuthError _:
           ScaffoldMessenger.of(context).showSnackBar(
@@ -80,8 +80,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             ),
           );
           break;
-        case AuthAuthorized _:
-          context.goNamed('otp_verification');
+        case AuthRegistered _:
+          context.goNamed('otp_verification', extra: _emailController.text);
           break;
         default:
           break;

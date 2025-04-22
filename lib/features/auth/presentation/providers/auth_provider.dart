@@ -19,6 +19,10 @@ sealed class AuthState with _$AuthState {
 
   const factory AuthState.authorized(User user) = AuthAuthorized;
 
+  const factory AuthState.verified() = AuthVerified;
+
+  const factory AuthState.sendedMail() = AuthSendedMail;
+
   const factory AuthState.error(String message) = AuthError;
 }
 
@@ -56,6 +60,35 @@ class AuthController extends _$AuthController {
       final loginUseCase = ref.read(loginUserProvider);
       final result = await loginUseCase(LoginUserParams(email: email, password: password));
       state = result.fold(ifRight: AuthState.authorized, ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> sendMail({required String email}) async {
+    state = const AuthState.loading();
+    try {
+      final verifyOtpUseCase = ref.read(sendMailProvider);
+      final result = await verifyOtpUseCase(email);
+      state = result.fold(ifRight: (_) => const AuthState.sendedMail(), ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> resendMail({required String email}) async {
+    return await sendMail(email: email);
+  }
+
+  Future<void> verifyOtp({required String otp}) async {
+    try {
+      final verifyOtpUseCase = ref.read(verifyOTPProvider);
+      final result = await verifyOtpUseCase(otp);
+      state = result.fold(ifRight: (_) => const AuthState.verified(), ifLeft: (e) => AuthState.error(e.message));
     } on ServerException catch (e) {
       state = AuthState.error(e.message);
     } catch (e) {
