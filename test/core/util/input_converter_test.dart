@@ -58,6 +58,23 @@ void main() {
         expect(result, equals('Please enter a password'));
       });
     });
+    group('Validate Confirm Password', () {
+      test('should return null for a non-empty password', () {
+        const nonEmptyPassword = 'password123';
+        final result = InputConverter.validateConfirmPassword(nonEmptyPassword);
+        expect(result, isNull);
+      });
+      test('should return error message for null input', () {
+        const String? nullInput = null;
+        final result = InputConverter.validateConfirmPassword(nullInput);
+        expect(result, equals('Please enter a confirm password'));
+      });
+      test('should return error message for empty input', () {
+        const emptyInput = '';
+        final result = InputConverter.validateConfirmPassword(emptyInput);
+        expect(result, equals('Please enter a confirm password'));
+      });
+    });
     group('Validate Name', () {
       test('should return null for a non-empty name', () {
         const nonEmptyName = 'Nguyen Van A';

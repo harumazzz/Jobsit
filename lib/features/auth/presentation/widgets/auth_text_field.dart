@@ -56,7 +56,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
       keyboardType: widget.keyboardType,
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
-        border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20.0))),
+        border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
         labelText: widget.label,
         contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
         suffixIcon: StatefulBuilder(

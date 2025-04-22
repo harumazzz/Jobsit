@@ -85,7 +85,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20.0))),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                   labelText: 'Email',
                   contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                 ),
@@ -137,8 +137,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       const Text('Save password'),
                     ],
                   ),
-                  InkWell(
-                    borderRadius: BorderRadius.zero,
+                  GestureDetector(
                     onTap: () async {
                       context.goNamed('forgot_password');
                     },
@@ -153,7 +152,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: const ButtonStyle(
-                      padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 20.0, horizontal: 32.0)),
+                      padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 24.0, horizontal: 32.0)),
                       shape: WidgetStatePropertyAll(
                         RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                       ),
@@ -201,6 +200,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     onPressed: () async {
                       // TODO(self): Implement Facebook login
                     },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 4.0,
+                children: [
+                  const Text(
+                    'Don\'t have an Account?',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: Colors.black),
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      context.goNamed('register');
+                    },
+                    child: const Text('Sign Up', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
                   ),
                 ],
               ),

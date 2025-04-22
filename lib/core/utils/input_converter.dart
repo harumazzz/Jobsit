@@ -23,6 +23,13 @@ class InputConverter extends Equatable {
     return null;
   }
 
+  static String? validateConfirmPassword(String? input) {
+    if (input == null || input.isEmpty) {
+      return 'Please enter a confirm password';
+    }
+    return null;
+  }
+
   static String? validateName(String? input) {
     if (input == null || input.isEmpty) {
       return 'Please enter a name';
