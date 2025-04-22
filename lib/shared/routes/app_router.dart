@@ -18,6 +18,16 @@ class AppRouter extends Equatable {
       GoRoute(path: '/home', name: 'home', builder: (_, _) => const HomePage()),
       GoRoute(path: '/forgot_password', name: 'forgot_password', builder: (_, _) => const ForgotPasswordPage()),
       GoRoute(
+        path: '/reset_password',
+        name: 'reset_password',
+        builder: (_, state) {
+          final extra = state.extra as String;
+          assert(extra.isNotEmpty, 'Reset Token is required for password reset');
+          final resetToken = extra;
+          return ResetPasswordPage(resetToken: resetToken);
+        },
+      ),
+      GoRoute(
         path: '/otp_verification',
         name: 'otp_verification',
         builder: (_, state) {

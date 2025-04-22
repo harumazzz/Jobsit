@@ -11,9 +11,12 @@ class AuthTextField extends StatefulWidget {
     this.keyboardType,
     this.validator,
     this.onFieldSubmitted,
+    this.autovalidateMode,
   });
 
   final TextEditingController controller;
+
+  final AutovalidateMode? autovalidateMode;
 
   final String label;
 
@@ -37,6 +40,7 @@ class AuthTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextInputType?>('keyboardType', keyboardType));
     properties.add(ObjectFlagProperty<String? Function(String? value)?>.has('validator', validator));
     properties.add(ObjectFlagProperty<void Function(String value)?>.has('onFieldSubmitted', onFieldSubmitted));
+    properties.add(EnumProperty<AutovalidateMode?>('autovalidateMode', autovalidateMode));
   }
 }
 
@@ -70,6 +74,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
       ),
       controller: widget.controller,
       obscureText: _obscureText,
+      autovalidateMode: widget.autovalidateMode,
       validator: widget.validator,
       onFieldSubmitted: widget.onFieldSubmitted,
     );
