@@ -76,42 +76,53 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
     return Scaffold(
       body: Form(
         key: _formKey,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const _Stepper(),
-              const SizedBox(height: 20),
-              const Text('VERIFICATION'),
-              const SizedBox(height: 20),
-              const Text('Enter the OTP code that we send you via SMS'),
-              const SizedBox(height: 30),
-              _OtpField(controller: _otpController, focusNode: _otpFocusNode),
-              const SizedBox(height: 20),
-              Row(
-                spacing: 4.0,
-                children: [
-                  const Text('Didn\'t receive the code?'),
-                  GestureDetector(
-                    onTap: () async {
-                      _otpFocusNode.unfocus();
-                      await ref.read(authControllerProvider.notifier).resendMail(email: widget.email);
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const _Stepper(),
+                const SizedBox(height: 30.0),
+                const Text('VERIFICATION'),
+                const SizedBox(height: 20.0),
+                const Text('Enter the OTP code that we send you via SMS'),
+                const SizedBox(height: 30.0),
+                _OtpField(controller: _otpController, focusNode: _otpFocusNode),
+                const SizedBox(height: 20.0),
+                Row(
+                  spacing: 4.0,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Didn\'t receive the code?'),
+                    GestureDetector(
+                      onTap: () async {
+                        _otpFocusNode.unfocus();
+                        await ref.read(authControllerProvider.notifier).resendMail(email: widget.email);
+                      },
+                      child: const Text('Resend', style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20.0),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                      padding: const EdgeInsets.symmetric(vertical: 20.0),
+                    ),
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        _otpFocusNode.unfocus();
+                        await ref.read(authControllerProvider.notifier).verifyOtp(otp: _otpController.text);
+                      }
                     },
-                    child: const Text('Resend'),
+                    child: const Text('Verify'),
                   ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    _otpFocusNode.unfocus();
-                    await ref.read(authControllerProvider.notifier).verifyOtp(otp: _otpController.text);
-                  }
-                },
-                child: const Text('Verify'),
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -137,6 +148,8 @@ class _OtpField extends StatelessWidget {
         border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
         labelText: 'Enter OTP code',
         contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+        counterText: '',
+        errorStyle: TextStyle(color: Colors.red),
       ),
       controller: controller,
       validator: InputConverter.validateOtp,
@@ -193,9 +206,13 @@ class OtpVerifiedPage extends StatelessWidget {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 12.0,
           children: [
             Image.asset('assets/images/checked.png', width: 85, height: 85),
-            const Text('Account verified successfully'),
+            const Text(
+              'Account verified successfully',
+              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400, color: Colors.green),
+            ),
           ],
         ),
       ),

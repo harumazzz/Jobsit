@@ -21,10 +21,9 @@ class AppRouter extends Equatable {
         path: '/otp_verification',
         name: 'otp_verification',
         builder: (_, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          assert(extra != null, 'Extra data is required for OTP verification');
-          assert(extra!['email'] != null, 'Email is required in extra data for OTP verification');
-          final email = extra?['email'] as String;
+          final extra = state.extra as String;
+          assert(extra.isNotEmpty, 'Extra data is required for OTP verification');
+          final email = extra;
           return OtpVerificationPage(email: email);
         },
       ),

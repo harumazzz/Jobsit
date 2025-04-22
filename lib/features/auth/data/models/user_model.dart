@@ -38,8 +38,8 @@ abstract class UserCreationResponse with _$UserCreationResponse {
     required String firstName,
     required String lastName,
     required String phone,
-    required RoleResponse role,
-    required StatusResponse status,
+    @JsonKey(name: 'roleDTO') required RoleResponse role,
+    @JsonKey(name: 'statusDTO') required StatusResponse status,
   }) = _UserCreationResponse;
 
   factory UserCreationResponse.fromJson(Map<String, dynamic> json) => _$UserCreationResponseFromJson(json);
@@ -52,7 +52,7 @@ abstract class UserResponse with _$UserResponse {
     required String type,
     required String email,
     required String role,
-    required String avatar,
+    String? avatar,
     required int idUser,
   }) = _UserResponse;
 

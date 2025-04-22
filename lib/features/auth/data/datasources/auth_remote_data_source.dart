@@ -70,7 +70,7 @@ final class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<Either<Failure, Success>> sendMail(String email) async {
     try {
-      final response = await _dio.post(ApiConstant.sendOtpEndpoint, queryParameters: {'email': email});
+      final response = await _dio.get(ApiConstant.sendOtpEndpoint, queryParameters: {'email': email});
       if (response.statusCode == HttpStatus.ok) {
         return const Right(Success());
       } else {
@@ -86,7 +86,7 @@ final class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<Either<Failure, Success>> verifyOTP(String otp) async {
     try {
-      final response = await _dio.post(ApiConstant.verifyOtpEndpoint, queryParameters: {'otp': otp});
+      final response = await _dio.get(ApiConstant.verifyOtpEndpoint, queryParameters: {'otp': otp});
       if (response.statusCode == HttpStatus.ok) {
         return const Right(Success());
       } else {

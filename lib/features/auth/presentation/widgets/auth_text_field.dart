@@ -59,16 +59,12 @@ class _AuthTextFieldState extends State<AuthTextField> {
         border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
         labelText: widget.label,
         contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-        suffixIcon: StatefulBuilder(
-          builder: (context, setState) {
-            return _VisibilityButton(
-              obscureText: _obscureText,
-              onPressed: () {
-                setState(() {
-                  _obscureText = !_obscureText;
-                });
-              },
-            );
+        suffixIcon: _VisibilityButton(
+          obscureText: _obscureText,
+          onPressed: () {
+            setState(() {
+              _obscureText = !_obscureText;
+            });
           },
         ),
       ),
