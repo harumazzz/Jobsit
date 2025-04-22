@@ -20,9 +20,7 @@ AuthRemoteDataSource authRemoteDataSource(Ref ref) {
 }
 
 abstract class AuthRemoteDataSource {
-  Future<Either<Failure, UserCreationResponse>> registerUser(
-    UserCreationRequest request,
-  );
+  Future<Either<Failure, UserCreationResponse>> registerUser(UserCreationRequest request);
 
   Future<Either<Failure, UserResponse>> loginUser(LogInRequest request);
 }
@@ -32,14 +30,9 @@ final class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final Dio _dio;
 
   @override
-  Future<Either<Failure, UserCreationResponse>> registerUser(
-    UserCreationRequest request,
-  ) async {
+  Future<Either<Failure, UserCreationResponse>> registerUser(UserCreationRequest request) async {
     try {
-      final response = await _dio.post(
-        ApiConstant.registerEndpoint,
-        data: {'userCreationDTO': request.toJson()},
-      );
+      final response = await _dio.post(ApiConstant.registerEndpoint, data: {'userCreationDTO': request.toJson()});
       if (response.statusCode == HttpStatus.created) {
         final result = UserCreationResponse.fromJson(response.data['userDTO']);
         return Right(result);
@@ -56,10 +49,7 @@ final class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<Either<Failure, UserResponse>> loginUser(LogInRequest request) async {
     try {
-      final response = await _dio.post(
-        ApiConstant.loginEndpoint,
-        data: request.toJson(),
-      );
+      final response = await _dio.post(ApiConstant.loginEndpoint, data: request.toJson());
       if (response.statusCode == HttpStatus.created) {
         final result = UserResponse.fromJson(response.data);
         return Right(result);

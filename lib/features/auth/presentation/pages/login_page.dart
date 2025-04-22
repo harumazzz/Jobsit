@@ -1,9 +1,12 @@
-import 'dart:developer' as developer;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/utils/input_converter.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/auth_text_field.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -13,12 +16,26 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  late TextEditingController _emailController, _passwordController;
+  late TextEditingController _emailController;
+
+  late TextEditingController _passwordController;
+
+  late FocusNode _emailFocusNode;
+
+  late FocusNode _passwordFocusNode;
+
+  late GlobalKey<FormState> _formKey;
+
+  late bool _savePassword;
 
   @override
   void initState() {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+    _emailFocusNode = FocusNode();
+    _passwordFocusNode = FocusNode();
+    _formKey = GlobalKey<FormState>();
+    _savePassword = false;
     super.initState();
   }
 
@@ -26,46 +43,170 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _formKey.currentState?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(authControllerProvider);
+    ref.listen<AuthState>(authControllerProvider, (previous, next) {
+      switch (next) {
+        case AuthError _:
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(next.message),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          break;
+        case AuthAuthorized _:
+          context.goNamed('home');
+          break;
+        default:
+          break;
+      }
+    });
     return Scaffold(
-      body: Column(
-        children: [
-          const Text("Login Page"),
-          TextField(
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Email',
-            ),
-            controller: _emailController,
+      body: Form(
+        key: _formKey,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ClipRRect(borderRadius: BorderRadius.circular(20.0), child: const Icon(Symbols.image, size: 100.0)),
+              const SizedBox(height: 50.0),
+              TextFormField(
+                focusNode: _emailFocusNode,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20.0))),
+                  labelText: 'Email',
+                  contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                ),
+                controller: _emailController,
+                validator: InputConverter.validateEmail,
+                onFieldSubmitted: (value) async {
+                  if (_emailFocusNode.hasFocus) {
+                    _emailFocusNode.unfocus();
+                  }
+                  FocusScope.of(context).requestFocus(_passwordFocusNode);
+                },
+              ),
+              const SizedBox(height: 20.0),
+              AuthTextField(
+                label: 'Password',
+                controller: _passwordController,
+                focusNode: _passwordFocusNode,
+                keyboardType: TextInputType.visiblePassword,
+                validator: InputConverter.validatePassword,
+                onFieldSubmitted: (value) async {
+                  if (_passwordFocusNode.hasFocus) {
+                    _passwordFocusNode.unfocus();
+                  }
+                },
+              ),
+              const SizedBox(height: 12.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      StatefulBuilder(
+                        builder: (context, setState) {
+                          return Checkbox.adaptive(
+                            value: _savePassword,
+                            onChanged: (value) {
+                              setState(() {
+                                _savePassword = value!;
+                              });
+                            },
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
+                            activeColor: Theme.of(context).colorScheme.primary,
+                            checkColor: Theme.of(context).colorScheme.onPrimary,
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 10.0),
+                      const Text('Save password'),
+                    ],
+                  ),
+                  InkWell(
+                    borderRadius: BorderRadius.zero,
+                    onTap: () async {
+                      context.goNamed('forgot_password');
+                    },
+                    child: const Text('Forgot password?'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20.0),
+              switch (state) {
+                AuthLoading() => const CircularProgressIndicator(),
+                _ => SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: const ButtonStyle(
+                      padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 20.0, horizontal: 32.0)),
+                      shape: WidgetStatePropertyAll(
+                        RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                      ),
+                    ),
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        await ref
+                            .read(authControllerProvider.notifier)
+                            .login(email: _emailController.text, password: _passwordController.text);
+                      }
+                    },
+                    child: const Text('Login'),
+                  ),
+                ),
+              },
+              const SizedBox(height: 20.0),
+              const Text('Or Sign in with'),
+              const SizedBox(height: 12.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: SvgPicture.asset('assets/images/icon_google.svg', height: 36.0),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(8.0),
+                    ),
+                    onPressed: () async {
+                      // TODO(self): Implement Google login
+                    },
+                  ),
+                  const SizedBox(width: 20.0),
+                  IconButton(
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(8.0),
+                    ),
+                    icon: SvgPicture.asset(
+                      'assets/images/icon_facebook.svg',
+                      height: 36.0,
+                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                    ),
+                    onPressed: () async {
+                      // TODO(self): Implement Facebook login
+                    },
+                  ),
+                ],
+              ),
+            ],
           ),
-          TextField(
-            obscureText: true,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Password',
-            ),
-            controller: _passwordController,
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                await ref
-                    .read(authControllerProvider.notifier)
-                    .login(
-                      email: _emailController.text,
-                      password: _passwordController.text,
-                    );
-              } catch (e) {
-                developer.log(e.toString());
-              }
-            },
-            child: const Text("Login"),
-          ),
-        ],
+        ),
       ),
     );
   }

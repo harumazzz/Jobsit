@@ -6,7 +6,7 @@ class ApiConstant extends Equatable {
   @override
   List<Object?> get props => [];
 
-  static const String baseUrl = 'http://localhost:8085/api/';
+  static const String baseUrl = 'http://192.168.31.122:8085/api/';
 
   static const String loginEndpoint = '/login';
 

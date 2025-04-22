@@ -4,7 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_interceptor.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 Interceptor authInterceptor(Ref ref) {
   return const AuthInterceptor();
 }
@@ -13,10 +13,7 @@ class AuthInterceptor extends Interceptor {
   const AuthInterceptor();
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     options.headers['Content-Type'] = 'application/json';
     options.headers['Accept'] = 'application/json';
     // TODO(self): add token

@@ -15,24 +15,19 @@ sealed class UserCreationRequest with _$UserCreationRequest {
     required String phone,
   }) = _UserCreationRequest;
 
-  factory UserCreationRequest.fromJson(Map<String, dynamic> json) =>
-      _$UserCreationRequestFromJson(json);
+  factory UserCreationRequest.fromJson(Map<String, dynamic> json) => _$UserCreationRequestFromJson(json);
 }
 
 @freezed
 abstract class RoleResponse with _$RoleResponse {
-  const factory RoleResponse({required int id, required String name}) =
-      _RoleResponse;
-  factory RoleResponse.fromJson(Map<String, dynamic> json) =>
-      _$RoleResponseFromJson(json);
+  const factory RoleResponse({required int id, required String name}) = _RoleResponse;
+  factory RoleResponse.fromJson(Map<String, dynamic> json) => _$RoleResponseFromJson(json);
 }
 
 @freezed
 abstract class StatusResponse with _$StatusResponse {
-  const factory StatusResponse({required int id, required String name}) =
-      _StatusResponse;
-  factory StatusResponse.fromJson(Map<String, dynamic> json) =>
-      _$StatusResponseFromJson(json);
+  const factory StatusResponse({required int id, required String name}) = _StatusResponse;
+  factory StatusResponse.fromJson(Map<String, dynamic> json) => _$StatusResponseFromJson(json);
 }
 
 @freezed
@@ -47,8 +42,7 @@ abstract class UserCreationResponse with _$UserCreationResponse {
     required StatusResponse status,
   }) = _UserCreationResponse;
 
-  factory UserCreationResponse.fromJson(Map<String, dynamic> json) =>
-      _$UserCreationResponseFromJson(json);
+  factory UserCreationResponse.fromJson(Map<String, dynamic> json) => _$UserCreationResponseFromJson(json);
 }
 
 @freezed
@@ -62,19 +56,14 @@ abstract class UserResponse with _$UserResponse {
     required int idUser,
   }) = _UserResponse;
 
-  factory UserResponse.fromJson(Map<String, dynamic> json) =>
-      _$UserResponseFromJson(json);
+  factory UserResponse.fromJson(Map<String, dynamic> json) => _$UserResponseFromJson(json);
 }
 
 @freezed
 abstract class LogInRequest with _$LogInRequest {
-  const factory LogInRequest({
-    required String email,
-    required String password,
-  }) = _LogInRequest;
+  const factory LogInRequest({required String email, required String password}) = _LogInRequest;
 
-  factory LogInRequest.fromJson(Map<String, dynamic> json) =>
-      _$LogInRequestFromJson(json);
+  factory LogInRequest.fromJson(Map<String, dynamic> json) => _$LogInRequestFromJson(json);
 }
 
 extension UserCreationResponseMapper on UserCreationResponse {

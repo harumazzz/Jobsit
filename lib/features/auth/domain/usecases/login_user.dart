@@ -20,10 +20,7 @@ LoginUser loginUser(Ref ref) {
 
 @freezed
 sealed class LoginUserParams with _$LoginUserParams {
-  const factory LoginUserParams({
-    required String email,
-    required String password,
-  }) = _LoginUserParams;
+  const factory LoginUserParams({required String email, required String password}) = _LoginUserParams;
 }
 
 class LoginUser implements UseCase<User, LoginUserParams> {
@@ -33,9 +30,6 @@ class LoginUser implements UseCase<User, LoginUserParams> {
 
   @override
   Future<Either<Failure, User>> call(LoginUserParams params) async {
-    return await _authRepository.loginUser(
-      email: params.email,
-      password: params.password,
-    );
+    return await _authRepository.loginUser(email: params.email, password: params.password);
   }
 }

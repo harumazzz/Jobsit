@@ -30,25 +30,14 @@ class AuthRepositoryImpl implements AuthRepository {
     required String phone,
   }) async {
     final result = await _authRemoteDataSource.registerUser(
-      UserCreationRequest(
-        email: email,
-        password: password,
-        firstName: firstName,
-        lastName: lastName,
-        phone: phone,
-      ),
+      UserCreationRequest(email: email, password: password, firstName: firstName, lastName: lastName, phone: phone),
     );
     return result.fold(ifLeft: Left.new, ifRight: (e) => Right(e.toEntity()));
   }
 
   @override
-  Future<Either<Failure, User>> loginUser({
-    required String email,
-    required String password,
-  }) async {
-    final result = await _authRemoteDataSource.loginUser(
-      LogInRequest(email: email, password: password),
-    );
+  Future<Either<Failure, User>> loginUser({required String email, required String password}) async {
+    final result = await _authRemoteDataSource.loginUser(LogInRequest(email: email, password: password));
     return result.fold(ifLeft: Left.new, ifRight: (e) => Right(e.toEntity()));
   }
 }
