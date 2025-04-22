@@ -43,6 +43,21 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(authControllerProvider);
+    ref.listen<AuthState>(authControllerProvider, (previous, next) async {
+      if (next is AuthForgotPassword) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Verification code sent to your email. Please check your inbox.'),
+            duration: Duration(seconds: 5),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        // TODO(self): Navigate to OTP verification page for reset password
+      }
+      if (next is AuthError) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(next.message)));
+      }
+    });
     return Scaffold(
       body: Form(
         key: _formKey,
@@ -100,7 +115,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                     ),
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        // TODO(self): Add logic to send email
+                        await ref.read(authControllerProvider.notifier).forgotPassword(email: _emailController.text);
                       }
                     },
                     child: const Text('Send'),
@@ -173,6 +188,21 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(authControllerProvider);
+    ref.listen<AuthState>(authControllerProvider, (previous, next) async {
+      if (next is AuthResetPassword) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password reset successfully. Please login with your new password.'),
+            duration: Duration(seconds: 5),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        context.goNamed('login');
+      }
+      if (next is AuthError) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(next.message)));
+      }
+    });
     return Scaffold(
       body: Form(
         key: _formKey,
@@ -235,7 +265,13 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                     ),
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        // TODO(self): Add logic to reset password
+                        await ref
+                            .read(authControllerProvider.notifier)
+                            .resetPassword(
+                              resetToken: widget.resetToken,
+                              password: _passwordController.text,
+                              confirmPassword: _confirmPasswordController.text,
+                            );
                       }
                     },
                     child: const Text('Reset'),

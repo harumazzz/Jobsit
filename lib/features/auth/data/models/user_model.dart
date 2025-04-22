@@ -66,6 +66,17 @@ abstract class LogInRequest with _$LogInRequest {
   factory LogInRequest.fromJson(Map<String, dynamic> json) => _$LogInRequestFromJson(json);
 }
 
+@freezed
+abstract class ResetPasswordRequest with _$ResetPasswordRequest {
+  const factory ResetPasswordRequest({
+    required String resetToken,
+    required String password,
+    required String confirmPassword,
+  }) = _ResetPasswordRequest;
+
+  factory ResetPasswordRequest.fromJson(Map<String, dynamic> json) => _$ResetPasswordRequestFromJson(json);
+}
+
 extension UserCreationResponseMapper on UserCreationResponse {
   RegisteredUser toEntity() {
     return RegisteredUser(

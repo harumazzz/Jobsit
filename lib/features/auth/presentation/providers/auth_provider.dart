@@ -21,6 +21,12 @@ sealed class AuthState with _$AuthState {
 
   const factory AuthState.verified() = AuthVerified;
 
+  const factory AuthState.forgotPassword() = AuthForgotPassword;
+
+  const factory AuthState.verifiedOtp(String resetToken) = AuthVerifiedOtp;
+
+  const factory AuthState.resetPassword() = AuthResetPassword;
+
   const factory AuthState.sendedMail() = AuthSendedMail;
 
   const factory AuthState.error(String message) = AuthError;
@@ -70,8 +76,8 @@ class AuthController extends _$AuthController {
   Future<void> sendMail({required String email}) async {
     state = const AuthState.loading();
     try {
-      final verifyOtpUseCase = ref.read(sendMailProvider);
-      final result = await verifyOtpUseCase(email);
+      final sendMailUseCase = ref.read(sendMailProvider);
+      final result = await sendMailUseCase(email);
       state = result.fold(ifRight: (_) => const AuthState.sendedMail(), ifLeft: (e) => AuthState.error(e.message));
     } on ServerException catch (e) {
       state = AuthState.error(e.message);
@@ -84,11 +90,53 @@ class AuthController extends _$AuthController {
     return await sendMail(email: email);
   }
 
+  Future<void> verifyEmail({required String otp}) async {
+    try {
+      final verifyEmailUseCase = ref.read(verifyEmailProvider);
+      final result = await verifyEmailUseCase(otp);
+      state = result.fold(ifRight: (_) => const AuthState.verified(), ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> forgotPassword({required String email}) async {
+    try {
+      final forgotPasswordUsecase = ref.read(forgotPasswordProvider);
+      final result = await forgotPasswordUsecase(email);
+      state = result.fold(ifRight: (_) => const AuthState.forgotPassword(), ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
   Future<void> verifyOtp({required String otp}) async {
     try {
-      final verifyOtpUseCase = ref.read(verifyOTPProvider);
+      final verifyOtpUseCase = ref.read(verifyOtpProvider);
       final result = await verifyOtpUseCase(otp);
-      state = result.fold(ifRight: (_) => const AuthState.verified(), ifLeft: (e) => AuthState.error(e.message));
+      state = result.fold(ifRight: AuthState.verifiedOtp, ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> resetPassword({
+    required String resetToken,
+    required String password,
+    required String confirmPassword,
+  }) async {
+    try {
+      final resetPasswordUseCase = ref.read(resetPasswordProvider);
+      final result = await resetPasswordUseCase(
+        ResetPasswordParams(resetToken: resetToken, password: password, confirmPassword: confirmPassword),
+      );
+      state = result.fold(ifRight: (_) => const AuthState.resetPassword(), ifLeft: (e) => AuthState.error(e.message));
     } on ServerException catch (e) {
       state = AuthState.error(e.message);
     } catch (e) {

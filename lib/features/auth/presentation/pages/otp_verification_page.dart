@@ -115,7 +115,7 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         _otpFocusNode.unfocus();
-                        await ref.read(authControllerProvider.notifier).verifyOtp(otp: _otpController.text);
+                        await ref.read(authControllerProvider.notifier).verifyEmail(otp: _otpController.text);
                       }
                     },
                     child: const Text('Verify'),
