@@ -10,7 +10,7 @@ import '../../features/jobs/presentation/pages/home_page.dart';
 class AppRouter extends Equatable {
   const AppRouter._();
 
-  static final GoRouter config = GoRouter(
+  static final GoRouter _router = GoRouter(
     initialLocation: '/login',
     routes: [
       GoRoute(path: '/login', name: 'login', builder: (_, _) => const LoginPage()),
@@ -40,6 +40,8 @@ class AppRouter extends Equatable {
       GoRoute(path: '/otp_verified', name: 'otp_verified', builder: (_, _) => const OtpVerifiedPage()),
     ],
   );
+
+  static GoRouter get router => _router;
 
   @override
   List<Object?> get props => [];

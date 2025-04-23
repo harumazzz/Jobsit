@@ -28,7 +28,7 @@ class MainApp extends StatelessWidget {
         multitouchDragStrategy: MultitouchDragStrategy.sumAllPointers,
         scrollbars: false,
       ),
-      routerConfig: AppRouter.config,
+      routerConfig: AppRouter.router,
     );
   }
 }

@@ -14,10 +14,10 @@ class InjectionContainer {
 
   static void injectDependencies() => _configureDependencies(_getIt);
 
-  static Future<void> reset() async => _getIt.reset();
+  static Future<void> reset() async => await _getIt.reset();
 
   static T get<T extends Object>() {
-    assert(_getIt.isRegistered<T>(), 'Injection not registered');
+    assert(_getIt.isRegistered<T>(), '$T not registered');
     return _getIt.get<T>();
   }
 }
