@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/input_converter.dart';
+import '../../../../shared/widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -153,13 +154,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 AuthLoading() => const CircularProgressIndicator(),
                 _ => SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    style: const ButtonStyle(
-                      padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 24.0, horizontal: 32.0)),
-                      shape: WidgetStatePropertyAll(
-                        RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                      ),
-                    ),
+                  child: CustomButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         await ref

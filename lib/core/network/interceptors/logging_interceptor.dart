@@ -1,46 +1,44 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logger/logger.dart';
+import 'package:injectable/injectable.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../injection_container.dart';
+import '../../logger/app_logger.dart';
 
 part 'logging_interceptor.g.dart';
 
 @Riverpod(keepAlive: true)
 Interceptor loggingInterceptor(Ref ref) {
-  var logger = null as Logger?;
-  if (kDebugMode) {
-    logger = Logger();
-  }
-  return LoggingInterceptor(logger);
+  return InjectionContainer.get<LoggingInterceptor>();
 }
 
+@injectable
 class LoggingInterceptor extends Interceptor {
   const LoggingInterceptor(this._logger);
 
-  final Logger? _logger;
+  final AppLogger _logger;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    _logger?.i('➡️ REQUEST[${options.method}] => PATH: ${options.path}');
-    _logger?.d('Headers: ${options.headers}');
-    _logger?.d('Query: ${options.queryParameters}');
-    _logger?.d('Body: ${options.data}');
+    _logger.info('➡️ REQUEST[${options.method}] => PATH: ${options.path}');
+    _logger.debug('Headers: ${options.headers}');
+    _logger.debug('Query: ${options.queryParameters}');
+    _logger.debug('Body: ${options.data}');
     super.onRequest(options, handler);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) async {
-    _logger?.i('✅ RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
-    _logger?.d('Data: ${response.data}');
+    _logger.info('✅ RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
+    _logger.debug('Data: ${response.data}');
     super.onResponse(response, handler);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    _logger?.e('⛔ ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}');
-    _logger?.e('Message: ${err.message}');
-    _logger?.e('Data: ${err.response?.data}');
+    _logger.error('⛔ ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}');
+    _logger.error('Message: ${err.message}');
+    _logger.error('Data: ${err.response?.data}');
     super.onError(err, handler);
   }
 }

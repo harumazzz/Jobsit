@@ -19,6 +19,6 @@ Dio dio(Ref ref) {
   final dio = Dio(option);
   final authInterceptor = ref.watch(authInterceptorProvider);
   final loggingInterceptor = ref.watch(loggingInterceptorProvider);
-  dio.interceptors.addAll([authInterceptor, loggingInterceptor]);
+  dio.interceptors.addAll([loggingInterceptor, authInterceptor]);
   return dio;
 }

@@ -41,6 +41,7 @@ migrate_working_dir/
 **/*.g.dart
 **/*.freezed.dart
 **/*.mocks.dart
+**/*.config.dart
 
 # Web related
 lib/generated_plugin_registrant.dart
