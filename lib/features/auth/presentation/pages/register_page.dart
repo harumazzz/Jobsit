@@ -135,15 +135,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   },
                 ),
                 const SizedBox(height: 20.0),
-                TextFormField(
+                RegisterEmailTextField(
                   controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                    labelText: 'Email',
-                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                  ),
-                  validator: InputConverter.validateEmail,
                   focusNode: _emailFocusNode,
                   onFieldSubmitted: (value) {
                     if (_emailFocusNode.hasFocus) {

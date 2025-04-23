@@ -143,4 +143,16 @@ class AuthController extends _$AuthController {
       state = AuthState.error(e.toString());
     }
   }
+
+  Future<String> checkEmailExists(String email) async {
+    try {
+      final checkEmailUseCase = ref.read(checkEmailProvider);
+      final result = await checkEmailUseCase(email);
+      return result.fold(ifRight: (e) => e, ifLeft: (e) => e.message);
+    } on ServerException catch (e) {
+      return e.message;
+    } catch (e) {
+      return e.toString();
+    }
+  }
 }
