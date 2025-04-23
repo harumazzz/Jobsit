@@ -1,4 +1,5 @@
 import 'package:dart_either/dart_either.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -42,6 +43,8 @@ class AuthRepositoryImpl implements AuthRepository {
         ),
       );
       return Right(result.user.toEntity());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
@@ -52,6 +55,8 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final result = await _authRemoteDataSource.loginUser(LogInRequest(email: email, password: password));
       return Right(result.toEntity());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
@@ -62,6 +67,8 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final _ = await _authRemoteDataSource.sendMail(email);
       return const Right(Success());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
@@ -72,6 +79,8 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final _ = await _authRemoteDataSource.verifyEmail(otp);
       return const Right(Success());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
@@ -82,6 +91,8 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final result = await _authRemoteDataSource.checkEmail(email);
       return Right(result.message);
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
@@ -92,6 +103,8 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final _ = await _authRemoteDataSource.forgotPassword(email);
       return const Right(Success());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
@@ -108,6 +121,8 @@ class AuthRepositoryImpl implements AuthRepository {
         ResetPasswordRequest(resetToken: resetToken, password: password, confirmPassword: confirmPassword),
       );
       return const Right(Success());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
@@ -118,6 +133,8 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final result = await _authRemoteDataSource.verifyOtp(otp);
       return Right(result.message);
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

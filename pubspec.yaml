@@ -21,6 +21,7 @@ dependencies:
   flutter_svg: ^2.1.0
   flutter_debouncer: ^2.0.0
   retrofit: ^4.4.2
+  injectable: ^2.5.0
 
 dev_dependencies:
   flutter_test:
@@ -35,6 +36,7 @@ dev_dependencies:
   json_serializable: ^6.9.5
   mockito: ^5.4.5
   retrofit_generator: ^9.1.9
+  injectable_generator: ^2.7.0
 flutter:
   uses-material-design: true
   assets:
