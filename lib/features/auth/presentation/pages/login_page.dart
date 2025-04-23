@@ -117,14 +117,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 children: [
                   Row(
                     mainAxisSize: MainAxisSize.min,
+                    spacing: 10.0,
                     children: [
                       StatefulBuilder(
                         builder: (context, setState) {
                           return Checkbox.adaptive(
                             value: _savePassword,
                             onChanged: (value) {
+                              if (value == null) {
+                                return;
+                              }
                               setState(() {
-                                _savePassword = value!;
+                                _savePassword = value;
                               });
                             },
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
@@ -133,7 +137,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           );
                         },
                       ),
-                      const SizedBox(width: 10.0),
                       const Text('Save password'),
                     ],
                   ),
@@ -173,6 +176,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               const SizedBox(height: 12.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 20.0,
                 children: [
                   IconButton(
                     icon: SvgPicture.asset('assets/images/icon_google.svg', height: 36.0),
@@ -185,7 +189,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       // TODO(self): Implement Google login
                     },
                   ),
-                  const SizedBox(width: 20.0),
                   IconButton(
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.blue,
