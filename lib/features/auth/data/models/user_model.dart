@@ -6,7 +6,7 @@ part 'user_model.freezed.dart';
 part 'user_model.g.dart';
 
 @freezed
-sealed class UserCreationRequest with _$UserCreationRequest {
+abstract class UserCreationRequest with _$UserCreationRequest {
   const factory UserCreationRequest({
     required String email,
     required String password,
@@ -16,6 +16,20 @@ sealed class UserCreationRequest with _$UserCreationRequest {
   }) = _UserCreationRequest;
 
   factory UserCreationRequest.fromJson(Map<String, dynamic> json) => _$UserCreationRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+abstract class RegisterUserRequest with _$RegisterUserRequest {
+  const factory RegisterUserRequest({@JsonKey(name: 'userCreationDTO') required UserCreationRequest user}) =
+      _RegisterUserRequest;
+
+  factory RegisterUserRequest.fromJson(Map<String, dynamic> json) => _$RegisterUserRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
 }
 
 @freezed
@@ -46,17 +60,27 @@ abstract class UserCreationResponse with _$UserCreationResponse {
 }
 
 @freezed
-abstract class UserResponse with _$UserResponse {
-  const factory UserResponse({
+abstract class RegisteredUserResponse with _$RegisteredUserResponse {
+  const factory RegisteredUserResponse({
+    required int id,
+    @JsonKey(name: 'userDTO') required UserCreationResponse user,
+  }) = _RegisteredUserResponse;
+
+  factory RegisteredUserResponse.fromJson(Map<String, dynamic> json) => _$RegisteredUserResponseFromJson(json);
+}
+
+@freezed
+abstract class LogInResponse with _$LogInResponse {
+  const factory LogInResponse({
     required String token,
     required String type,
     required String email,
     required String role,
     String? avatar,
     required int idUser,
-  }) = _UserResponse;
+  }) = _LogInResponse;
 
-  factory UserResponse.fromJson(Map<String, dynamic> json) => _$UserResponseFromJson(json);
+  factory LogInResponse.fromJson(Map<String, dynamic> json) => _$LogInResponseFromJson(json);
 }
 
 @freezed
@@ -64,6 +88,9 @@ abstract class LogInRequest with _$LogInRequest {
   const factory LogInRequest({required String email, required String password}) = _LogInRequest;
 
   factory LogInRequest.fromJson(Map<String, dynamic> json) => _$LogInRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
 }
 
 @freezed
@@ -75,6 +102,51 @@ abstract class ResetPasswordRequest with _$ResetPasswordRequest {
   }) = _ResetPasswordRequest;
 
   factory ResetPasswordRequest.fromJson(Map<String, dynamic> json) => _$ResetPasswordRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+abstract class SendMailResponse with _$SendMailResponse {
+  const factory SendMailResponse({required String message}) = _SendMailResponse;
+
+  factory SendMailResponse.fromJson(Map<String, dynamic> json) => _$SendMailResponseFromJson(json);
+}
+
+@freezed
+abstract class VerifyMailResponse with _$VerifyMailResponse {
+  const factory VerifyMailResponse({required String message}) = _VerifyMailResponse;
+
+  factory VerifyMailResponse.fromJson(Map<String, dynamic> json) => _$VerifyMailResponseFromJson(json);
+}
+
+@freezed
+abstract class CheckMailResponse with _$CheckMailResponse {
+  const factory CheckMailResponse({required String message}) = _CheckMailResponse;
+
+  factory CheckMailResponse.fromJson(Map<String, dynamic> json) => _$CheckMailResponseFromJson(json);
+}
+
+@freezed
+abstract class ForgotPasswordResponse with _$ForgotPasswordResponse {
+  const factory ForgotPasswordResponse({required String message}) = _ForgotPasswordResponse;
+
+  factory ForgotPasswordResponse.fromJson(Map<String, dynamic> json) => _$ForgotPasswordResponseFromJson(json);
+}
+
+@freezed
+abstract class ResetPasswordResponse with _$ResetPasswordResponse {
+  const factory ResetPasswordResponse({required String message}) = _ResetPasswordResponse;
+
+  factory ResetPasswordResponse.fromJson(Map<String, dynamic> json) => _$ResetPasswordResponseFromJson(json);
+}
+
+@freezed
+abstract class VerifyOtpResponse with _$VerifyOtpResponse {
+  const factory VerifyOtpResponse({required String message}) = _VerifyOtpResponse;
+
+  factory VerifyOtpResponse.fromJson(Map<String, dynamic> json) => _$VerifyOtpResponseFromJson(json);
 }
 
 extension UserCreationResponseMapper on UserCreationResponse {
@@ -103,7 +175,7 @@ extension StatusResponseMapper on StatusResponse {
   }
 }
 
-extension UserResponseMapper on UserResponse {
+extension UserResponseMapper on LogInResponse {
   User toEntity() {
     return User(idUser: idUser, email: email, role: role, avatar: avatar);
   }

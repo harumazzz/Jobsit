@@ -1,11 +1,9 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:retrofit/error_logger.dart';
+import 'package:retrofit/http.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/error/exceptions.dart';
-import '../../../../core/error/failures.dart';
 import '../../../../core/network/api_constant.dart';
 import '../../../../core/network/dio_client.dart';
 import '../models/user_model.dart';
@@ -15,158 +13,34 @@ part 'auth_remote_data_source.g.dart';
 @riverpod
 AuthRemoteDataSource authRemoteDataSource(Ref ref) {
   final dio = ref.watch(dioProvider);
-  return AuthRemoteDataSourceImpl(dio);
+  return _AuthRemoteDataSource(dio);
 }
 
+@RestApi()
 abstract class AuthRemoteDataSource {
-  Future<UserCreationResponse> registerUser(UserCreationRequest request);
+  factory AuthRemoteDataSource(Dio dio) = _AuthRemoteDataSource;
 
-  Future<UserResponse> loginUser(LogInRequest request);
+  @POST(ApiConstant.registerEndpoint)
+  Future<RegisteredUserResponse> registerUser(@Body() RegisterUserRequest request);
 
-  Future<Success> sendMail(String email);
+  @POST(ApiConstant.loginEndpoint)
+  Future<LogInResponse> loginUser(@Body() LogInRequest request);
 
-  Future<Success> verifyEmail(String otp);
+  @GET(ApiConstant.sendMailEndpoint)
+  Future<SendMailResponse> sendMail(@Query('email') String email);
 
-  Future<String> checkEmail(String email);
+  @GET(ApiConstant.verifyEmailEndpoint)
+  Future<VerifyMailResponse> verifyEmail(@Query('otp') String otp);
 
-  Future<Success> forgotPassword(String email);
+  @GET(ApiConstant.checkEmailEndpoint)
+  Future<CheckMailResponse> checkEmail(@Query('email') String email);
 
-  Future<Success> resetPassword(ResetPasswordRequest request);
+  @GET(ApiConstant.forgotPasswordEndpoint)
+  Future<ForgotPasswordResponse> forgotPassword(@Query('email') String email);
 
-  Future<String> verifyOtp(String otp);
-}
+  @POST(ApiConstant.resetPasswordEndpoint)
+  Future<ResetPasswordResponse> resetPassword(@Body() ResetPasswordRequest request);
 
-final class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  const AuthRemoteDataSourceImpl(this._dio);
-  final Dio _dio;
-
-  @override
-  Future<UserCreationResponse> registerUser(UserCreationRequest request) async {
-    try {
-      final response = await _dio.post(ApiConstant.registerEndpoint, data: {'userCreationDTO': request.toJson()});
-      if (response.statusCode == HttpStatus.created) {
-        final result = UserCreationResponse.fromJson(response.data['userDTO']);
-        return result;
-      } else {
-        throw ServerException(response.data['message']);
-      }
-    } on DioException catch (e) {
-      throw ServerException(e.response?.data['message']);
-    } catch (e) {
-      throw SystemException(e.toString());
-    }
-  }
-
-  @override
-  Future<UserResponse> loginUser(LogInRequest request) async {
-    try {
-      final response = await _dio.post(ApiConstant.loginEndpoint, data: request.toJson());
-      if (response.statusCode == HttpStatus.created) {
-        final result = UserResponse.fromJson(response.data);
-        return result;
-      } else {
-        throw ServerException(response.data['message']);
-      }
-    } on DioException catch (e) {
-      throw ServerException(e.response?.data['message']);
-    } catch (e) {
-      throw SystemException(e.toString());
-    }
-  }
-
-  @override
-  Future<Success> sendMail(String email) async {
-    try {
-      final response = await _dio.get(ApiConstant.sendOtpEndpoint, queryParameters: {'email': email});
-      if (response.statusCode == HttpStatus.ok) {
-        return const Success();
-      } else {
-        throw ServerException(response.data['message']);
-      }
-    } on DioException catch (e) {
-      throw ServerException(e.response?.data['message']);
-    } catch (e) {
-      throw SystemException(e.toString());
-    }
-  }
-
-  @override
-  Future<Success> verifyEmail(String otp) async {
-    try {
-      final response = await _dio.get(ApiConstant.verifyEmailEndpoint, queryParameters: {'otp': otp});
-      if (response.statusCode == HttpStatus.ok) {
-        return const Success();
-      } else {
-        throw ServerException(response.data['message']);
-      }
-    } on DioException catch (e) {
-      throw ServerException(e.response?.data['message']);
-    } catch (e) {
-      throw SystemException(e.toString());
-    }
-  }
-
-  @override
-  Future<String> checkEmail(String email) async {
-    try {
-      final response = await _dio.get(ApiConstant.checkEmailEndpoint, queryParameters: {'email': email});
-      if (response.statusCode == HttpStatus.ok) {
-        return response.data['message'] as String;
-      } else {
-        throw ServerException(response.data['message']);
-      }
-    } on DioException catch (e) {
-      throw ServerException(e.response?.data['message']);
-    } catch (e) {
-      throw SystemException(e.toString());
-    }
-  }
-
-  @override
-  Future<Success> forgotPassword(String email) async {
-    try {
-      final response = await _dio.get(ApiConstant.forgotPasswordEndpoint, queryParameters: {'email': email});
-      if (response.statusCode == HttpStatus.ok) {
-        return const Success();
-      } else {
-        throw ServerException(response.data['message']);
-      }
-    } on DioException catch (e) {
-      throw ServerException(e.response?.data['message']);
-    } catch (e) {
-      throw SystemException(e.toString());
-    }
-  }
-
-  @override
-  Future<Success> resetPassword(ResetPasswordRequest request) async {
-    try {
-      final response = await _dio.post(ApiConstant.resetPasswordEndpoint, data: request.toJson());
-      if (response.statusCode == HttpStatus.ok) {
-        return const Success();
-      } else {
-        throw ServerException(response.data['message']);
-      }
-    } on DioException catch (e) {
-      throw ServerException(e.response?.data['message']);
-    } catch (e) {
-      throw SystemException(e.toString());
-    }
-  }
-
-  @override
-  Future<String> verifyOtp(String otp) async {
-    try {
-      final response = await _dio.post(ApiConstant.verifyEmailEndpoint, queryParameters: {'otp': otp});
-      if (response.statusCode == HttpStatus.ok) {
-        return response.data['message'] as String;
-      } else {
-        throw ServerException(response.data['message']);
-      }
-    } on DioException catch (e) {
-      throw ServerException(e.response?.data['message']);
-    } catch (e) {
-      throw SystemException(e.toString());
-    }
-  }
+  @POST(ApiConstant.verifyOtpEndpoint)
+  Future<VerifyOtpResponse> verifyOtp(@Query('otp') String otp);
 }

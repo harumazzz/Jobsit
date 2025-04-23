@@ -12,7 +12,7 @@ class ApiConstant extends Equatable {
 
   static const String registerEndpoint = '/candidate';
 
-  static const String sendOtpEndpoint = '/mail/active-user';
+  static const String sendMailEndpoint = '/mail/active-user';
 
   static const String verifyEmailEndpoint = '/active';
 
