@@ -1,13 +1,11 @@
-import 'dart:io';
-
-import 'package:dart_either/dart_either.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:retrofit/error_logger.dart';
+import 'package:retrofit/http.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/error/exceptions.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/network/dio_provider.dart';
+import '../../../../core/network/api_constant.dart';
+import '../../../../core/network/dio_client.dart';
 import '../models/user_model.dart';
 
 part 'auth_remote_data_source.g.dart';
@@ -15,57 +13,34 @@ part 'auth_remote_data_source.g.dart';
 @riverpod
 AuthRemoteDataSource authRemoteDataSource(Ref ref) {
   final dio = ref.watch(dioProvider);
-  return AuthRemoteDataSourceImpl(dio);
+  return _AuthRemoteDataSource(dio);
 }
 
+@RestApi()
 abstract class AuthRemoteDataSource {
-  Future<Either<Failure, UserCreationResponse>> registerUser(
-    UserCreationRequest request,
-  );
+  factory AuthRemoteDataSource(Dio dio) = _AuthRemoteDataSource;
 
-  Future<Either<Failure, UserResponse>> loginUser(LogInRequest request);
-}
+  @POST(ApiConstant.registerEndpoint)
+  Future<RegisteredUserResponse> registerUser(@Body() RegisterUserRequest request);
 
-final class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  const AuthRemoteDataSourceImpl(this._dio);
-  final Dio _dio;
+  @POST(ApiConstant.loginEndpoint)
+  Future<LogInResponse> loginUser(@Body() LogInRequest request);
 
-  @override
-  Future<Either<Failure, UserCreationResponse>> registerUser(
-    UserCreationRequest request,
-  ) async {
-    try {
-      final response = await _dio.post(
-        'candidate',
-        data: {'userCreationDTO': request.toJson()},
-      );
-      if (response.statusCode != HttpStatus.created) {
-        final result = UserCreationResponse.fromJson(response.data['userDTO']);
-        return Right(result);
-      } else {
-        throw ServerException(response.data['message']);
-      }
-    } on DioException catch (e) {
-      throw ServerException(e.response?.data['message']);
-    } catch (e) {
-      throw SystemException(e.toString());
-    }
-  }
+  @GET(ApiConstant.sendMailEndpoint)
+  Future<SendMailResponse> sendMail(@Query('email') String email);
 
-  @override
-  Future<Either<Failure, UserResponse>> loginUser(LogInRequest request) async {
-    try {
-      final response = await _dio.post('login', data: request.toJson());
-      if (response.statusCode != HttpStatus.created) {
-        final result = UserResponse.fromJson(response.data);
-        return Right(result);
-      } else {
-        throw ServerException(response.data['message']);
-      }
-    } on DioException catch (e) {
-      throw ServerException(e.response?.data['message']);
-    } catch (e) {
-      throw SystemException(e.toString());
-    }
-  }
+  @GET(ApiConstant.verifyEmailEndpoint)
+  Future<VerifyMailResponse> verifyEmail(@Query('otp') String otp);
+
+  @GET(ApiConstant.checkEmailEndpoint)
+  Future<CheckMailResponse> checkEmail(@Query('email') String email);
+
+  @GET(ApiConstant.forgotPasswordEndpoint)
+  Future<ForgotPasswordResponse> forgotPassword(@Query('email') String email);
+
+  @POST(ApiConstant.resetPasswordEndpoint)
+  Future<ResetPasswordResponse> resetPassword(@Body() ResetPasswordRequest request);
+
+  @POST(ApiConstant.verifyOtpEndpoint)
+  Future<VerifyOtpResponse> verifyOtp(@Query('otp') String otp);
 }

@@ -29,18 +29,13 @@ sealed class RegisterUserParams with _$RegisterUserParams {
   }) = _RegisterUserParams;
 }
 
-class RegisterUser implements UseCase<RegisteredUser, RegisterUserParams> {
+final class RegisterUser implements UseCase<RegisteredUser, RegisterUserParams> {
   const RegisterUser(this._authRepository);
 
   final AuthRepository _authRepository;
 
   @override
-  Future<Either<Failure, RegisteredUser>> call(
-    RegisterUserParams params,
-  ) async {
-    if (params.password.length < 5) {
-      return const Left(ShortPasswordFailure('Password is too short'));
-    }
+  Future<Either<Failure, RegisteredUser>> call(RegisterUserParams params) async {
     final result = await _authRepository.registerUser(
       email: params.email,
       password: params.password,
@@ -48,6 +43,60 @@ class RegisterUser implements UseCase<RegisteredUser, RegisterUserParams> {
       lastName: params.lastName,
       phone: params.phone,
     );
+    return result;
+  }
+}
+
+@riverpod
+SendMail sendMail(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return SendMail(authRepository);
+}
+
+final class SendMail implements UseCase<Success, String> {
+  const SendMail(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, Success>> call(String email) async {
+    final result = await _authRepository.sendMail(email: email);
+    return result;
+  }
+}
+
+@riverpod
+VerifyEmail verifyEmail(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return VerifyEmail(authRepository);
+}
+
+final class VerifyEmail implements UseCase<Success, String> {
+  const VerifyEmail(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, Success>> call(String otp) async {
+    final result = await _authRepository.verifyEmail(otp: otp);
+    return result;
+  }
+}
+
+@riverpod
+CheckEmail checkEmail(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return CheckEmail(authRepository);
+}
+
+final class CheckEmail implements UseCase<String, String> {
+  const CheckEmail(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, String>> call(String email) async {
+    final result = await _authRepository.checkEmail(email: email);
     return result;
   }
 }

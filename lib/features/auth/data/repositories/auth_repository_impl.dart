@@ -29,26 +29,97 @@ class AuthRepositoryImpl implements AuthRepository {
     required String lastName,
     required String phone,
   }) async {
-    final result = await _authRemoteDataSource.registerUser(
-      UserCreationRequest(
-        email: email,
-        password: password,
-        firstName: firstName,
-        lastName: lastName,
-        phone: phone,
-      ),
-    );
-    return result.fold(ifLeft: Left.new, ifRight: (e) => Right(e.toEntity()));
+    try {
+      final result = await _authRemoteDataSource.registerUser(
+        RegisterUserRequest(
+          user: UserCreationRequest(
+            email: email,
+            password: password,
+            firstName: firstName,
+            lastName: lastName,
+            phone: phone,
+          ),
+        ),
+      );
+      return Right(result.user.toEntity());
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
   }
 
   @override
-  Future<Either<Failure, User>> loginUser({
-    required String email,
+  Future<Either<Failure, User>> loginUser({required String email, required String password}) async {
+    try {
+      final result = await _authRemoteDataSource.loginUser(LogInRequest(email: email, password: password));
+      return Right(result.toEntity());
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Success>> sendMail({required String email}) async {
+    try {
+      final _ = await _authRemoteDataSource.sendMail(email);
+      return const Right(Success());
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Success>> verifyEmail({required String otp}) async {
+    try {
+      final _ = await _authRemoteDataSource.verifyEmail(otp);
+      return const Right(Success());
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> checkEmail({required String email}) async {
+    try {
+      final result = await _authRemoteDataSource.checkEmail(email);
+      return Right(result.message);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Success>> forgotPassword({required String email}) async {
+    try {
+      final _ = await _authRemoteDataSource.forgotPassword(email);
+      return const Right(Success());
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Success>> resetPassword({
+    required String resetToken,
     required String password,
+    required String confirmPassword,
   }) async {
-    final result = await _authRemoteDataSource.loginUser(
-      LogInRequest(email: email, password: password),
-    );
-    return result.fold(ifLeft: Left.new, ifRight: (e) => Right(e.toEntity()));
+    try {
+      final _ = await _authRemoteDataSource.resetPassword(
+        ResetPasswordRequest(resetToken: resetToken, password: password, confirmPassword: confirmPassword),
+      );
+      return const Right(Success());
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> verifyOtp({required String otp}) async {
+    try {
+      final result = await _authRemoteDataSource.verifyOtp(otp);
+      return Right(result.message);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
   }
 }

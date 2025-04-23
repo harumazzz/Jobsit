@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/login_user.dart';
 import '../../domain/usecases/register_user.dart';
@@ -10,19 +11,29 @@ part 'auth_provider.g.dart';
 
 @freezed
 sealed class AuthState with _$AuthState {
-  const factory AuthState.initial() = _Initial;
+  const factory AuthState.initial() = AuthInitial;
 
-  const factory AuthState.loading() = _Loading;
+  const factory AuthState.loading() = AuthLoading;
 
-  const factory AuthState.registered(RegisteredUser user) = _Registered;
+  const factory AuthState.registered(RegisteredUser user) = AuthRegistered;
 
-  const factory AuthState.authorized(User user) = _Authorized;
+  const factory AuthState.authorized(User user) = AuthAuthorized;
 
-  const factory AuthState.error(String message) = _Error;
+  const factory AuthState.verified() = AuthVerified;
+
+  const factory AuthState.forgotPassword() = AuthForgotPassword;
+
+  const factory AuthState.verifiedOtp(String resetToken) = AuthVerifiedOtp;
+
+  const factory AuthState.resetPassword() = AuthResetPassword;
+
+  const factory AuthState.sendedMail() = AuthSendedMail;
+
+  const factory AuthState.error(String message) = AuthError;
 }
 
-@riverpod
-class AuthProvider extends _$AuthProvider {
+@Riverpod(keepAlive: true)
+class AuthController extends _$AuthController {
   @override
   AuthState build() {
     return const AuthState.initial();
@@ -36,31 +47,112 @@ class AuthProvider extends _$AuthProvider {
     required String phone,
   }) async {
     state = const AuthState.loading();
-    final registerUseCase = ref.read(registerUserProvider);
-    final result = await registerUseCase(
-      RegisterUserParams(
-        email: email,
-        password: password,
-        firstName: firstName,
-        lastName: lastName,
-        phone: phone,
-      ),
-    );
-    state = result.fold(
-      ifRight: AuthState.registered,
-      ifLeft: (r) => AuthState.error(r.message),
-    );
+    try {
+      final registerUseCase = ref.read(registerUserProvider);
+      final result = await registerUseCase(
+        RegisterUserParams(email: email, password: password, firstName: firstName, lastName: lastName, phone: phone),
+      );
+      state = result.fold(ifRight: AuthState.registered, ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
   }
 
   Future<void> login({required String email, required String password}) async {
     state = const AuthState.loading();
-    final loginUseCase = ref.read(loginUserProvider);
-    final result = await loginUseCase(
-      LoginUserParams(email: email, password: password),
-    );
-    state = result.fold(
-      ifRight: AuthState.authorized,
-      ifLeft: (r) => AuthState.error(r.message),
-    );
+    try {
+      final loginUseCase = ref.read(loginUserProvider);
+      final result = await loginUseCase(LoginUserParams(email: email, password: password));
+      state = result.fold(ifRight: AuthState.authorized, ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> sendMail({required String email}) async {
+    state = const AuthState.loading();
+    try {
+      final sendMailUseCase = ref.read(sendMailProvider);
+      final result = await sendMailUseCase(email);
+      state = result.fold(ifRight: (_) => const AuthState.sendedMail(), ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> resendMail({required String email}) async {
+    return await sendMail(email: email);
+  }
+
+  Future<void> verifyEmail({required String otp}) async {
+    try {
+      final verifyEmailUseCase = ref.read(verifyEmailProvider);
+      final result = await verifyEmailUseCase(otp);
+      state = result.fold(ifRight: (_) => const AuthState.verified(), ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> forgotPassword({required String email}) async {
+    try {
+      final forgotPasswordUsecase = ref.read(forgotPasswordProvider);
+      final result = await forgotPasswordUsecase(email);
+      state = result.fold(ifRight: (_) => const AuthState.forgotPassword(), ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> verifyOtp({required String otp}) async {
+    try {
+      final verifyOtpUseCase = ref.read(verifyOtpProvider);
+      final result = await verifyOtpUseCase(otp);
+      state = result.fold(ifRight: AuthState.verifiedOtp, ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> resetPassword({
+    required String resetToken,
+    required String password,
+    required String confirmPassword,
+  }) async {
+    try {
+      final resetPasswordUseCase = ref.read(resetPasswordProvider);
+      final result = await resetPasswordUseCase(
+        ResetPasswordParams(resetToken: resetToken, password: password, confirmPassword: confirmPassword),
+      );
+      state = result.fold(ifRight: (_) => const AuthState.resetPassword(), ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<String> checkEmailExists(String email) async {
+    try {
+      final checkEmailUseCase = ref.read(checkEmailProvider);
+      final result = await checkEmailUseCase(email);
+      return result.fold(ifRight: (e) => e, ifLeft: (e) => e.message);
+    } on ServerException catch (e) {
+      return e.message;
+    } catch (e) {
+      return e.toString();
+    }
   }
 }

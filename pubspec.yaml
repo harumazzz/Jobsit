@@ -7,7 +7,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
   get_it: ^8.0.3
   flutter_riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
@@ -16,6 +15,12 @@ dependencies:
   freezed_annotation: ^3.0.0
   dio: ^5.8.0+1
   json_annotation: ^4.9.0
+  logger: ^2.5.0
+  go_router: ^15.0.0
+  material_symbols_icons: ^4.2815.0
+  flutter_svg: ^2.1.0
+  flutter_debouncer: ^2.0.0
+  retrofit: ^4.4.2
 
 dev_dependencies:
   flutter_test:
@@ -28,5 +33,13 @@ dev_dependencies:
   freezed: ^3.0.6
   riverpod_lint: ^2.6.5
   json_serializable: ^6.9.5
+  mockito: ^5.4.5
+  retrofit_generator: ^9.1.9
 flutter:
   uses-material-design: true
+  assets:
+    - test/
+    - test/core/
+    - test/core/util/
+    - assets/
+    - assets/images/
