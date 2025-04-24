@@ -61,7 +61,7 @@ class AppRouter extends Equatable {
 
   static const String jobDetailRoute = '/$jobDetailName/:id';
 
-  static final GoRouter router = _router;
+  static GoRouter get router => _router;
 
   @override
   List<Object?> get props => [];
