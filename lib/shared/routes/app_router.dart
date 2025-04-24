@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/shared_prefs_service.dart';
@@ -9,6 +11,8 @@ import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/jobs/presentation/pages/home_page.dart';
 import '../../features/jobs/presentation/pages/job_detail_page.dart';
 import '../../injection_container.dart';
+
+part 'app_router.g.dart';
 
 class AppRouter extends Equatable {
   const AppRouter._();
@@ -57,61 +61,102 @@ class AppRouter extends Equatable {
 
   static const String jobDetailRoute = '/$jobDetailName/:id';
 
-  static final GoRouter _router = GoRouter(
-    redirect: (context, state) async {
-      final token = await InjectionContainer.get<IAuthStorageService>().getToken();
-      if (token == null) {
-        return loginRoute;
-      }
-      final path = state.path;
-      switch (path) {
-        case loginRoute:
-        case registerRoute:
-        case forgotPasswordRoute:
-        case resetPasswordRoute:
-        case otpVerificationRoute:
-        case otpVerifiedRoute:
-        case null:
-          return homeRoute;
-      }
-      return path;
-    },
-    routes: [
-      GoRoute(path: loginRoute, name: loginName, builder: (_, _) => const LoginPage()),
-      GoRoute(path: registerRoute, name: registerName, builder: (_, _) => const RegisterPage()),
-      GoRoute(path: forgotPasswordRoute, name: forgotPasswordName, builder: (_, _) => const ForgotPasswordPage()),
-      GoRoute(
-        path: resetPasswordRoute,
-        name: resetPasswordName,
-        builder: (_, state) {
-          final extra = state.extra as String;
-          assert(extra.isNotEmpty, 'Reset Token is required for password reset');
-          final resetToken = extra;
-          return ResetPasswordPage(resetToken: resetToken);
-        },
-      ),
-      GoRoute(
-        path: otpVerificationRoute,
-        name: otpVerificationName,
-        builder: (_, state) {
-          final extra = state.extra as String;
-          assert(extra.isNotEmpty, 'Extra data is required for OTP verification');
-          final email = extra;
-          return OtpVerificationPage(email: email);
-        },
-      ),
-      GoRoute(path: otpVerifiedRoute, name: otpVerifiedName, builder: (_, _) => const OtpVerifiedPage()),
-      GoRoute(path: homeRoute, name: homeName, builder: (context, state) => const HomePage()),
-      GoRoute(
-        path: jobDetailRoute,
-        name: homeName,
-        builder: (context, state) => JobDetailPage(jobId: state.extra as int),
-      ),
-    ],
-  );
-
-  static GoRouter get router => _router;
+  static final GoRouter router = _router;
 
   @override
   List<Object?> get props => [];
 }
+
+@TypedGoRoute<LoginRoute>(path: AppRouter.loginRoute, name: AppRouter.loginName)
+class LoginRoute extends GoRouteData {
+  const LoginRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const LoginPage();
+}
+
+@TypedGoRoute<RegisterRoute>(path: AppRouter.registerRoute, name: AppRouter.registerName)
+class RegisterRoute extends GoRouteData {
+  const RegisterRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const RegisterPage();
+}
+
+@TypedGoRoute<ForgotPasswordRoute>(path: AppRouter.forgotPasswordRoute, name: AppRouter.forgotPasswordName)
+class ForgotPasswordRoute extends GoRouteData {
+  const ForgotPasswordRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ForgotPasswordPage();
+}
+
+@TypedGoRoute<ResetPasswordRoute>(path: AppRouter.resetPasswordRoute, name: AppRouter.resetPasswordName)
+class ResetPasswordRoute extends GoRouteData {
+  const ResetPasswordRoute({required this.resetToken});
+  final String resetToken;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => ResetPasswordPage(resetToken: resetToken);
+
+  static ResetPasswordRoute fromExtra(String extra) => ResetPasswordRoute(resetToken: extra);
+}
+
+@TypedGoRoute<OtpVerificationRoute>(path: AppRouter.otpVerificationRoute, name: AppRouter.otpVerificationName)
+class OtpVerificationRoute extends GoRouteData {
+  const OtpVerificationRoute({required this.email});
+  final String email;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => OtpVerificationPage(email: email);
+
+  static OtpVerificationRoute fromExtra(String extra) => OtpVerificationRoute(email: extra);
+}
+
+@TypedGoRoute<OtpVerifiedRoute>(path: AppRouter.otpVerifiedRoute, name: AppRouter.otpVerifiedName)
+class OtpVerifiedRoute extends GoRouteData {
+  const OtpVerifiedRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const OtpVerifiedPage();
+}
+
+@TypedGoRoute<HomeRoute>(path: AppRouter.homeRoute, name: AppRouter.homeName)
+class HomeRoute extends GoRouteData {
+  const HomeRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const HomePage();
+}
+
+@TypedGoRoute<JobDetailRoute>(path: AppRouter.jobDetailRoute, name: AppRouter.jobDetailName)
+class JobDetailRoute extends GoRouteData {
+  const JobDetailRoute({required this.id});
+  final int id;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => JobDetailPage(jobId: id);
+}
+
+final _router = GoRouter(
+  routes: $appRoutes,
+  initialLocation: AppRouter.loginRoute,
+  debugLogDiagnostics: kDebugMode,
+  redirect: (context, state) async {
+    final token = await InjectionContainer.get<IAuthStorageService>().getToken();
+    final path = state.uri.toString();
+    if (token != null) {
+      switch (path) {
+        case AppRouter.loginRoute:
+        case AppRouter.registerRoute:
+        case AppRouter.forgotPasswordRoute:
+        case AppRouter.resetPasswordRoute:
+        case AppRouter.otpVerificationRoute:
+        case AppRouter.otpVerifiedRoute:
+          return AppRouter.homeRoute;
+      }
+      return path;
+    }
+    return path;
+  },
+);

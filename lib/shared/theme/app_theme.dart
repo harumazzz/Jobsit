@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme extends Equatable {
   const AppTheme._();
@@ -50,6 +51,7 @@ class AppTheme extends Equatable {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       ),
     ),
+    fontFamily: GoogleFonts.workSans().fontFamily,
     useMaterial3: true,
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(

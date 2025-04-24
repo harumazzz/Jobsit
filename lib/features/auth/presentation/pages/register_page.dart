@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/routes/app_router.dart';
@@ -30,7 +30,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   late FocusNode _confirmPasswordFocusNode;
   late FocusNode _phoneFocusNode;
 
-  late GlobalKey<FormState> _formKey;
+  late GlobalKey<FormBuilderState> _formKey;
 
   @override
   void initState() {
@@ -40,7 +40,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
     _phoneController = TextEditingController();
-    _formKey = GlobalKey<FormState>();
+    _formKey = GlobalKey<FormBuilderState>();
     _firstNameFocusNode = FocusNode();
     _lastNameFocusNode = FocusNode();
     _emailFocusNode = FocusNode();
@@ -83,7 +83,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           );
           break;
         case AuthRegistered _:
-          context.goNamed(AppRouter.otpVerificationName, extra: _emailController.text);
+          OtpVerificationRoute(email: _emailController.text).go(context);
           break;
         default:
           break;
@@ -92,7 +92,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold)), centerTitle: true),
-      body: Form(
+      body: FormBuilder(
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -101,7 +101,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 20.0),
-                TextFormField(
+                FormBuilderTextField(
+                  name: 'first_name',
                   keyboardType: TextInputType.name,
                   controller: _firstNameController,
                   decoration: const InputDecoration(
@@ -111,7 +112,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
                   validator: InputConverter.validateName,
                   focusNode: _firstNameFocusNode,
-                  onFieldSubmitted: (value) {
+                  onSubmitted: (_) async {
                     if (_firstNameFocusNode.hasFocus) {
                       _firstNameFocusNode.unfocus();
                     }
@@ -119,7 +120,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   },
                 ),
                 const SizedBox(height: 20.0),
-                TextFormField(
+                FormBuilderTextField(
+                  name: 'last_name',
                   keyboardType: TextInputType.name,
                   controller: _lastNameController,
                   decoration: const InputDecoration(
@@ -129,7 +131,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
                   validator: InputConverter.validateName,
                   focusNode: _lastNameFocusNode,
-                  onFieldSubmitted: (value) {
+                  onSubmitted: (_) async {
                     if (_lastNameFocusNode.hasFocus) {
                       _lastNameFocusNode.unfocus();
                     }
@@ -149,6 +151,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 ),
                 const SizedBox(height: 20.0),
                 AuthTextField(
+                  name: 'password',
                   keyboardType: TextInputType.visiblePassword,
                   focusNode: _passwordFocusNode,
                   controller: _passwordController,
@@ -163,6 +166,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 ),
                 const SizedBox(height: 20.0),
                 AuthTextField(
+                  name: 'confirm_password',
                   controller: _confirmPasswordController,
                   validator: InputConverter.validateConfirmPassword,
                   label: 'Confirm Password',
@@ -176,7 +180,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   },
                 ),
                 const SizedBox(height: 20.0),
-                TextFormField(
+                FormBuilderTextField(
+                  name: 'phone',
                   controller: _phoneController,
                   focusNode: _phoneFocusNode,
                   keyboardType: TextInputType.phone,
@@ -186,7 +191,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
                   validator: InputConverter.validatePhone,
-                  onFieldSubmitted: (value) {
+                  onSubmitted: (_) async {
                     if (_phoneFocusNode.hasFocus) {
                       _phoneFocusNode.unfocus();
                     }
@@ -269,8 +274,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text('Already have an Account?'),
-                    GestureDetector(
-                      onTap: () => context.goNamed(AppRouter.loginName),
+                    InkWell(
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      onTap: () async => const LoginRoute().go(context),
                       child: const Text(' Sign In', style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ],

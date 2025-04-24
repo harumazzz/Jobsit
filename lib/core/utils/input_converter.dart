@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 
 class InputConverter extends Equatable {
   const InputConverter._();
@@ -7,60 +8,39 @@ class InputConverter extends Equatable {
   List<Object?> get props => [];
 
   static String? validateEmail(String? input) {
-    const emailRegex = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
-    if (input == null || input.isEmpty) {
-      return 'Please enter an email address';
-    } else if (!RegExp(emailRegex).hasMatch(input)) {
-      return 'Please enter a valid email address';
-    }
-    return null;
+    return FormBuilderValidators.compose([
+      FormBuilderValidators.required(errorText: 'Please enter an email address'),
+      FormBuilderValidators.email(errorText: 'Please enter a valid email address'),
+    ])(input);
   }
 
   static String? validatePassword(String? input) {
-    if (input == null || input.isEmpty) {
-      return 'Please enter a password';
-    }
-    return null;
+    return FormBuilderValidators.required(errorText: 'Please enter a password')(input);
   }
 
   static String? validateConfirmPassword(String? input) {
-    if (input == null || input.isEmpty) {
-      return 'Please enter a confirm password';
-    }
-    return null;
+    return FormBuilderValidators.required(errorText: 'Please enter a confirm password')(input);
   }
 
   static String? validateName(String? input) {
-    if (input == null || input.isEmpty) {
-      return 'Please enter a name';
-    }
-    return null;
+    return FormBuilderValidators.required(errorText: 'Please enter a name')(input);
   }
 
   static String? validatePhone(String? input) {
-    if (input == null || input.isEmpty) {
-      return 'Please enter a phone number';
-    }
-    if (!RegExp(r'^\d{10}$').hasMatch(input)) {
-      return 'Please enter a valid 10-digit phone number';
-    }
-    return null;
+    return FormBuilderValidators.compose([
+      FormBuilderValidators.required(errorText: 'Please enter a phone number'),
+      FormBuilderValidators.match(RegExp(r'^\d{10}$'), errorText: 'Please enter a valid 10-digit phone number'),
+    ])(input);
   }
 
   static String? validateAddress(String? input) {
-    if (input == null || input.isEmpty) {
-      return 'Please enter an address';
-    }
-    return null;
+    return FormBuilderValidators.required(errorText: 'Please enter an address')(input);
   }
 
   static String? validateOtp(String? input) {
-    if (input == null || input.isEmpty) {
-      return 'Please enter an OTP';
-    }
-    if (!RegExp(r'^\d{6}$').hasMatch(input)) {
-      return 'Please enter a valid 6-digit OTP';
-    }
-    return null;
+    return FormBuilderValidators.compose([
+      FormBuilderValidators.required(errorText: 'Please enter an OTP'),
+      FormBuilderValidators.match(RegExp(r'^\d{6}$'), errorText: 'Please enter a valid 6-digit OTP'),
+    ])(input);
   }
 }
