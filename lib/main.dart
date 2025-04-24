@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:toastification/toastification.dart';
 
 import 'injection_container.dart';
 import 'shared/routes/app_router.dart';
@@ -20,15 +21,17 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'Jobsit IT',
-      theme: AppTheme.theme,
-      scrollBehavior: const MaterialScrollBehavior().copyWith(
-        multitouchDragStrategy: MultitouchDragStrategy.sumAllPointers,
-        scrollbars: false,
+    return ToastificationWrapper(
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        title: 'Jobsit IT',
+        theme: AppTheme.theme,
+        scrollBehavior: const MaterialScrollBehavior().copyWith(
+          multitouchDragStrategy: MultitouchDragStrategy.sumAllPointers,
+          scrollbars: false,
+        ),
+        routerConfig: AppRouter.router,
       ),
-      routerConfig: AppRouter.router,
     );
   }
 }

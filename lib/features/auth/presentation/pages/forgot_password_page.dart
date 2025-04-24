@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:toastification/toastification.dart';
 
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/routes/app_router.dart';
@@ -43,17 +44,27 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     final state = ref.watch(authControllerProvider);
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       if (next is AuthForgotPassword) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Verification code sent to your email. Please check your inbox.'),
-            duration: Duration(seconds: 5),
-            behavior: SnackBarBehavior.floating,
-          ),
+        toastification.show(
+          context: context,
+          title: const Text('Verification code sent to your email. Please check your inbox.'),
+          autoCloseDuration: const Duration(seconds: 4),
+          style: ToastificationStyle.flatColored,
+          type: ToastificationType.success,
+          showProgressBar: true,
+          alignment: Alignment.bottomCenter,
         );
         // TODO(self): Navigate to OTP verification page for reset password
       }
       if (next is AuthError) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(next.message)));
+        toastification.show(
+          context: context,
+          title: Text(next.message),
+          autoCloseDuration: const Duration(seconds: 4),
+          style: ToastificationStyle.flatColored,
+          type: ToastificationType.error,
+          showProgressBar: true,
+          alignment: Alignment.bottomCenter,
+        );
       }
     });
     return Scaffold(
@@ -185,17 +196,27 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
     final state = ref.watch(authControllerProvider);
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       if (next is AuthResetPassword) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Password reset successfully. Please login with your new password.'),
-            duration: Duration(seconds: 5),
-            behavior: SnackBarBehavior.floating,
-          ),
+        toastification.show(
+          context: context,
+          title: const Text('Password reset successfully. Please login with your new password.'),
+          autoCloseDuration: const Duration(seconds: 4),
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          showProgressBar: true,
+          alignment: Alignment.bottomCenter,
         );
         const LoginRoute().go(context);
       }
       if (next is AuthError) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(next.message)));
+        toastification.show(
+          context: context,
+          title: Text(next.message),
+          autoCloseDuration: const Duration(seconds: 4),
+          style: ToastificationStyle.flatColored,
+          type: ToastificationType.error,
+          showProgressBar: true,
+          alignment: Alignment.bottomCenter,
+        );
       }
     });
     return Scaffold(

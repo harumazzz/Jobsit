@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:toastification/toastification.dart';
 
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/routes/app_router.dart';
@@ -57,21 +58,25 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
         const OtpVerifiedRoute().go(context);
       }
       if (next is AuthSendedMail) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Verification code sent to your email. Please check your inbox.'),
-            duration: Duration(seconds: 5),
-            behavior: SnackBarBehavior.floating,
-          ),
+        toastification.show(
+          context: context,
+          title: const Text('Verification code sent to your email. Please check your inbox.'),
+          autoCloseDuration: const Duration(seconds: 4),
+          style: ToastificationStyle.flatColored,
+          type: ToastificationType.success,
+          showProgressBar: true,
+          alignment: Alignment.bottomCenter,
         );
       }
       if (next is AuthError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.message),
-            duration: const Duration(seconds: 5),
-            behavior: SnackBarBehavior.floating,
-          ),
+        toastification.show(
+          context: context,
+          title: Text(next.message),
+          autoCloseDuration: const Duration(seconds: 4),
+          style: ToastificationStyle.flatColored,
+          type: ToastificationType.error,
+          showProgressBar: true,
+          alignment: Alignment.bottomCenter,
         );
       }
     });
