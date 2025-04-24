@@ -10,7 +10,7 @@ void _configureDependencies(GetIt getIt) => init(getIt, environment: Environment
 class InjectionContainer {
   const InjectionContainer._();
 
-  static final GetIt _getIt = GetIt.instance;
+  static final GetIt _getIt = GetIt.asNewInstance();
 
   static void injectDependencies() => _configureDependencies(_getIt);
 
