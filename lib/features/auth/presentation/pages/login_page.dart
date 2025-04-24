@@ -4,10 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/input_converter.dart';
+import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -65,7 +65,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           );
           break;
         case AuthAuthorized _:
-          context.goNamed('home');
+          context.goNamed(AppRouter.homeName);
           break;
         default:
           break;
@@ -79,7 +79,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ClipRRect(borderRadius: BorderRadius.circular(20.0), child: const Icon(Symbols.image, size: 100.0)),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20.0),
+                child: Image.asset('assets/images/icon.png', width: 100.0, height: 100.0),
+              ),
               const SizedBox(height: 50.0),
               TextFormField(
                 focusNode: _emailFocusNode,
@@ -143,7 +146,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      context.goNamed('forgot_password');
+                      context.goNamed(AppRouter.forgotPasswordName);
                     },
                     child: const Text('Forgot password?'),
                   ),
@@ -212,7 +215,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      context.goNamed('register');
+                      context.goNamed(AppRouter.registerName);
                     },
                     child: const Text('Sign Up', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
                   ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class AppliedJobsPage extends StatelessWidget {
-  const AppliedJobsPage({super.key});
+class ProfileInfoTile extends StatelessWidget {
+  const ProfileInfoTile({super.key});
 
   @override
   Widget build(BuildContext context) {

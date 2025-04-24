@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/input_converter.dart';
+import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
 
@@ -53,7 +54,7 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
   Widget build(BuildContext context) {
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       if (next is AuthVerified) {
-        context.goNamed('otp_verified');
+        context.goNamed(AppRouter.otpVerifiedName);
       }
       if (next is AuthSendedMail) {
         ScaffoldMessenger.of(context).showSnackBar(

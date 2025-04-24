@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/input_converter.dart';
+import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
@@ -119,7 +120,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               },
               GestureDetector(
                 onTap: () async {
-                  context.goNamed('login');
+                  context.goNamed(AppRouter.loginName);
                 },
                 child: const Text('Return to Sign In', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
               ),
@@ -192,7 +193,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        context.goNamed('login');
+        context.goNamed(AppRouter.loginName);
       }
       if (next is AuthError) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(next.message)));
@@ -269,7 +270,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
               },
               GestureDetector(
                 onTap: () async {
-                  context.goNamed('login');
+                  context.goNamed(AppRouter.loginName);
                 },
                 child: const Text('Return to Sign In', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
               ),
