@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:toastification/toastification.dart';
 
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/routes/app_router.dart';
@@ -28,13 +29,13 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
 
   late FocusNode _otpFocusNode;
 
-  late GlobalKey<FormState> _formKey;
+  late GlobalKey<FormBuilderState> _formKey;
 
   @override
   void initState() {
     _otpController = TextEditingController();
     _otpFocusNode = FocusNode();
-    _formKey = GlobalKey<FormState>();
+    _formKey = GlobalKey<FormBuilderState>();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _otpFocusNode.requestFocus();
@@ -54,29 +55,33 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
   Widget build(BuildContext context) {
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       if (next is AuthVerified) {
-        context.goNamed(AppRouter.otpVerifiedName);
+        const OtpVerifiedRoute().go(context);
       }
       if (next is AuthSendedMail) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Verification code sent to your email. Please check your inbox.'),
-            duration: Duration(seconds: 5),
-            behavior: SnackBarBehavior.floating,
-          ),
+        toastification.show(
+          context: context,
+          title: const Text('Verification code sent to your email. Please check your inbox.'),
+          autoCloseDuration: const Duration(seconds: 4),
+          style: ToastificationStyle.flatColored,
+          type: ToastificationType.success,
+          showProgressBar: true,
+          alignment: Alignment.bottomCenter,
         );
       }
       if (next is AuthError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.message),
-            duration: const Duration(seconds: 5),
-            behavior: SnackBarBehavior.floating,
-          ),
+        toastification.show(
+          context: context,
+          title: Text(next.message),
+          autoCloseDuration: const Duration(seconds: 4),
+          style: ToastificationStyle.flatColored,
+          type: ToastificationType.error,
+          showProgressBar: true,
+          alignment: Alignment.bottomCenter,
         );
       }
     });
     return Scaffold(
-      body: Form(
+      body: FormBuilder(
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -97,7 +102,10 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text('Didn\'t receive the code?'),
-                    GestureDetector(
+                    InkWell(
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
                       onTap: () async {
                         _otpFocusNode.unfocus();
                         await ref.read(authControllerProvider.notifier).resendMail(email: widget.email);
@@ -137,7 +145,8 @@ class _OtpField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
+    return FormBuilderTextField(
+      name: 'otp',
       focusNode: focusNode,
       keyboardType: TextInputType.number,
       maxLength: 6,
@@ -151,7 +160,7 @@ class _OtpField extends StatelessWidget {
       ),
       controller: controller,
       validator: InputConverter.validateOtp,
-      onFieldSubmitted: (value) async {
+      onSubmitted: (_) async {
         focusNode.unfocus();
       },
     );

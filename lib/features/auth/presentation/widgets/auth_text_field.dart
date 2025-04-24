@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../core/utils/input_converter.dart';
@@ -14,6 +16,7 @@ class AuthTextField extends HookWidget {
     required this.controller,
     required this.label,
     required this.focusNode,
+    required this.name,
     this.keyboardType,
     this.validator,
     this.onFieldSubmitted,
@@ -26,13 +29,15 @@ class AuthTextField extends HookWidget {
 
   final String label;
 
+  final String name;
+
   final FocusNode focusNode;
 
   final TextInputType? keyboardType;
 
   final String? Function(String? value)? validator;
 
-  final void Function(String value)? onFieldSubmitted;
+  final void Function(String? value)? onFieldSubmitted;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -44,12 +49,14 @@ class AuthTextField extends HookWidget {
     properties.add(ObjectFlagProperty<String? Function(String? value)?>.has('validator', validator));
     properties.add(ObjectFlagProperty<void Function(String value)?>.has('onFieldSubmitted', onFieldSubmitted));
     properties.add(EnumProperty<AutovalidateMode?>('autovalidateMode', autovalidateMode));
+    properties.add(StringProperty('name', name));
   }
 
   @override
   Widget build(BuildContext context) {
     final obscureText = useState(true);
-    return TextFormField(
+    return FormBuilderTextField(
+      name: name,
       focusNode: focusNode,
       keyboardType: keyboardType,
       textInputAction: TextInputAction.next,
@@ -73,7 +80,7 @@ class AuthTextField extends HookWidget {
       obscureText: obscureText.value,
       autovalidateMode: autovalidateMode,
       validator: validator,
-      onFieldSubmitted: onFieldSubmitted,
+      onSubmitted: onFieldSubmitted,
     );
   }
 }
@@ -88,7 +95,7 @@ class _VisibilityButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(obscureText ? Symbols.visibility_off : Symbols.visibility),
+      icon: Icon(obscureText ? IconlyLight.show : IconlyLight.hide),
       onPressed: onPressed,
       tooltip: obscureText ? 'Show password' : 'Hide password',
       highlightColor: Colors.transparent,
@@ -108,7 +115,7 @@ class RegisterEmailTextField extends ConsumerStatefulWidget {
 
   final TextEditingController controller;
   final FocusNode focusNode;
-  final void Function(String value)? onFieldSubmitted;
+  final void Function(String? value)? onFieldSubmitted;
 
   @override
   ConsumerState<RegisterEmailTextField> createState() => _RegisterEmailTextFieldState();
@@ -178,7 +185,8 @@ class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField>
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
+    return FormBuilderTextField(
+      name: 'email',
       controller: widget.controller,
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
@@ -211,7 +219,7 @@ class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField>
       },
       focusNode: widget.focusNode,
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      onFieldSubmitted: widget.onFieldSubmitted,
+      onSubmitted: widget.onFieldSubmitted,
     );
   }
 }

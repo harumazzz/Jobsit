@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
+import 'package:toastification/toastification.dart';
 
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/routes/app_router.dart';
@@ -25,7 +26,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   late FocusNode _passwordFocusNode;
 
-  late GlobalKey<FormState> _formKey;
+  late GlobalKey<FormBuilderState> _formKey;
 
   late bool _savePassword;
 
@@ -35,7 +36,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     _passwordController = TextEditingController();
     _emailFocusNode = FocusNode();
     _passwordFocusNode = FocusNode();
-    _formKey = GlobalKey<FormState>();
+    _formKey = GlobalKey<FormBuilderState>();
     _savePassword = false;
     super.initState();
   }
@@ -56,23 +57,34 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       switch (next) {
         case AuthError _:
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(next.message),
-              duration: const Duration(seconds: 2),
-              behavior: SnackBarBehavior.floating,
-            ),
+          toastification.show(
+            context: context,
+            title: Text(next.message),
+            autoCloseDuration: const Duration(seconds: 4),
+            type: ToastificationType.error,
+            style: ToastificationStyle.flatColored,
+            showProgressBar: true,
+            alignment: Alignment.bottomCenter,
           );
           break;
         case AuthAuthorized _:
-          context.goNamed(AppRouter.homeName);
+          toastification.show(
+            context: context,
+            title: const Text('Login successfully!'),
+            autoCloseDuration: const Duration(seconds: 4),
+            style: ToastificationStyle.flatColored,
+            type: ToastificationType.success,
+            showProgressBar: true,
+            alignment: Alignment.bottomCenter,
+          );
+          const HomeRoute().go(context);
           break;
         default:
           break;
       }
     });
     return Scaffold(
-      body: Form(
+      body: FormBuilder(
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -84,7 +96,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 child: Image.asset('assets/images/icon.png', width: 100.0, height: 100.0),
               ),
               const SizedBox(height: 50.0),
-              TextFormField(
+              FormBuilderTextField(
+                name: 'email',
                 focusNode: _emailFocusNode,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
@@ -95,7 +108,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 controller: _emailController,
                 validator: InputConverter.validateEmail,
-                onFieldSubmitted: (value) async {
+                onSubmitted: (_) async {
                   if (_emailFocusNode.hasFocus) {
                     _emailFocusNode.unfocus();
                   }
@@ -104,6 +117,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
               const SizedBox(height: 20.0),
               AuthTextField(
+                name: 'password',
                 label: 'Password',
                 controller: _passwordController,
                 focusNode: _passwordFocusNode,
@@ -144,9 +158,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       const Text('Save password'),
                     ],
                   ),
-                  GestureDetector(
+                  InkWell(
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
                     onTap: () async {
-                      context.goNamed(AppRouter.forgotPasswordName);
+                      const ForgotPasswordRoute().go(context);
                     },
                     child: const Text('Forgot password?'),
                   ),
@@ -213,9 +230,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     'Don\'t have an Account?',
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: Colors.black),
                   ),
-                  GestureDetector(
+                  InkWell(
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
                     onTap: () async {
-                      context.goNamed(AppRouter.registerName);
+                      const RegisterRoute().go(context);
                     },
                     child: const Text('Sign Up', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
                   ),

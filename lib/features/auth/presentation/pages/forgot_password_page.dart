@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:toastification/toastification.dart';
 
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/routes/app_router.dart';
@@ -17,17 +19,14 @@ class ForgotPasswordPage extends ConsumerStatefulWidget {
 }
 
 class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
-  late TextEditingController _emailController;
+  late GlobalKey<FormBuilderState> _formKey;
 
   late FocusNode _emailFocusNode;
 
-  late GlobalKey<FormState> _formKey;
-
   @override
   void initState() {
-    _emailController = TextEditingController();
+    _formKey = GlobalKey<FormBuilderState>();
     _emailFocusNode = FocusNode();
-    _formKey = GlobalKey<FormState>();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _emailFocusNode.requestFocus();
@@ -36,9 +35,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
   @override
   void dispose() {
-    _emailController.dispose();
     _emailFocusNode.dispose();
-    _formKey.currentState?.dispose();
     super.dispose();
   }
 
@@ -47,21 +44,31 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     final state = ref.watch(authControllerProvider);
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       if (next is AuthForgotPassword) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Verification code sent to your email. Please check your inbox.'),
-            duration: Duration(seconds: 5),
-            behavior: SnackBarBehavior.floating,
-          ),
+        toastification.show(
+          context: context,
+          title: const Text('Verification code sent to your email. Please check your inbox.'),
+          autoCloseDuration: const Duration(seconds: 4),
+          style: ToastificationStyle.flatColored,
+          type: ToastificationType.success,
+          showProgressBar: true,
+          alignment: Alignment.bottomCenter,
         );
         // TODO(self): Navigate to OTP verification page for reset password
       }
       if (next is AuthError) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(next.message)));
+        toastification.show(
+          context: context,
+          title: Text(next.message),
+          autoCloseDuration: const Duration(seconds: 4),
+          style: ToastificationStyle.flatColored,
+          type: ToastificationType.error,
+          showProgressBar: true,
+          alignment: Alignment.bottomCenter,
+        );
       }
     });
     return Scaffold(
-      body: Form(
+      body: FormBuilder(
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -86,7 +93,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
-              TextFormField(
+              FormBuilderTextField(
+                name: 'email',
                 focusNode: _emailFocusNode,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
@@ -95,9 +103,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                   labelText: 'Email',
                   contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                 ),
-                controller: _emailController,
                 validator: InputConverter.validateEmail,
-                onFieldSubmitted: (value) async {
+                onSubmitted: (value) {
                   if (_emailFocusNode.hasFocus) {
                     _emailFocusNode.unfocus();
                   }
@@ -109,18 +116,22 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 _ => SizedBox(
                   width: double.infinity,
                   child: CustomButton(
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        await ref.read(authControllerProvider.notifier).forgotPassword(email: _emailController.text);
+                    onPressed: () {
+                      if (_formKey.currentState!.saveAndValidate()) {
+                        final email = _formKey.currentState!.value['email'] as String;
+                        ref.read(authControllerProvider.notifier).forgotPassword(email: email);
                       }
                     },
                     child: const Text('Send'),
                   ),
                 ),
               },
-              GestureDetector(
+              InkWell(
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                hoverColor: Colors.transparent,
                 onTap: () async {
-                  context.goNamed(AppRouter.loginName);
+                  const LoginRoute().go(context);
                 },
                 child: const Text('Return to Sign In', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
               ),
@@ -148,6 +159,8 @@ class ResetPasswordPage extends ConsumerStatefulWidget {
 }
 
 class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
+  late GlobalKey<FormBuilderState> _formKey;
+
   late TextEditingController _passwordController;
 
   late TextEditingController _confirmPasswordController;
@@ -156,15 +169,13 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
 
   late FocusNode _confirmPasswordFocusNode;
 
-  late GlobalKey<FormState> _formKey;
-
   @override
   void initState() {
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
+    _formKey = GlobalKey<FormBuilderState>();
     _passwordFocusNode = FocusNode();
     _confirmPasswordFocusNode = FocusNode();
-    _formKey = GlobalKey<FormState>();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _passwordFocusNode.requestFocus();
@@ -177,7 +188,6 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
     _confirmPasswordController.dispose();
     _passwordFocusNode.dispose();
     _confirmPasswordFocusNode.dispose();
-    _formKey.currentState?.dispose();
     super.dispose();
   }
 
@@ -186,21 +196,31 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
     final state = ref.watch(authControllerProvider);
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       if (next is AuthResetPassword) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Password reset successfully. Please login with your new password.'),
-            duration: Duration(seconds: 5),
-            behavior: SnackBarBehavior.floating,
-          ),
+        toastification.show(
+          context: context,
+          title: const Text('Password reset successfully. Please login with your new password.'),
+          autoCloseDuration: const Duration(seconds: 4),
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          showProgressBar: true,
+          alignment: Alignment.bottomCenter,
         );
-        context.goNamed(AppRouter.loginName);
+        const LoginRoute().go(context);
       }
       if (next is AuthError) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(next.message)));
+        toastification.show(
+          context: context,
+          title: Text(next.message),
+          autoCloseDuration: const Duration(seconds: 4),
+          style: ToastificationStyle.flatColored,
+          type: ToastificationType.error,
+          showProgressBar: true,
+          alignment: Alignment.bottomCenter,
+        );
       }
     });
     return Scaffold(
-      body: Form(
+      body: FormBuilder(
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -214,11 +234,12 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey),
               ),
               AuthTextField(
+                controller: _passwordController,
+                name: 'password',
                 focusNode: _passwordFocusNode,
                 keyboardType: TextInputType.visiblePassword,
-                controller: _passwordController,
-                validator: InputConverter.validatePassword,
                 label: 'Password',
+                validator: InputConverter.validatePassword,
                 onFieldSubmitted: (value) async {
                   if (_passwordFocusNode.hasFocus) {
                     _passwordFocusNode.unfocus();
@@ -227,20 +248,20 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                 },
               ),
               AuthTextField(
+                controller: _confirmPasswordController,
+                name: 'confirm_password',
+                label: 'Confirm Password',
                 focusNode: _confirmPasswordFocusNode,
                 keyboardType: TextInputType.visiblePassword,
-                controller: _confirmPasswordController,
-                validator: (value) {
-                  final result = InputConverter.validatePassword(value);
-                  if (result != null) {
-                    return result;
-                  }
-                  if (value != _passwordController.text) {
-                    return 'Confirm Password does not match';
-                  }
-                  return null;
-                },
-                label: 'Confirm Password',
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(),
+                  (value) {
+                    if (value != _passwordController.text) {
+                      return 'Confirm Password does not match';
+                    }
+                    return null;
+                  },
+                ]),
                 onFieldSubmitted: (value) async {
                   if (_confirmPasswordFocusNode.hasFocus) {
                     _confirmPasswordFocusNode.unfocus();
@@ -254,7 +275,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                   width: double.infinity,
                   child: CustomButton(
                     onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
+                      if (_formKey.currentState!.saveAndValidate()) {
                         await ref
                             .read(authControllerProvider.notifier)
                             .resetPassword(
@@ -268,9 +289,12 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                   ),
                 ),
               },
-              GestureDetector(
+              InkWell(
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                hoverColor: Colors.transparent,
                 onTap: () async {
-                  context.goNamed(AppRouter.loginName);
+                  const LoginRoute().go(context);
                 },
                 child: const Text('Return to Sign In', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
               ),
