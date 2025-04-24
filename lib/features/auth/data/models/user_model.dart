@@ -52,6 +52,7 @@ abstract class UserCreationResponse with _$UserCreationResponse {
     required String firstName,
     required String lastName,
     required String phone,
+    String? avatar,
     @JsonKey(name: 'roleDTO') required RoleResponse role,
     @JsonKey(name: 'statusDTO') required StatusResponse status,
   }) = _UserCreationResponse;
@@ -77,7 +78,7 @@ abstract class LogInResponse with _$LogInResponse {
     required String email,
     required String role,
     String? avatar,
-    required int idUser,
+    @JsonKey(name: 'idUser') required int userId,
   }) = _LogInResponse;
 
   factory LogInResponse.fromJson(Map<String, dynamic> json) => _$LogInResponseFromJson(json);
@@ -119,6 +120,14 @@ abstract class VerifyMailResponse with _$VerifyMailResponse {
   const factory VerifyMailResponse({required String message}) = _VerifyMailResponse;
 
   factory VerifyMailResponse.fromJson(Map<String, dynamic> json) => _$VerifyMailResponseFromJson(json);
+}
+
+@freezed
+abstract class GetUserResponse with _$GetUserResponse {
+  const factory GetUserResponse({required int id, @JsonKey(name: 'userDTO') required UserCreationResponse user}) =
+      _GetUserResponse;
+
+  factory GetUserResponse.fromJson(Map<String, dynamic> json) => _$GetUserResponseFromJson(json);
 }
 
 @freezed
@@ -177,6 +186,12 @@ extension StatusResponseMapper on StatusResponse {
 
 extension UserResponseMapper on LogInResponse {
   User toEntity() {
-    return User(idUser: idUser, email: email, role: role, avatar: avatar);
+    return User(userId: userId, email: email, role: role, avatar: avatar);
+  }
+}
+
+extension GetUserResponseMapper on GetUserResponse {
+  User toEntity() {
+    return User(userId: user.id, email: user.email, role: user.role.name, avatar: user.avatar);
   }
 }

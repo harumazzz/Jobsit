@@ -23,4 +23,6 @@ class ApiConstant extends Equatable {
   static const String checkEmailEndpoint = '/user/check-email';
 
   static const String verifyOtpEndpoint = '/user/verify-otp';
+
+  static const String getUserEndpoint = '/candidate/user/{userId}';
 }

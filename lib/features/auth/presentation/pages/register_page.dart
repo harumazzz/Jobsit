@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/input_converter.dart';
+import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
@@ -82,7 +83,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           );
           break;
         case AuthRegistered _:
-          context.goNamed('otp_verification', extra: _emailController.text);
+          context.goNamed(AppRouter.otpVerificationName, extra: _emailController.text);
           break;
         default:
           break;
@@ -269,7 +270,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   children: [
                     const Text('Already have an Account?'),
                     GestureDetector(
-                      onTap: () => context.goNamed('login'),
+                      onTap: () => context.goNamed(AppRouter.loginName),
                       child: const Text(' Sign In', style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ],

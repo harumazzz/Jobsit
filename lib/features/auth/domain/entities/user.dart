@@ -27,5 +27,5 @@ sealed class RegisteredUser with _$RegisteredUser {
 
 @freezed
 sealed class User with _$User {
-  const factory User({required int idUser, required String email, required String role, String? avatar}) = _User;
+  const factory User({required int userId, required String email, required String role, String? avatar}) = _User;
 }

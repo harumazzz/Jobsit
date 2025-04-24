@@ -1,9 +1,12 @@
 import 'package:dart_either/dart_either.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/services/shared_prefs_service.dart';
+import '../../../../injection_container.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
@@ -14,13 +17,16 @@ part 'auth_repository_impl.g.dart';
 @riverpod
 AuthRepository authRepository(Ref ref) {
   final remoteDataSource = ref.watch(authRemoteDataSourceProvider);
-  return AuthRepositoryImpl(remoteDataSource);
+  final authStorageService = InjectionContainer.get<IAuthStorageService>();
+  return AuthRepositoryImpl(remoteDataSource, authStorageService);
 }
 
-class AuthRepositoryImpl implements AuthRepository {
-  const AuthRepositoryImpl(this._authRemoteDataSource);
+final class AuthRepositoryImpl implements AuthRepository {
+  const AuthRepositoryImpl(this._authRemoteDataSource, this._authStorageService);
 
   final AuthRemoteDataSource _authRemoteDataSource;
+
+  final IAuthStorageService _authStorageService;
 
   @override
   Future<Either<Failure, RegisteredUser>> registerUser({
@@ -54,7 +60,11 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, User>> loginUser({required String email, required String password}) async {
     try {
       final result = await _authRemoteDataSource.loginUser(LogInRequest(email: email, password: password));
+      await _authStorageService.saveToken(result.token);
+      await _authStorageService.saveUserId(result.userId);
       return Right(result.toEntity());
+    } on PlatformException catch (e) {
+      return Left(CacheFailure(e.message.toString()));
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {
@@ -133,6 +143,18 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final result = await _authRemoteDataSource.verifyOtp(otp);
       return Right(result.message);
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> getUser({required int userId}) async {
+    try {
+      final result = await _authRemoteDataSource.getUser(userId);
+      return Right(result.toEntity());
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {
