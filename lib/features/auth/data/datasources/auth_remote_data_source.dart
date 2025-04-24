@@ -43,4 +43,7 @@ abstract class AuthRemoteDataSource {
 
   @POST(ApiConstant.verifyOtpEndpoint)
   Future<VerifyOtpResponse> verifyOtp(@Query('otp') String otp);
+
+  @GET(ApiConstant.getUserEndpoint)
+  Future<GetUserResponse> getUser(@Path() int userId);
 }

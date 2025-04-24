@@ -2,22 +2,30 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../injection_container.dart';
+import '../../services/shared_prefs_service.dart';
+
 part 'auth_interceptor.g.dart';
 
 @Riverpod(keepAlive: true)
 Interceptor authInterceptor(Ref ref) {
-  return const AuthInterceptor();
+  final authStorageService = InjectionContainer.get<IAuthStorageService>();
+  return AuthInterceptor(authStorageService);
 }
 
-class AuthInterceptor extends Interceptor {
-  const AuthInterceptor();
+final class AuthInterceptor extends Interceptor {
+  const AuthInterceptor(this._authStorageService);
+
+  final IAuthStorageService _authStorageService;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     options.headers['Content-Type'] = 'application/json';
     options.headers['Accept'] = 'application/json';
-    // TODO(self): add token
-    // options.headers['Authorization'] = 'Bearer $token';
+    final token = await _authStorageService.getToken();
+    if (token != null) {
+      options.headers['Authorization'] = 'Bearer $token';
+    }
     super.onRequest(options, handler);
   }
 

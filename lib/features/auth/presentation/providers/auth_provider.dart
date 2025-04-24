@@ -155,4 +155,17 @@ class AuthController extends _$AuthController {
       return e.toString();
     }
   }
+
+  Future<void> getCandidateData(int userId) async {
+    assert(state is AuthInitial, 'State must be initialized to get candidate data');
+    try {
+      final checkEmailUseCase = ref.read(getUserDataProvider);
+      final result = await checkEmailUseCase(userId);
+      state = result.fold(ifRight: AuthState.authorized, ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
 }

@@ -1,13 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_debouncer/flutter_debouncer.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../../core/utils/input_converter.dart';
 import '../providers/auth_provider.dart';
 
-class AuthTextField extends StatefulWidget {
+class AuthTextField extends HookWidget {
   const AuthTextField({
     super.key,
     required this.controller,
@@ -34,9 +35,6 @@ class AuthTextField extends StatefulWidget {
   final void Function(String value)? onFieldSubmitted;
 
   @override
-  State<AuthTextField> createState() => _AuthTextFieldState();
-
-  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller));
@@ -47,41 +45,35 @@ class AuthTextField extends StatefulWidget {
     properties.add(ObjectFlagProperty<void Function(String value)?>.has('onFieldSubmitted', onFieldSubmitted));
     properties.add(EnumProperty<AutovalidateMode?>('autovalidateMode', autovalidateMode));
   }
-}
-
-class _AuthTextFieldState extends State<AuthTextField> {
-  late bool _obscureText;
-
-  @override
-  void initState() {
-    _obscureText = true;
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
+    final obscureText = useState(true);
     return TextFormField(
-      focusNode: widget.focusNode,
-      keyboardType: widget.keyboardType,
+      focusNode: focusNode,
+      keyboardType: keyboardType,
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
         border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-        labelText: widget.label,
+        labelText: label,
         contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
         suffixIcon: _VisibilityButton(
-          obscureText: _obscureText,
-          onPressed: () {
-            setState(() {
-              _obscureText = !_obscureText;
-            });
+          obscureText: obscureText.value,
+          onPressed: () async {
+            obscureText.value = !obscureText.value;
+            if (obscureText.value) {
+              focusNode.requestFocus();
+            } else {
+              focusNode.unfocus();
+            }
           },
         ),
       ),
-      controller: widget.controller,
-      obscureText: _obscureText,
-      autovalidateMode: widget.autovalidateMode,
-      validator: widget.validator,
-      onFieldSubmitted: widget.onFieldSubmitted,
+      controller: controller,
+      obscureText: obscureText.value,
+      autovalidateMode: autovalidateMode,
+      validator: validator,
+      onFieldSubmitted: onFieldSubmitted,
     );
   }
 }
@@ -131,7 +123,7 @@ class RegisterEmailTextField extends ConsumerStatefulWidget {
 }
 
 class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField> {
-  late Debouncer _emailDebouncer;
+  late PublishSubject<String> _emailSubject;
   bool _isCheckingEmail = false;
   bool _isEmailAvailable = true;
   String? _emailErrorText;
@@ -139,7 +131,8 @@ class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField>
   @override
   void initState() {
     super.initState();
-    _emailDebouncer = Debouncer();
+    _emailSubject = PublishSubject<String>();
+    _emailSubject.debounceTime(const Duration(milliseconds: 800)).listen(_checkEmailAvailability);
     widget.controller.addListener(_onEmailChanged);
   }
 
@@ -157,30 +150,29 @@ class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField>
       _isCheckingEmail = true;
       _emailErrorText = null;
     });
-    _emailDebouncer.debounce(
-      duration: const Duration(milliseconds: 800),
-      onDebounce: () async {
-        try {
-          final result = await ref.read(authControllerProvider.notifier).checkEmailExists(email);
-          setState(() {
-            _isCheckingEmail = false;
-            _isEmailAvailable = !result.toLowerCase().contains('đã sử dụng');
-            _emailErrorText = _isEmailAvailable ? null : 'Email already exists';
-          });
-        } catch (e) {
-          setState(() {
-            _isCheckingEmail = false;
-            _emailErrorText = null;
-          });
-        }
-      },
-    );
+    _emailSubject.add(email);
+  }
+
+  void _checkEmailAvailability(String email) async {
+    try {
+      final result = await ref.read(authControllerProvider.notifier).checkEmailExists(email);
+      setState(() {
+        _isCheckingEmail = false;
+        _isEmailAvailable = !result.toLowerCase().contains('đã sử dụng');
+        _emailErrorText = _isEmailAvailable ? null : 'Email already exists';
+      });
+    } catch (e) {
+      setState(() {
+        _isCheckingEmail = false;
+        _emailErrorText = null;
+      });
+    }
   }
 
   @override
   void dispose() {
+    _emailSubject.close();
     widget.controller.removeListener(_onEmailChanged);
-    _emailDebouncer.cancel();
     super.dispose();
   }
 

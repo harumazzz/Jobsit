@@ -13,6 +13,10 @@ final class ServerFailure extends Failure {
   const ServerFailure(super.message);
 }
 
+final class CacheFailure extends Failure {
+  const CacheFailure(super.message);
+}
+
 final class InvalidEmailFailure extends Failure {
   const InvalidEmailFailure(super.message);
 }

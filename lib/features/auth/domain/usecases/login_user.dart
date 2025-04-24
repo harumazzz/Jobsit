@@ -97,3 +97,20 @@ final class ResetPassword implements UseCase<Success, ResetPasswordParams> {
     );
   }
 }
+
+@riverpod
+GetUserData getUserData(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return GetUserData(authRepository);
+}
+
+final class GetUserData implements UseCase<User, int> {
+  const GetUserData(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, User>> call(int userId) async {
+    return await _authRepository.getUser(userId: userId);
+  }
+}

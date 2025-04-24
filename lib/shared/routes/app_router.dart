@@ -1,17 +1,35 @@
 import 'package:equatable/equatable.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/services/shared_prefs_service.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/jobs/presentation/pages/home_page.dart';
+import '../../injection_container.dart';
 
 class AppRouter extends Equatable {
   const AppRouter._();
 
   static final GoRouter _router = GoRouter(
-    initialLocation: '/login',
+    redirect: (context, state) async {
+      final token = await InjectionContainer.get<IAuthStorageService>().getToken();
+      if (token == null) {
+        return '/login';
+      }
+      final path = state.path;
+      switch (path) {
+        case '/login':
+        case '/register':
+        case '/forgot_password':
+        case '/reset_password':
+        case '/otp_verification':
+        case null:
+          return '/home';
+      }
+      return state.path;
+    },
     routes: [
       GoRoute(path: '/login', name: 'login', builder: (_, _) => const LoginPage()),
       GoRoute(path: '/register', name: 'register', builder: (_, _) => const RegisterPage()),

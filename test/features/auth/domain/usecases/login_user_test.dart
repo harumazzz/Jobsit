@@ -24,30 +24,17 @@ void main() {
     });
     const tEmail = 'test@example.com';
     const tPassword = 'password123';
-    const tUser = User(
-      idUser: 1,
-      email: tEmail,
-      role: 'ROLE_CANDIDATE',
-      avatar: 'None',
-    );
+    const tUser = User(userId: 1, email: tEmail, role: 'ROLE_CANDIDATE', avatar: 'None');
     const tLoginParams = LoginUserParams(email: tEmail, password: tPassword);
-    test(
-      'should get user from the repository when login is successful',
-      () async {
-        when(
-          mockAuthRepository.loginUser(email: tEmail, password: tPassword),
-        ).thenAnswer((_) async => const Right(tUser));
-        final result = await loginUseCase(tLoginParams);
-        expect(result, equals(const Right(tUser)));
-        verify(
-          await mockAuthRepository.loginUser(
-            email: tEmail,
-            password: tPassword,
-          ),
-        );
-        verifyNoMoreInteractions(mockAuthRepository);
-      },
-    );
+    test('should get user from the repository when login is successful', () async {
+      when(
+        mockAuthRepository.loginUser(email: tEmail, password: tPassword),
+      ).thenAnswer((_) async => const Right(tUser));
+      final result = await loginUseCase(tLoginParams);
+      expect(result, equals(const Right(tUser)));
+      verify(await mockAuthRepository.loginUser(email: tEmail, password: tPassword));
+      verifyNoMoreInteractions(mockAuthRepository);
+    });
     test('should return a Failure when login fails', () async {
       const tFailure = ServerFailure('Server error');
       when(
@@ -55,9 +42,7 @@ void main() {
       ).thenAnswer((_) async => const Left(tFailure));
       final result = await loginUseCase(tLoginParams);
       expect(result, equals(const Left(tFailure)));
-      verify(
-        await mockAuthRepository.loginUser(email: tEmail, password: tPassword),
-      );
+      verify(await mockAuthRepository.loginUser(email: tEmail, password: tPassword));
       verifyNoMoreInteractions(mockAuthRepository);
     });
   });
