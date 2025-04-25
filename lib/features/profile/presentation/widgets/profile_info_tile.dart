@@ -47,6 +47,8 @@ class SimpleTile extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
     properties.add(DiagnosticsProperty<IconData>('icon', icon));
+    properties.add(DoubleProperty('spacing', spacing));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
   }
 }
 

@@ -304,7 +304,7 @@ class ProfilePage extends HookWidget {
               child: CustomButton(
                 color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.24),
                 onPressed: () async {
-                  // TODO(self): Implement the logic to logout
+                  // TODO(self): Implement the logic to change password
                 },
                 child: const Text('Change Password'),
               ),
