@@ -3,18 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 
 class CustomButton extends StatelessWidget {
-  const CustomButton({super.key, this.onPressed, required this.child});
+  const CustomButton({super.key, this.onPressed, required this.child, this.color});
 
   final void Function()? onPressed;
 
   final Widget child;
 
+  final Color? color;
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      style: const ButtonStyle(
-        padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 24.0, horizontal: 32.0)),
-        shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)))),
+      style: ButtonStyle(
+        backgroundColor: WidgetStatePropertyAll(color ?? Theme.of(context).colorScheme.primary),
+        padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 24.0, horizontal: 32.0)),
+        shape: const WidgetStatePropertyAll(
+          RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+        ),
       ),
       onPressed: onPressed,
       child: child,
@@ -25,6 +30,7 @@ class CustomButton extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ObjectFlagProperty<void Function()?>.has('onPressed', onPressed));
+    properties.add(ColorProperty('color', color));
   }
 }
 
@@ -149,5 +155,35 @@ class _DropdownButtonFieldState<T> extends State<DropdownButtonField<T>> {
     properties.add(StringProperty('label', widget.label));
     properties.add(DiagnosticsProperty<T>('value', widget.value));
     properties.add(ObjectFlagProperty<void Function(T?)>.has('onChanged', widget.onChanged));
+  }
+}
+
+class DisabledButton extends StatelessWidget {
+  const DisabledButton({super.key, required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.24),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Center(
+        child: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
   }
 }

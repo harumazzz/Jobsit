@@ -103,6 +103,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     });
 
     return Scaffold(
+      backgroundColor: const Color(0xFFefeff0),
       appBar: AppBar(title: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold)), centerTitle: true),
       body: FormBuilder(
         key: _formKey,

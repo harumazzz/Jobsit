@@ -62,7 +62,8 @@ final class AuthRepositoryImpl implements AuthRepository {
       final result = await _authRemoteDataSource.loginUser(LogInRequest(email: email, password: password));
       await _authStorageService.saveToken(result.token);
       await _authStorageService.saveUserId(result.userId);
-      return Right(result.toEntity());
+      final user = await _authRemoteDataSource.getUser(result.userId);
+      return Right(user.toEntity());
     } on PlatformException catch (e) {
       return Left(CacheFailure(e.message.toString()));
     } on DioException catch (e) {

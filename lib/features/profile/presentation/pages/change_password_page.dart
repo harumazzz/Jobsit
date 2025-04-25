@@ -5,6 +5,6 @@ class ChangePasswordPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Placeholder());
+    return const Scaffold(backgroundColor: Color(0xFFefeff0), body: Placeholder());
   }
 }

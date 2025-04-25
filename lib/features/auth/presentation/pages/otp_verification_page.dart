@@ -81,6 +81,7 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
       }
     });
     return Scaffold(
+      backgroundColor: const Color(0xFFefeff0),
       body: FormBuilder(
         key: _formKey,
         child: Padding(
@@ -210,6 +211,7 @@ class OtpVerifiedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFefeff0),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

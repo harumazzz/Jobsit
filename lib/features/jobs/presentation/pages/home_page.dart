@@ -30,6 +30,7 @@ class HomePage extends HookConsumerWidget {
     final controller = usePageController();
     final index = useState(0);
     return Scaffold(
+      backgroundColor: const Color(0xFFefeff0),
       body: PageView.builder(
         controller: controller,
         itemCount: _pages.length,

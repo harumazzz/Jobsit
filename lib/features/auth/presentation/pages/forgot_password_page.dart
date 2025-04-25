@@ -68,6 +68,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
       }
     });
     return Scaffold(
+      backgroundColor: const Color(0xFFefeff0),
       body: FormBuilder(
         key: _formKey,
         child: Padding(
@@ -220,6 +221,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
       }
     });
     return Scaffold(
+      backgroundColor: const Color(0xFFefeff0),
       body: FormBuilder(
         key: _formKey,
         child: Padding(
