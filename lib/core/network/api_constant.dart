@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class ApiConstant extends Equatable {
+final class ApiConstant extends Equatable {
   const ApiConstant._();
 
   @override
@@ -25,4 +25,8 @@ class ApiConstant extends Equatable {
   static const String verifyOtpEndpoint = '/user/verify-otp';
 
   static const String getUserEndpoint = '/candidate/user/{userId}';
+
+  static const String jobListEndpoint = '/job';
+
+  static const String jobDetailEndpoint = '/job/{jobId}';
 }

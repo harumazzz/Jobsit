@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:toastification/toastification.dart';
+import 'package:elegant_notification/elegant_notification.dart';
 
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/routes/app_router.dart';
@@ -44,27 +44,14 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     final state = ref.watch(authControllerProvider);
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       if (next is AuthForgotPassword) {
-        toastification.show(
-          context: context,
-          title: const Text('Verification code sent to your email. Please check your inbox.'),
-          autoCloseDuration: const Duration(seconds: 4),
-          style: ToastificationStyle.flatColored,
-          type: ToastificationType.success,
-          showProgressBar: true,
-          alignment: Alignment.bottomCenter,
-        );
+        ElegantNotification.success(
+          background: const Color(0xFFDEF2ED),
+          description: const Text('Verification code sent to your email. Please check your inbox.'),
+        ).show(context);
         // TODO(self): Navigate to OTP verification page for reset password
       }
       if (next is AuthError) {
-        toastification.show(
-          context: context,
-          title: Text(next.message),
-          autoCloseDuration: const Duration(seconds: 4),
-          style: ToastificationStyle.flatColored,
-          type: ToastificationType.error,
-          showProgressBar: true,
-          alignment: Alignment.bottomCenter,
-        );
+        ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
       }
     });
     return Scaffold(
@@ -197,27 +184,14 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
     final state = ref.watch(authControllerProvider);
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       if (next is AuthResetPassword) {
-        toastification.show(
-          context: context,
-          title: const Text('Password reset successfully. Please login with your new password.'),
-          autoCloseDuration: const Duration(seconds: 4),
-          type: ToastificationType.success,
-          style: ToastificationStyle.flatColored,
-          showProgressBar: true,
-          alignment: Alignment.bottomCenter,
-        );
+        ElegantNotification.success(
+          background: const Color(0xFFDEF2ED),
+          description: const Text('Password reset successfully. Please login with your new password.'),
+        ).show(context);
         const LoginRoute().go(context);
       }
       if (next is AuthError) {
-        toastification.show(
-          context: context,
-          title: Text(next.message),
-          autoCloseDuration: const Duration(seconds: 4),
-          style: ToastificationStyle.flatColored,
-          type: ToastificationType.error,
-          showProgressBar: true,
-          alignment: Alignment.bottomCenter,
-        );
+        ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
       }
     });
     return Scaffold(

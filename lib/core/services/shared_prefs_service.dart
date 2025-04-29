@@ -85,5 +85,9 @@ class AuthStorageService implements IAuthStorageService {
 @module
 abstract class StorageModule {
   @singleton
-  FlutterSecureStorage get secureStorage => const FlutterSecureStorage();
+  FlutterSecureStorage get secureStorage {
+    const androidOption = AndroidOptions(encryptedSharedPreferences: true);
+    const iosOption = IOSOptions(accessibility: KeychainAccessibility.first_unlock);
+    return const FlutterSecureStorage(aOptions: androidOption, iOptions: iosOption);
+  }
 }

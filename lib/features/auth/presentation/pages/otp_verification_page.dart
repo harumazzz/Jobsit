@@ -1,8 +1,8 @@
+import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:toastification/toastification.dart';
 
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/routes/app_router.dart';
@@ -58,26 +58,13 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
         const OtpVerifiedRoute().go(context);
       }
       if (next is AuthSendedMail) {
-        toastification.show(
-          context: context,
-          title: const Text('Verification code sent to your email. Please check your inbox.'),
-          autoCloseDuration: const Duration(seconds: 4),
-          style: ToastificationStyle.flatColored,
-          type: ToastificationType.success,
-          showProgressBar: true,
-          alignment: Alignment.bottomCenter,
-        );
+        ElegantNotification.success(
+          background: const Color(0xFFDEF2ED),
+          description: const Text('Verification code sent to your email. Please check your inbox.'),
+        ).show(context);
       }
       if (next is AuthError) {
-        toastification.show(
-          context: context,
-          title: Text(next.message),
-          autoCloseDuration: const Duration(seconds: 4),
-          style: ToastificationStyle.flatColored,
-          type: ToastificationType.error,
-          showProgressBar: true,
-          alignment: Alignment.bottomCenter,
-        );
+        ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
       }
     });
     return Scaffold(
@@ -87,48 +74,50 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const _Stepper(),
-                const SizedBox(height: 30.0),
-                const Text('VERIFICATION'),
-                const SizedBox(height: 20.0),
-                const Text('Enter the OTP code that we send you via SMS'),
-                const SizedBox(height: 30.0),
-                _OtpField(controller: _otpController, focusNode: _otpFocusNode),
-                const SizedBox(height: 20.0),
-                Row(
-                  spacing: 4.0,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Didn\'t receive the code?'),
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      onTap: () async {
-                        _otpFocusNode.unfocus();
-                        await ref.read(authControllerProvider.notifier).resendMail(email: widget.email);
-                      },
-                      child: const Text('Resend', style: TextStyle(color: Colors.red)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20.0),
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomButton(
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        _otpFocusNode.unfocus();
-                        await ref.read(authControllerProvider.notifier).verifyEmail(otp: _otpController.text);
-                      }
-                    },
-                    child: const Text('Verify'),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const _Stepper(),
+                  const SizedBox(height: 30.0),
+                  const Text('VERIFICATION'),
+                  const SizedBox(height: 20.0),
+                  const Text('Enter the OTP code that we send you via SMS'),
+                  const SizedBox(height: 30.0),
+                  _OtpField(controller: _otpController, focusNode: _otpFocusNode),
+                  const SizedBox(height: 20.0),
+                  Row(
+                    spacing: 4.0,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Didn\'t receive the code?'),
+                      InkWell(
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        onTap: () async {
+                          _otpFocusNode.unfocus();
+                          await ref.read(authControllerProvider.notifier).resendMail(email: widget.email);
+                        },
+                        child: const Text('Resend', style: TextStyle(color: Colors.red)),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 20.0),
+                  SizedBox(
+                    width: double.infinity,
+                    child: CustomButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          _otpFocusNode.unfocus();
+                          await ref.read(authControllerProvider.notifier).verifyEmail(otp: _otpController.text);
+                        }
+                      },
+                      child: const Text('Verify'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

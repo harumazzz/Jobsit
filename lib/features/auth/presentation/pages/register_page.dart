@@ -1,8 +1,8 @@
+import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:toastification/toastification.dart';
 
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/routes/app_router.dart';
@@ -75,26 +75,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       switch (next) {
         case AuthError _:
-          toastification.show(
-            context: context,
-            title: Text(next.message),
-            autoCloseDuration: const Duration(seconds: 4),
-            style: ToastificationStyle.flatColored,
-            type: ToastificationType.error,
-            showProgressBar: true,
-            alignment: Alignment.bottomCenter,
-          );
+          ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
           break;
         case AuthRegistered _:
-          toastification.show(
-            context: context,
-            title: const Text('Register an account successfully!'),
-            autoCloseDuration: const Duration(seconds: 4),
-            style: ToastificationStyle.flatColored,
-            type: ToastificationType.success,
-            showProgressBar: true,
-            alignment: Alignment.bottomCenter,
-          );
+          ElegantNotification.success(
+            background: const Color(0xFFDEF2ED),
+            description: const Text('Register an account successfully!'),
+          ).show(context);
           OtpVerificationRoute(email: _emailController.text).go(context);
           break;
         default:

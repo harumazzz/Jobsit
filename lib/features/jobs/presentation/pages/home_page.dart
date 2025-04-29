@@ -3,13 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import '../../../../core/services/shared_prefs_service.dart';
 import '../../../../injection_container.dart';
+import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/bottom_nav_bar.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
+import '../../domain/entities/job.dart';
+import '../providers/job_provider.dart';
+import '../widgets/job_card.dart';
 import 'applied_jobs_page.dart';
 import 'saved_jobs_page.dart';
 
@@ -49,11 +54,19 @@ class HomePage extends HookConsumerWidget {
   }
 }
 
-class _JobPage extends StatelessWidget {
+class _JobPage extends HookConsumerWidget {
   const _JobPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final page = useState(0);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final state = ref.read(searchJobsControllerProvider);
+      if (state is SearchJobsInitial) {
+        await ref.read(searchJobsControllerProvider.notifier).searchJobs(page: page.value, limit: 10);
+        page.value++;
+      }
+    });
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -124,6 +137,52 @@ class _JobPage extends StatelessWidget {
                 ],
               ),
             ),
+            const SliverToBoxAdapter(child: SizedBox(height: 16.0)),
+            Consumer(
+              builder: (context, ref, child) {
+                final jobState = ref.watch(searchJobsControllerProvider);
+                switch (jobState) {
+                  case SearchJobsInitial():
+                  case SearchJobsLoading():
+                    return SliverToBoxAdapter(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: 10,
+                        itemBuilder: (context, index) => const ShimmerCard(),
+                      ),
+                    );
+                  case SearchJobsError():
+                    return SliverToBoxAdapter(
+                      child: Center(child: Text(jobState.message, style: Theme.of(context).textTheme.bodyLarge)),
+                    );
+                  case SearchJobsLoaded():
+                    final state = PagingState<int, Job>(
+                      pages: [jobState.jobs],
+                      keys: const [0],
+                      hasNextPage: jobState.finished,
+                    );
+                    return PagedSliverList<int, Job>(
+                      state: state,
+                      fetchNextPage: () async {
+                        final controller = ref.read(searchJobsControllerProvider.notifier);
+                        await controller.searchJobs(page: page.value, limit: 10);
+                        page.value++;
+                      },
+                      builderDelegate: PagedChildBuilderDelegate<Job>(
+                        itemBuilder: (context, item, index) {
+                          return JobCard(
+                            job: item,
+                            onPressed: () async {
+                              JobDetailRoute(id: item.id).go(context);
+                            },
+                          );
+                        },
+                      ),
+                    );
+                }
+              },
+            ),
           ],
         ),
       ),
@@ -139,110 +198,107 @@ class _FilterModal extends HookWidget {
     final jobTypeSelection = useState<int>(0);
     final jobPositionSelection = useState<int>(0);
     final majorSelection = useState<int>(0);
-
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.6,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(IconlyLight.location, color: Theme.of(context).colorScheme.primaryContainer),
-                const SizedBox(width: 8.0),
-                Text(
-                  'Location',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      height: MediaQuery.of(context).size.height * 0.7,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(IconlyLight.location, color: Theme.of(context).colorScheme.primaryContainer),
+              const SizedBox(width: 8.0),
+              Text(
+                'Location',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16.0),
+          DropdownButtonField<String>(
+            items: [
+              ...['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng'].map((String value) {
+                return DropdownMenuItem<String>(value: value, child: Text(value));
+              }),
+            ],
+            label: '-Choose a location-',
+            onChanged: (String? value) {
+              // TODO(self): Implement location filter functionality
+            },
+          ),
+          const SizedBox(height: 24.0),
+          Text(
+            'Job Type',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 16.0),
-            DropdownButtonField<String>(
-              items: [
-                ...['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng'].map((String value) {
-                  return DropdownMenuItem<String>(value: value, child: Text(value));
-                }),
-              ],
-              label: '-Choose a location-',
-              onChanged: (String? value) {
-                // TODO(self): Implement location filter functionality
+          ),
+          const SizedBox(height: 12.0),
+          SizedBox(
+            height: 42.0,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (_, index) {
+                return _SelectedOption(label: 'Option $index', index: index, selection: jobTypeSelection);
               },
+              separatorBuilder: (_, _) => const SizedBox(width: 12.0),
+              itemCount: 3,
             ),
-            const SizedBox(height: 24.0),
-            Text(
-              'Job Type',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                fontWeight: FontWeight.bold,
-              ),
+          ),
+          const SizedBox(height: 24.0),
+          Text(
+            'Job Position',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 12.0),
-            SizedBox(
-              height: 42.0,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (_, index) {
-                  return _SelectedOption(label: 'Option $index', index: index, selection: jobTypeSelection);
-                },
-                separatorBuilder: (_, _) => const SizedBox(width: 12.0),
-                itemCount: 3,
-              ),
-            ),
-            const SizedBox(height: 24.0),
-            Text(
-              'Job Position',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12.0),
-            SizedBox(
-              height: 42.0,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (_, index) {
-                  return _SelectedOption(label: 'Option $index', index: index, selection: jobPositionSelection);
-                },
-                separatorBuilder: (_, _) => const SizedBox(width: 12.0),
-                itemCount: 3,
-              ),
-            ),
-            const SizedBox(height: 24.0),
-            Text(
-              'Major',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12.0),
-            SizedBox(
-              height: 42.0,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (_, index) {
-                  return _SelectedOption(label: 'Option $index', index: index, selection: majorSelection);
-                },
-                separatorBuilder: (_, _) => const SizedBox(width: 12.0),
-                itemCount: 3,
-              ),
-            ),
-            const SizedBox(height: 50.0),
-            CustomButton(
-              onPressed: () async {
-                // TODO(self): Implement filter
-                Navigator.of(context).pop();
+          ),
+          const SizedBox(height: 12.0),
+          SizedBox(
+            height: 42.0,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (_, index) {
+                return _SelectedOption(label: 'Option $index', index: index, selection: jobPositionSelection);
               },
-              child: const Center(child: Text('Apply filter')),
+              separatorBuilder: (_, _) => const SizedBox(width: 12.0),
+              itemCount: 3,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 24.0),
+          Text(
+            'Major',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12.0),
+          SizedBox(
+            height: 42.0,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (_, index) {
+                return _SelectedOption(label: 'Option $index', index: index, selection: majorSelection);
+              },
+              separatorBuilder: (_, _) => const SizedBox(width: 12.0),
+              itemCount: 3,
+            ),
+          ),
+          const SizedBox(height: 50.0),
+          CustomButton(
+            onPressed: () async {
+              // TODO(self): Implement filter
+              Navigator.of(context).pop();
+            },
+            child: const Center(child: Text('Apply filter')),
+          ),
+        ],
       ),
     );
   }

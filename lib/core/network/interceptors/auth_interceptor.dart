@@ -43,14 +43,6 @@ final class AuthInterceptor extends Interceptor {
         }
       }
     }
-    final error = DioException(
-      requestOptions: err.requestOptions,
-      response: err.response,
-      type: err.type,
-      message: message,
-      error: err.error,
-      stackTrace: err.stackTrace,
-    );
-    handler.next(error);
+    handler.next(err.copyWith(message: message));
   }
 }
