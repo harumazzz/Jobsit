@@ -9,7 +9,7 @@ abstract class AppLogger {
 
 @Injectable(as: AppLogger)
 @prod
-class ProductionLogger implements AppLogger {
+final class ProductionLogger implements AppLogger {
   ProductionLogger()
     : _logger = log_package.Logger(printer: log_package.PrettyPrinter(colors: false, printEmojis: false));
 
@@ -31,7 +31,7 @@ class ProductionLogger implements AppLogger {
 
 @Injectable(as: AppLogger)
 @dev
-class DevelopmentLogger implements AppLogger {
+final class DevelopmentLogger implements AppLogger {
   DevelopmentLogger() : _logger = log_package.Logger(printer: log_package.PrettyPrinter());
 
   final log_package.Logger _logger;

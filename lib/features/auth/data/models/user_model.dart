@@ -45,6 +45,12 @@ abstract class StatusResponse with _$StatusResponse {
 }
 
 @freezed
+sealed class UniversityResponse with _$UniversityResponse {
+  const factory UniversityResponse({required int id, required String name}) = _UniversityResponse;
+  factory UniversityResponse.fromJson(Map<String, dynamic> json) => _$UniversityResponseFromJson(json);
+}
+
+@freezed
 abstract class UserCreationResponse with _$UserCreationResponse {
   const factory UserCreationResponse({
     required int id,
@@ -52,7 +58,10 @@ abstract class UserCreationResponse with _$UserCreationResponse {
     required String firstName,
     required String lastName,
     required String phone,
-    String? avatar,
+    @JsonKey(name: 'gender') bool? gender,
+    @JsonKey(name: 'birthDay') String? birthDate,
+    @JsonKey(name: 'avatar') String? avatar,
+    @JsonKey(name: 'location') String? address,
     @JsonKey(name: 'roleDTO') required RoleResponse role,
     @JsonKey(name: 'statusDTO') required StatusResponse status,
   }) = _UserCreationResponse;
@@ -61,10 +70,27 @@ abstract class UserCreationResponse with _$UserCreationResponse {
 }
 
 @freezed
+sealed class JobInformationResponse with _$JobInformationResponse {
+  const factory JobInformationResponse({
+    @JsonKey(name: 'universityDTO') UniversityResponse? university,
+    @JsonKey(name: 'referenceLetter') String? referenceLetter,
+    @JsonKey(name: 'positionDTOs') required List<int> positions,
+    @JsonKey(name: 'majorDTOs') required List<int> majors,
+    @JsonKey(name: 'scheduleDTOs') required List<int> schedules,
+    @JsonKey(name: 'desiredJob') String? desiredJob,
+    @JsonKey(name: 'desiredWorkingProvince') String? desiredWorkingProvince,
+    @JsonKey(name: 'cv') String? cv,
+  }) = _JobInformationResponse;
+
+  factory JobInformationResponse.fromJson(Map<String, dynamic> json) => _$JobInformationResponseFromJson(json);
+}
+
+@freezed
 abstract class RegisteredUserResponse with _$RegisteredUserResponse {
   const factory RegisteredUserResponse({
     required int id,
     @JsonKey(name: 'userDTO') required UserCreationResponse user,
+    @JsonKey(name: 'candidateOtherInfoDTO') required JobInformationResponse jobInfo,
   }) = _RegisteredUserResponse;
 
   factory RegisteredUserResponse.fromJson(Map<String, dynamic> json) => _$RegisteredUserResponseFromJson(json);
@@ -124,8 +150,11 @@ abstract class VerifyMailResponse with _$VerifyMailResponse {
 
 @freezed
 abstract class GetUserResponse with _$GetUserResponse {
-  const factory GetUserResponse({required int id, @JsonKey(name: 'userDTO') required UserCreationResponse user}) =
-      _GetUserResponse;
+  const factory GetUserResponse({
+    required int id,
+    @JsonKey(name: 'userDTO') required UserCreationResponse user,
+    @JsonKey(name: 'candidateOtherInfoDTO') required JobInformationResponse jobInfo,
+  }) = _GetUserResponse;
 
   factory GetUserResponse.fromJson(Map<String, dynamic> json) => _$GetUserResponseFromJson(json);
 }
@@ -178,20 +207,43 @@ extension RoleResponseMapper on RoleResponse {
   }
 }
 
+extension UniversityResponseMapper on UniversityResponse {
+  University toEntity() {
+    return University(id: id, name: name);
+  }
+}
+
 extension StatusResponseMapper on StatusResponse {
   Status toEntity() {
     return Status(id: id, name: name);
   }
 }
 
-extension UserResponseMapper on LogInResponse {
-  User toEntity() {
-    return User(userId: userId, email: email, role: role, avatar: avatar);
-  }
-}
-
 extension GetUserResponseMapper on GetUserResponse {
   User toEntity() {
-    return User(userId: user.id, email: user.email, role: user.role.name, avatar: user.avatar);
+    return User(
+      userId: user.id,
+      role: user.role.name,
+      userInfo: UserInformation(
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        avatar: user.avatar,
+        gender: user.gender ?? false,
+        birthDate: user.birthDate,
+        address: user.address,
+      ),
+      jobInfo: JobInformation(
+        university: jobInfo.university?.toEntity(),
+        referenceLetter: jobInfo.referenceLetter,
+        positions: jobInfo.positions,
+        majors: jobInfo.majors,
+        schedules: jobInfo.schedules,
+        desiredJob: jobInfo.desiredJob,
+        desiredWorkingProvince: jobInfo.desiredWorkingProvince,
+        cv: jobInfo.cv,
+      ),
+    );
   }
 }

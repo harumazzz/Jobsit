@@ -24,7 +24,30 @@ void main() {
     });
     const tEmail = 'test@example.com';
     const tPassword = 'password123';
-    const tUser = User(userId: 1, email: tEmail, role: 'ROLE_CANDIDATE', avatar: 'None');
+    const tUser = User(
+      userId: 1,
+      role: 'ROLE_CANDIDATE',
+      userInfo: UserInformation(
+        email: tEmail,
+        firstName: 'John',
+        lastName: 'Doe',
+        phone: '1234567890',
+        gender: false,
+        address: '123 Main St',
+        avatar: 'avatar.png',
+        birthDate: '1990-01-01',
+      ),
+      jobInfo: JobInformation(
+        university: University(id: 1, name: 'University of Example'),
+        referenceLetter: 'reference_letter.pdf',
+        positions: [1, 2],
+        majors: [1],
+        schedules: [1],
+        desiredJob: 'Software Engineer',
+        desiredWorkingProvince: 'Example Province',
+        cv: 'cv.pdf',
+      ),
+    );
     const tLoginParams = LoginUserParams(email: tEmail, password: tPassword);
     test('should get user from the repository when login is successful', () async {
       when(

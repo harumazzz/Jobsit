@@ -1,0 +1,134 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../../domain/entities/job.dart';
+
+part 'job_model.freezed.dart';
+part 'job_model.g.dart';
+
+@freezed
+sealed class JobListResponse with _$JobListResponse {
+  const factory JobListResponse({
+    required List<JobResponse> contents,
+    required int totalPages,
+    required int totalItems,
+    required int limit,
+    required int no,
+    required bool last,
+    required bool first,
+  }) = _JobListResponse;
+
+  factory JobListResponse.fromJson(Map<String, dynamic> json) => _$JobListResponseFromJson(json);
+}
+
+@freezed
+sealed class JobResponse with _$JobResponse {
+  const factory JobResponse({
+    required int id,
+    required String title,
+    @JsonKey(name: 'positionDTOS') required List<int> positions,
+    @JsonKey(name: 'majorDTOS') required List<int> majors,
+    @JsonKey(name: 'scheduleDTOS') required List<int> schedules,
+    required int amount,
+    required DateTime postingDate,
+    required DateTime applicationDeadline,
+    required double minAllowance,
+    required double maxAllowance,
+    required String description,
+    required String requirements,
+    required String benefits,
+    required String country,
+    required String city,
+    required String district,
+    required String address,
+    required bool noAllowance,
+    @JsonKey(name: 'companyDTO') required CompanyResponse company,
+    @JsonKey(name: 'statusDTO') required JobStatusResponse status,
+  }) = _JobResponse;
+
+  factory JobResponse.fromJson(Map<String, dynamic> json) => _$JobResponseFromJson(json);
+}
+
+@freezed
+sealed class JobStatusResponse with _$JobStatusResponse {
+  const factory JobStatusResponse({required int id, required String name}) = _JobStatusResponse;
+
+  factory JobStatusResponse.fromJson(Map<String, dynamic> json) => _$JobStatusResponseFromJson(json);
+}
+
+@freezed
+sealed class CompanyResponse with _$CompanyResponse {
+  const factory CompanyResponse({
+    required int id,
+    required String logo,
+    required String name,
+    required String tax,
+    required String email,
+    required String phone,
+    required String personnelSize,
+    required String website,
+    required String country,
+    required String province,
+    required String district,
+    required String createdDate,
+    required String location,
+    @JsonKey(name: 'statusDTO') required JobStatusResponse status,
+    required String description,
+  }) = _CompanyResponse;
+
+  factory CompanyResponse.fromJson(Map<String, dynamic> json) => _$CompanyResponseFromJson(json);
+}
+
+extension JobResponseExtension on JobResponse {
+  Job toEntity() {
+    return Job(
+      id: id,
+      title: title,
+      positions: positions,
+      majors: majors,
+      schedules: schedules,
+      amount: amount,
+      postingDate: postingDate,
+      applicationDeadline: applicationDeadline,
+      minAllowance: minAllowance,
+      maxAllowance: maxAllowance,
+      description: description,
+      requirements: requirements,
+      benefits: benefits,
+      country: country,
+      city: city,
+      district: district,
+      address: address,
+      noAllowance: noAllowance,
+      company: company.toEntity(),
+      status: status.toEntity(),
+    );
+  }
+}
+
+extension JobStatusResponseExtension on JobStatusResponse {
+  JobStatus toEntity() {
+    return JobStatus(id: id, name: name);
+  }
+}
+
+extension CompanyResponseExtension on CompanyResponse {
+  Company toEntity() {
+    return Company(
+      id: id,
+      logo: logo,
+      name: name,
+      tax: tax,
+      email: email,
+      phone: phone,
+      personnelSize: personnelSize,
+      website: website,
+      country: country,
+      province: province,
+      district: district,
+      createdDate: createdDate,
+      location: location,
+      status: status.toEntity(),
+      description: description,
+    );
+  }
+}
