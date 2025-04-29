@@ -26,11 +26,7 @@ class JobCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 8.0,
                 children: [
-                  Icon(
-                    IconlyLight.image,
-                    size: 48.0,
-                    color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.58),
-                  ),
+                  Icon(IconlyLight.image, size: 48.0, color: Theme.of(context).colorScheme.primary),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,22 +38,14 @@ class JobCard extends StatelessWidget {
                     onPressed: () async {
                       // TODO(self): Implement bookmark functionality
                     },
-                    icon: Icon(
-                      IconlyLight.bookmark,
-                      size: 24.0,
-                      color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.58),
-                    ),
+                    icon: Icon(IconlyLight.bookmark, size: 24.0, color: Theme.of(context).colorScheme.primary),
                   ),
                 ],
               ),
               Row(
                 spacing: 8.0,
                 children: [
-                  Icon(
-                    IconlyLight.location,
-                    size: 24.0,
-                    color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.58),
-                  ),
+                  Icon(IconlyLight.location, size: 24.0, color: Theme.of(context).colorScheme.primary),
                   Text(job.address),
                 ],
               ),
@@ -68,22 +56,14 @@ class JobCard extends StatelessWidget {
                   Row(
                     spacing: 8.0,
                     children: [
-                      Icon(
-                        IconlyLight.profile,
-                        size: 24.0,
-                        color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.58),
-                      ),
+                      Icon(IconlyLight.profile, size: 24.0, color: Theme.of(context).colorScheme.primary),
                       Text('${job.amount}'),
                     ],
                   ),
                   Row(
                     spacing: 8.0,
                     children: [
-                      Icon(
-                        IconlyLight.timeCircle,
-                        size: 24.0,
-                        color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.58),
-                      ),
+                      Icon(IconlyLight.timeCircle, size: 24.0, color: Theme.of(context).colorScheme.primary),
                       Text('${DateTime(job.applicationDeadline.millisecond - job.postingDate.millisecond).day} days'),
                     ],
                   ),

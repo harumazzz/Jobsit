@@ -7,4 +7,10 @@ abstract class JobRepository {
   Future<Either<Failure, List<Job>>> getJobs({int page = 1, int limit = 10});
 
   Future<Either<Failure, Job>> getJobById(int jobId);
+
+  Future<Either<Failure, List<Major>>> getMajors();
+
+  Future<Either<Failure, List<Position>>> getPositions();
+
+  Future<Either<Failure, List<Schedule>>> getSchedules();
 }

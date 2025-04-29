@@ -53,3 +53,18 @@ sealed class Company with _$Company {
     required String description,
   }) = _Company;
 }
+
+@freezed
+sealed class Schedule with _$Schedule {
+  const factory Schedule({required int id, required String name}) = _Schedule;
+}
+
+@freezed
+sealed class Major with _$Major {
+  const factory Major({required int id, required String name}) = _Major;
+}
+
+@freezed
+sealed class Position with _$Position {
+  const factory Position({required int id, required String name}) = _Position;
+}

@@ -42,6 +42,7 @@ abstract class IAuthStorageService {
   Future<void> deleteToken();
   Future<void> saveUserId(int userId);
   Future<int?> getUserId();
+  Future<bool> isTokenExpired();
 }
 
 @Singleton(as: IAuthStorageService)
@@ -50,24 +51,45 @@ class AuthStorageService implements IAuthStorageService {
 
   static const String tokenKey = 'token';
   static const String userIdKey = 'userId';
+  static const String tokenTimestampKey = 'tokenTimestamp';
+
+  static const int tokenExpirationDuration = 7 * 24 * 60 * 60 * 1000;
 
   final ISecureStorageService _secureStorageService;
 
   @override
   Future<String?> getToken() async {
-    final result = await _secureStorageService.read(AuthStorageService.tokenKey);
-
+    final isExpired = await isTokenExpired();
+    if (isExpired) {
+      await deleteToken();
+      return null;
+    }
+    final result = await _secureStorageService.read(tokenKey);
     return result;
   }
 
   @override
   Future<void> saveToken(String token) async {
-    await _secureStorageService.write(AuthStorageService.tokenKey, token);
+    await _secureStorageService.write(tokenKey, token);
+    final currentTimestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    await _secureStorageService.write(tokenTimestampKey, currentTimestamp);
   }
 
   @override
   Future<void> deleteToken() async {
-    await _secureStorageService.delete(AuthStorageService.tokenKey);
+    await _secureStorageService.delete(tokenKey);
+    await _secureStorageService.delete(tokenTimestampKey);
+  }
+
+  @override
+  Future<bool> isTokenExpired() async {
+    final timestampString = await _secureStorageService.read(tokenTimestampKey);
+    if (timestampString == null) {
+      return true;
+    }
+    final timestamp = int.tryParse(timestampString) ?? 0;
+    final currentTime = DateTime.now().millisecondsSinceEpoch;
+    return (currentTime - timestamp) > tokenExpirationDuration;
   }
 
   @override

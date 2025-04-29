@@ -17,7 +17,7 @@ JobRepository jobRepository(Ref ref) {
   return JobRepositoryImpl(jobRemoteDataSource);
 }
 
-class JobRepositoryImpl implements JobRepository {
+final class JobRepositoryImpl implements JobRepository {
   const JobRepositoryImpl(this._jobRemoteDataSource);
 
   final JobRemoteDataSource _jobRemoteDataSource;
@@ -42,6 +42,42 @@ class JobRepositoryImpl implements JobRepository {
     try {
       final result = await _jobRemoteDataSource.getJobs(page: page, limit: limit);
       return Right([...result.contents.map((e) => e.toEntity())]);
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Major>>> getMajors() async {
+    try {
+      final result = await _jobRemoteDataSource.getMajors();
+      return Right([...result.map((e) => e.toEntity())]);
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Position>>> getPositions() async {
+    try {
+      final result = await _jobRemoteDataSource.getPositions();
+      return Right([...result.map((e) => e.toEntity())]);
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Schedule>>> getSchedules() async {
+    try {
+      final result = await _jobRemoteDataSource.getSchedules();
+      return Right([...result.map((e) => e.toEntity())]);
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {

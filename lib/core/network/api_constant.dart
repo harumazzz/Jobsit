@@ -8,6 +8,8 @@ final class ApiConstant extends Equatable {
 
   static const String baseUrl = 'http://192.168.31.122:8085/api/';
 
+  static const String provinceApi = 'https://provinces.open-api.vn/api/';
+
   static const String loginEndpoint = '/login';
 
   static const String registerEndpoint = '/candidate';
@@ -29,4 +31,10 @@ final class ApiConstant extends Equatable {
   static const String jobListEndpoint = '/job';
 
   static const String jobDetailEndpoint = '/job/{jobId}';
+
+  static const String majorListEndpoint = '/major';
+
+  static const String positionListEndpoint = '/position';
+
+  static const String scheduleListEndpoint = '/schedule';
 }

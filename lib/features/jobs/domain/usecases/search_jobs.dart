@@ -18,6 +18,24 @@ SearchJobsUseCase searchJobsUseCase(Ref ref) {
   return SearchJobsUseCase(jobRepository);
 }
 
+@riverpod
+GetPositionUseCase getPositionUseCase(Ref ref) {
+  final jobRepository = ref.watch(jobRepositoryProvider);
+  return GetPositionUseCase(jobRepository);
+}
+
+@riverpod
+GetMajorUseCase getMajorUseCase(Ref ref) {
+  final jobRepository = ref.watch(jobRepositoryProvider);
+  return GetMajorUseCase(jobRepository);
+}
+
+@riverpod
+GetScheduleUseCase getScheduleUseCase(Ref ref) {
+  final jobRepository = ref.watch(jobRepositoryProvider);
+  return GetScheduleUseCase(jobRepository);
+}
+
 @freezed
 sealed class SearchJobsUseCaseParams with _$SearchJobsUseCaseParams {
   const factory SearchJobsUseCaseParams({required int page, required int limit}) = _SearchJobsUseCaseParams;
@@ -31,5 +49,38 @@ final class SearchJobsUseCase implements UseCase<List<Job>, SearchJobsUseCasePar
   @override
   Future<Either<Failure, List<Job>>> call(SearchJobsUseCaseParams params) async {
     return await _jobRepository.getJobs(page: params.page, limit: params.limit);
+  }
+}
+
+final class GetPositionUseCase implements UseCase<List<Position>, NoParams> {
+  const GetPositionUseCase(this._jobRepository);
+
+  final JobRepository _jobRepository;
+
+  @override
+  Future<Either<Failure, List<Position>>> call(NoParams params) async {
+    return await _jobRepository.getPositions();
+  }
+}
+
+final class GetMajorUseCase implements UseCase<List<Major>, NoParams> {
+  const GetMajorUseCase(this._jobRepository);
+
+  final JobRepository _jobRepository;
+
+  @override
+  Future<Either<Failure, List<Major>>> call(NoParams params) async {
+    return await _jobRepository.getMajors();
+  }
+}
+
+final class GetScheduleUseCase implements UseCase<List<Schedule>, NoParams> {
+  const GetScheduleUseCase(this._jobRepository);
+
+  final JobRepository _jobRepository;
+
+  @override
+  Future<Either<Failure, List<Schedule>>> call(NoParams params) async {
+    return await _jobRepository.getSchedules();
   }
 }

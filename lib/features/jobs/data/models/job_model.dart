@@ -78,6 +78,27 @@ sealed class CompanyResponse with _$CompanyResponse {
   factory CompanyResponse.fromJson(Map<String, dynamic> json) => _$CompanyResponseFromJson(json);
 }
 
+@freezed
+sealed class ScheduleResponse with _$ScheduleResponse {
+  const factory ScheduleResponse({required int id, required String name}) = _ScheduleResponse;
+
+  factory ScheduleResponse.fromJson(Map<String, dynamic> json) => _$ScheduleResponseFromJson(json);
+}
+
+@freezed
+sealed class MajorResponse with _$MajorResponse {
+  const factory MajorResponse({required int id, required String name}) = _MajorResponse;
+
+  factory MajorResponse.fromJson(Map<String, dynamic> json) => _$MajorResponseFromJson(json);
+}
+
+@freezed
+sealed class PositionResponse with _$PositionResponse {
+  const factory PositionResponse({required int id, required String name}) = _PositionResponse;
+
+  factory PositionResponse.fromJson(Map<String, dynamic> json) => _$PositionResponseFromJson(json);
+}
+
 extension JobResponseExtension on JobResponse {
   Job toEntity() {
     return Job(
@@ -130,5 +151,23 @@ extension CompanyResponseExtension on CompanyResponse {
       status: status.toEntity(),
       description: description,
     );
+  }
+}
+
+extension ScheduleResponseExtension on ScheduleResponse {
+  Schedule toEntity() {
+    return Schedule(id: id, name: name);
+  }
+}
+
+extension MajorResponseExtension on MajorResponse {
+  Major toEntity() {
+    return Major(id: id, name: name);
+  }
+}
+
+extension PositionResponseExtension on PositionResponse {
+  Position toEntity() {
+    return Position(id: id, name: name);
   }
 }

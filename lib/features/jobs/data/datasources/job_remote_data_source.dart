@@ -25,4 +25,13 @@ abstract class JobRemoteDataSource {
 
   @GET(ApiConstant.jobDetailEndpoint)
   Future<JobResponse?> getJobById(@Path() int jobId);
+
+  @GET(ApiConstant.majorListEndpoint)
+  Future<List<MajorResponse>> getMajors();
+
+  @GET(ApiConstant.positionListEndpoint)
+  Future<List<PositionResponse>> getPositions();
+
+  @GET(ApiConstant.scheduleListEndpoint)
+  Future<List<ScheduleResponse>> getSchedules();
 }

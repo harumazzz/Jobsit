@@ -2,6 +2,7 @@ import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/input_converter.dart';
@@ -199,6 +200,11 @@ class OtpVerifiedPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ElegantNotification.success(
+      background: const Color(0xFFDEF2ED),
+      description: const Text('Registered successfully! Please login to your account.'),
+    ).show(context);
+    useDebounced(() async => const HomeRoute().go(context), const Duration(seconds: 5));
     return Scaffold(
       backgroundColor: const Color(0xFFefeff0),
       body: Center(
