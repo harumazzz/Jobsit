@@ -40,9 +40,9 @@ void main() {
       jobInfo: JobInformation(
         university: University(id: 1, name: 'University of Example'),
         referenceLetter: 'reference_letter.pdf',
-        positions: [1, 2],
-        majors: [1],
-        schedules: [1],
+        positions: [Position(id: 1, name: 'Software Engineer'), Position(id: 2, name: 'Data Scientist')],
+        majors: [],
+        schedules: [],
         desiredJob: 'Software Engineer',
         desiredWorkingProvince: 'Example Province',
         cv: 'cv.pdf',

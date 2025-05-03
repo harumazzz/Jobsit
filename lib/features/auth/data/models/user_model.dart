@@ -70,13 +70,31 @@ abstract class UserCreationResponse with _$UserCreationResponse {
 }
 
 @freezed
+sealed class MajorResponse with _$MajorResponse {
+  const factory MajorResponse({required int id, required String name}) = _MajorResponse;
+  factory MajorResponse.fromJson(Map<String, dynamic> json) => _$MajorResponseFromJson(json);
+}
+
+@freezed
+sealed class PositionResponse with _$PositionResponse {
+  const factory PositionResponse({required int id, required String name}) = _PositionResponse;
+  factory PositionResponse.fromJson(Map<String, dynamic> json) => _$PositionResponseFromJson(json);
+}
+
+@freezed
+sealed class ScheduleResponse with _$ScheduleResponse {
+  const factory ScheduleResponse({required int id, required String name}) = _ScheduleResponse;
+  factory ScheduleResponse.fromJson(Map<String, dynamic> json) => _$ScheduleResponseFromJson(json);
+}
+
+@freezed
 sealed class JobInformationResponse with _$JobInformationResponse {
   const factory JobInformationResponse({
     @JsonKey(name: 'universityDTO') UniversityResponse? university,
     @JsonKey(name: 'referenceLetter') String? referenceLetter,
-    @JsonKey(name: 'positionDTOs') required List<int> positions,
-    @JsonKey(name: 'majorDTOs') required List<int> majors,
-    @JsonKey(name: 'scheduleDTOs') required List<int> schedules,
+    @JsonKey(name: 'positionDTOs') required List<PositionResponse> positions,
+    @JsonKey(name: 'majorDTOs') required List<MajorResponse> majors,
+    @JsonKey(name: 'scheduleDTOs') required List<ScheduleResponse> schedules,
     @JsonKey(name: 'desiredJob') String? desiredJob,
     @JsonKey(name: 'desiredWorkingProvince') String? desiredWorkingProvince,
     @JsonKey(name: 'cv') String? cv,
@@ -201,6 +219,24 @@ extension UserCreationResponseMapper on UserCreationResponse {
   }
 }
 
+extension MajorResponseMapper on MajorResponse {
+  Major toEntity() {
+    return Major(id: id, name: name);
+  }
+}
+
+extension PositionResponseMapper on PositionResponse {
+  Position toEntity() {
+    return Position(id: id, name: name);
+  }
+}
+
+extension ScheduleResponseMapper on ScheduleResponse {
+  Schedule toEntity() {
+    return Schedule(id: id, name: name);
+  }
+}
+
 extension RoleResponseMapper on RoleResponse {
   Role toEntity() {
     return Role(id: id, name: name);
@@ -237,9 +273,9 @@ extension GetUserResponseMapper on GetUserResponse {
       jobInfo: JobInformation(
         university: jobInfo.university?.toEntity(),
         referenceLetter: jobInfo.referenceLetter,
-        positions: jobInfo.positions,
-        majors: jobInfo.majors,
-        schedules: jobInfo.schedules,
+        positions: jobInfo.positions.map((position) => position.toEntity()).toList(),
+        majors: jobInfo.majors.map((major) => major.toEntity()).toList(),
+        schedules: jobInfo.schedules.map((schedule) => schedule.toEntity()).toList(),
         desiredJob: jobInfo.desiredJob,
         desiredWorkingProvince: jobInfo.desiredWorkingProvince,
         cv: jobInfo.cv,

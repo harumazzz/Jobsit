@@ -45,13 +45,28 @@ sealed class UserInformation with _$UserInformation {
 }
 
 @freezed
+sealed class Major with _$Major {
+  const factory Major({required int id, required String name}) = _Major;
+}
+
+@freezed
+sealed class Position with _$Position {
+  const factory Position({required int id, required String name}) = _Position;
+}
+
+@freezed
+sealed class Schedule with _$Schedule {
+  const factory Schedule({required int id, required String name}) = _Schedule;
+}
+
+@freezed
 sealed class JobInformation with _$JobInformation {
   const factory JobInformation({
     University? university,
     String? referenceLetter,
-    required List<int> positions,
-    required List<int> majors,
-    required List<int> schedules,
+    required List<Position> positions,
+    required List<Major> majors,
+    required List<Schedule> schedules,
     String? desiredJob,
     String? desiredWorkingProvince,
     String? cv,
