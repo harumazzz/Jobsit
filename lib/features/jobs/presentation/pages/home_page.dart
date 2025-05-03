@@ -130,9 +130,9 @@ class _JobPage extends HookConsumerWidget {
                       final positionController = ref.read(positionControllerProvider.notifier);
                       final majorController = ref.read(majorControllerProvider.notifier);
                       await citiesController.fetchCities();
-                      await scheduleController.fetchSchedules();
-                      await positionController.fetchPositions();
-                      await majorController.fetchMajors();
+                      await scheduleController.getSchedules();
+                      await positionController.getPositions();
+                      await majorController.getMajors();
                       final jobFilterState = ref.read(jobFilterControllerProvider);
                       if (context.mounted) {
                         await showModalBottomSheet(
@@ -191,7 +191,11 @@ class _JobPage extends HookConsumerWidget {
                           return JobCard(
                             job: item,
                             onPressed: () async {
-                              await JobDetailRoute(id: item.id).push(context);
+                              final jobDetailState = ref.read(jobDetailControllerProvider.notifier);
+                              await jobDetailState.getJobDetail(jobId: item.id);
+                              if (context.mounted) {
+                                await JobDetailRoute(id: item.id).push(context);
+                              }
                             },
                           );
                         },

@@ -190,7 +190,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
         ).show(context);
         await const LoginRoute().push(context);
       }
-      if (next is AuthError) {
+      if (next is AuthError && context.mounted) {
         ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
       }
     });

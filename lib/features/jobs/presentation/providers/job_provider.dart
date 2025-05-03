@@ -100,7 +100,7 @@ class DistrictsController extends _$DistrictsController {
     return const DistrictsState.initial();
   }
 
-  Future<void> fetchDistricts({required int code}) async {
+  Future<void> getDistricts({required int code}) async {
     if (state is DistrictsLoaded) {
       return;
     }
@@ -136,7 +136,7 @@ class MajorController extends _$MajorController {
     return const MajorState.initial();
   }
 
-  Future<void> fetchMajors() async {
+  Future<void> getMajors() async {
     if (state is MajorLoaded) {
       return;
     }
@@ -172,7 +172,7 @@ class PositionController extends _$PositionController {
     return const PositionState.initial();
   }
 
-  Future<void> fetchPositions() async {
+  Future<void> getPositions() async {
     if (state is PositionLoaded) {
       return;
     }
@@ -208,7 +208,7 @@ class ScheduleController extends _$ScheduleController {
     return const ScheduleState.initial();
   }
 
-  Future<void> fetchSchedules() async {
+  Future<void> getSchedules() async {
     if (state is ScheduleLoaded) {
       return;
     }
@@ -271,5 +271,38 @@ class JobFilterController extends _$JobFilterController {
       city: city,
       major: major,
     );
+  }
+}
+
+@freezed
+sealed class JobDetailState with _$JobDetailState {
+  const factory JobDetailState.initial() = JobDetailInitial;
+
+  const factory JobDetailState.loading() = JobDetailLoading;
+
+  const factory JobDetailState.loaded({required Job job}) = JobDetailLoaded;
+
+  const factory JobDetailState.error(String message) = JobDetailError;
+}
+
+@Riverpod(keepAlive: true)
+class JobDetailController extends _$JobDetailController {
+  @override
+  JobDetailState build() {
+    return const JobDetailState.initial();
+  }
+
+  Future<void> getJobDetail({required int jobId}) async {
+    state = const JobDetailState.loading();
+    try {
+      final getJobDetailUseCase = ref.read(getJobDetailUseCaseProvider);
+      final result = await getJobDetailUseCase(GetJobDetailParams(jobId: jobId));
+      state = result.fold(
+        ifLeft: (failure) => JobDetailState.error(failure.message),
+        ifRight: (job) => JobDetailState.loaded(job: job),
+      );
+    } catch (e) {
+      state = JobDetailState.error(e.toString());
+    }
   }
 }

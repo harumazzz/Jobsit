@@ -84,3 +84,25 @@ final class GetScheduleUseCase implements UseCase<List<Schedule>, NoParams> {
     return await _jobRepository.getSchedules();
   }
 }
+
+@riverpod
+GetJobDetailUseCase getJobDetailUseCase(Ref ref) {
+  final jobRepository = ref.watch(jobRepositoryProvider);
+  return GetJobDetailUseCase(jobRepository);
+}
+
+@freezed
+sealed class GetJobDetailParams with _$GetJobDetailParams {
+  const factory GetJobDetailParams({required int jobId}) = _GetJobDetailParams;
+}
+
+final class GetJobDetailUseCase implements UseCase<Job, GetJobDetailParams> {
+  const GetJobDetailUseCase(this._jobRepository);
+
+  final JobRepository _jobRepository;
+
+  @override
+  Future<Either<Failure, Job>> call(GetJobDetailParams params) async {
+    return await _jobRepository.getJobById(params.jobId);
+  }
+}

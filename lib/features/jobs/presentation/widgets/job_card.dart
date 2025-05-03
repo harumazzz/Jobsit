@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../domain/entities/job.dart';
 
@@ -90,96 +91,99 @@ class ShimmerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final placeholderColor = isDarkMode ? Colors.grey[700] : Colors.grey[300];
+    final baseColor = isDarkMode ? Colors.grey[700]! : Colors.grey[300]!;
+    final highlightColor = isDarkMode ? Colors.grey[600]! : Colors.grey[100]!;
     return Card(
       elevation: 4.0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 16.0,
-          children: [
-            Row(
-              spacing: 16.0,
-              children: [
-                Container(
-                  width: 64.0,
-                  height: 64.0,
-                  decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(8.0)),
-                  child: Center(child: Icon(IconlyLight.image, color: placeholderColor, size: 32.0)),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      child: Shimmer.fromColors(
+        baseColor: baseColor,
+        highlightColor: highlightColor,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                spacing: 16.0,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48.0,
+                    height: 48.0,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.0)),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4.0,
+                      children: [
+                        Container(
+                          width: 200,
+                          height: 16.0,
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
+                        ),
+                        Container(
+                          width: 150,
+                          height: 16.0,
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: 24.0,
+                    height: 24.0,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.0)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12.0),
+              Row(
+                spacing: 8.0,
+                children: [
+                  Container(
+                    width: 24.0,
+                    height: 16.0,
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                  ),
+                  Container(
+                    width: 200,
+                    height: 16.0,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 80,
+                    height: 20.0,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.0)),
+                  ),
+                  Row(
                     spacing: 8.0,
                     children: [
-                      _ShimmerPlaceholder(width: 200, height: 24.0, borderRadius: 4.0, color: placeholderColor),
-                      _ShimmerPlaceholder(width: 150, height: 16.0, borderRadius: 4.0, color: placeholderColor),
+                      Container(
+                        width: 24.0,
+                        height: 20.0,
+                        decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                      ),
+                      Container(
+                        width: 80,
+                        height: 16.0,
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
+                      ),
                     ],
                   ),
-                ),
-              ],
-            ),
-            Row(
-              spacing: 8.0,
-              children: [
-                Icon(IconlyLight.location, color: placeholderColor, size: 24.0),
-                _ShimmerPlaceholder(width: 200, height: 16.0, borderRadius: 4.0, color: placeholderColor),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(16.0)),
-                  child: _ShimmerPlaceholder(width: 60, height: 16.0, borderRadius: 4.0, color: placeholderColor),
-                ),
-                Row(
-                  spacing: 8.0,
-                  children: [
-                    Icon(IconlyLight.timeSquare, color: placeholderColor, size: 24.0),
-                    _ShimmerPlaceholder(width: 80, height: 16.0, borderRadius: 4.0, color: placeholderColor),
-                  ],
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
-  }
-}
-
-class _ShimmerPlaceholder extends StatelessWidget {
-  const _ShimmerPlaceholder({
-    required this.width,
-    required this.height,
-    required this.borderRadius,
-    required this.color,
-  });
-
-  final double width;
-  final double height;
-  final double borderRadius;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(borderRadius)),
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DoubleProperty('width', width));
-    properties.add(DoubleProperty('height', height));
-    properties.add(DoubleProperty('borderRadius', borderRadius));
-    properties.add(ColorProperty('color', color));
   }
 }

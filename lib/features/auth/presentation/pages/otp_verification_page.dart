@@ -58,13 +58,13 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
       if (next is AuthVerified) {
         await const OtpVerifiedRoute().push(context);
       }
-      if (next is AuthSendedMail) {
+      if (next is AuthSendedMail && context.mounted) {
         ElegantNotification.success(
           background: const Color(0xFFDEF2ED),
           description: const Text('Verification code sent to your email. Please check your inbox.'),
         ).show(context);
       }
-      if (next is AuthError) {
+      if (next is AuthError && context.mounted) {
         ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
       }
     });
