@@ -191,7 +191,7 @@ class _JobPage extends HookConsumerWidget {
                           return JobCard(
                             job: item,
                             onPressed: () async {
-                              JobDetailRoute(id: item.id).go(context);
+                              await JobDetailRoute(id: item.id).push(context);
                             },
                           );
                         },

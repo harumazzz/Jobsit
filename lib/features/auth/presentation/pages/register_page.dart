@@ -82,7 +82,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             background: const Color(0xFFDEF2ED),
             description: const Text('Register an account successfully!'),
           ).show(context);
-          OtpVerificationRoute(email: _emailController.text).go(context);
+          await OtpVerificationRoute(email: _emailController.text).push(context);
           break;
         default:
           break;
@@ -278,7 +278,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent,
                       hoverColor: Colors.transparent,
-                      onTap: () async => const LoginRoute().go(context),
+                      onTap: () async => await const LoginRoute().push(context),
                       child: const Text(' Sign In', style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ],

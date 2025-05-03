@@ -119,7 +119,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 highlightColor: Colors.transparent,
                 hoverColor: Colors.transparent,
                 onTap: () async {
-                  const LoginRoute().go(context);
+                  await const LoginRoute().push(context);
                 },
                 child: const Text('Return to Sign In', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
               ),
@@ -188,7 +188,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
           background: const Color(0xFFDEF2ED),
           description: const Text('Password reset successfully. Please login with your new password.'),
         ).show(context);
-        const LoginRoute().go(context);
+        await const LoginRoute().push(context);
       }
       if (next is AuthError) {
         ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
@@ -270,7 +270,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                 highlightColor: Colors.transparent,
                 hoverColor: Colors.transparent,
                 onTap: () async {
-                  const LoginRoute().go(context);
+                  await const LoginRoute().push(context);
                 },
                 child: const Text('Return to Sign In', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
               ),

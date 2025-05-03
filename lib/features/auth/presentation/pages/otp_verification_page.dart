@@ -56,7 +56,7 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
   Widget build(BuildContext context) {
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       if (next is AuthVerified) {
-        const OtpVerifiedRoute().go(context);
+        await const OtpVerifiedRoute().push(context);
       }
       if (next is AuthSendedMail) {
         ElegantNotification.success(
@@ -204,7 +204,7 @@ class OtpVerifiedPage extends StatelessWidget {
       background: const Color(0xFFDEF2ED),
       description: const Text('Registered successfully! Please login to your account.'),
     ).show(context);
-    useDebounced(() async => const HomeRoute().go(context), const Duration(seconds: 5));
+    useDebounced(() async => await const HomeRoute().push(context), const Duration(seconds: 5));
     return Scaffold(
       backgroundColor: const Color(0xFFefeff0),
       body: Center(
