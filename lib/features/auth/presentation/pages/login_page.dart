@@ -64,7 +64,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             background: const Color(0xFFDEF2ED),
             description: const Text('Login successfully!'),
           ).show(context);
-          await const HomeRoute().push(context);
+          const HomeRoute().go(context);
           break;
         default:
           break;
@@ -152,7 +152,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       highlightColor: Colors.transparent,
                       hoverColor: Colors.transparent,
                       onTap: () async {
-                        await const ForgotPasswordRoute().push(context);
+                        const ForgotPasswordRoute().go(context);
                       },
                       child: const Text('Forgot password?'),
                     ),
@@ -232,7 +232,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 highlightColor: Colors.transparent,
                 hoverColor: Colors.transparent,
                 onTap: () async {
-                  await const RegisterRoute().push(context);
+                  const RegisterRoute().go(context);
                 },
                 child: const Text('Sign Up', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w700)),
               ),

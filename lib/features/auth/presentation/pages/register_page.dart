@@ -82,7 +82,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             background: const Color(0xFFDEF2ED),
             description: const Text('Register an account successfully!'),
           ).show(context);
-          await OtpVerificationRoute(email: _emailController.text).push(context);
+          OtpVerificationRoute(email: _emailController.text).go(context);
           break;
         default:
           break;
