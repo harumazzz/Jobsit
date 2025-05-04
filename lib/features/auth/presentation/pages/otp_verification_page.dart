@@ -69,7 +69,6 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
       }
     });
     return Scaffold(
-      backgroundColor: const Color(0xFFefeff0),
       body: FormBuilder(
         key: _formKey,
         child: Padding(
@@ -206,7 +205,6 @@ class OtpVerifiedPage extends StatelessWidget {
     ).show(context);
     useDebounced(() async => const HomeRoute().go(context), const Duration(seconds: 5));
     return Scaffold(
-      backgroundColor: const Color(0xFFefeff0),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

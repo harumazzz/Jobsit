@@ -53,7 +53,7 @@ class AuthStorageService implements IAuthStorageService {
   static const String userIdKey = 'userId';
   static const String tokenTimestampKey = 'tokenTimestamp';
 
-  static const int tokenExpirationDuration = 7 * 24 * 60 * 60 * 1000;
+  static const int tokenExpirationDuration = 5 * 60 * 60 * 1000;
 
   final ISecureStorageService _secureStorageService;
 

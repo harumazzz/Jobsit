@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../core/network/api_constant.dart';
 import '../../domain/entities/job.dart';
 
 class JobCard extends StatelessWidget {
@@ -27,7 +29,28 @@ class JobCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 8.0,
                 children: [
-                  Icon(IconlyLight.image, size: 48.0, color: Theme.of(context).colorScheme.primary),
+                  job.company.logo != null
+                      ? CachedNetworkImage(
+                        imageUrl: queryImage(job.company.logo!),
+                        width: 48.0,
+                        height: 48.0,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) {
+                          return Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(
+                              width: 48.0,
+                              height: 48.0,
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.0)),
+                            ),
+                          );
+                        },
+                        errorWidget: (context, url, error) {
+                          return Icon(IconlyLight.image, size: 48.0, color: Theme.of(context).colorScheme.primary);
+                        },
+                      )
+                      : Icon(IconlyLight.image, size: 48.0, color: Theme.of(context).colorScheme.primary),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,6 +63,25 @@ class JobCard extends StatelessWidget {
                       // TODO(self): Implement bookmark functionality
                     },
                     icon: Icon(IconlyLight.bookmark, size: 24.0, color: Theme.of(context).colorScheme.primary),
+                  ),
+                ],
+              ),
+              Row(
+                spacing: 8.0,
+                children: [
+                  ...job.positions.map(
+                    (position) => Chip(
+                      label: Text(
+                        position.name,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
+                      side: BorderSide.none,
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    ),
                   ),
                 ],
               ),
@@ -65,7 +107,9 @@ class JobCard extends StatelessWidget {
                     spacing: 8.0,
                     children: [
                       Icon(IconlyLight.timeCircle, size: 24.0, color: Theme.of(context).colorScheme.primary),
-                      Text('${DateTime(job.applicationDeadline.millisecond - job.postingDate.millisecond).day} days'),
+                      Text(
+                        '${DateTime.now().isBefore(job.applicationDeadline) ? job.applicationDeadline.difference(DateTime.now()).inDays : 0} days',
+                      ),
                     ],
                   ),
                 ],
@@ -135,6 +179,28 @@ class ShimmerCard extends StatelessWidget {
                     width: 24.0,
                     height: 24.0,
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.0)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12.0),
+              Row(
+                children: [
+                  Container(
+                    width: 60,
+                    height: 24.0,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.0)),
+                  ),
+                  const SizedBox(width: 8.0),
+                  Container(
+                    width: 70,
+                    height: 24.0,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.0)),
+                  ),
+                  const SizedBox(width: 8.0),
+                  Container(
+                    width: 50,
+                    height: 24.0,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.0)),
                   ),
                 ],
               ),

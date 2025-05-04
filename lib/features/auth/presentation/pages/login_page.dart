@@ -71,7 +71,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
     });
     return Scaffold(
-      backgroundColor: const Color(0xFFefeff0),
       body: FormBuilder(
         key: _formKey,
         child: Padding(

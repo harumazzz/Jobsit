@@ -38,3 +38,7 @@ final class ApiConstant extends Equatable {
 
   static const String scheduleListEndpoint = '/schedule';
 }
+
+String queryImage(String logo) {
+  return '${ApiConstant.baseUrl}file/display/$logo';
+}

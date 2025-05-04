@@ -90,12 +90,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFefeff0),
-      appBar: AppBar(
-        title: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
-        backgroundColor: const Color(0xFFefeff0),
-      ),
+      appBar: AppBar(title: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold)), centerTitle: true),
       body: FormBuilder(
         key: _formKey,
         child: Padding(
@@ -288,7 +283,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 splashColor: Colors.transparent,
                 highlightColor: Colors.transparent,
                 hoverColor: Colors.transparent,
-                onTap: () async => await const LoginRoute().push(context),
+                onTap: () async => const LoginRoute().go(context),
                 child: const Text(' Sign In', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ],
