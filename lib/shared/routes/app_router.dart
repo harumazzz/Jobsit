@@ -143,6 +143,7 @@ final _router = GoRouter(
   initialLocation: AppRouter.loginRoute,
   debugLogDiagnostics: kDebugMode,
   redirect: (context, state) async {
+    await InjectionContainer.get<IAuthStorageService>().deleteToken();
     final token = await InjectionContainer.get<IAuthStorageService>().getToken();
     final path = state.uri.toString();
     if (token != null) {

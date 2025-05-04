@@ -211,27 +211,32 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ],
                 ),
                 const SizedBox(height: 30.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 4.0,
-                  children: [
-                    const Text(
-                      'Don\'t have an Account?',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: Colors.black),
-                    ),
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      onTap: () async {
-                        await const RegisterRoute().push(context);
-                      },
-                      child: const Text('Sign Up', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                    ),
-                  ],
-                ),
               ],
             ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 30.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 4.0,
+            children: [
+              const Text(
+                'Don\'t have an Account?',
+                style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w400, color: Colors.black),
+              ),
+              InkWell(
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                onTap: () async {
+                  await const RegisterRoute().push(context);
+                },
+                child: const Text('Sign Up', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w700)),
+              ),
+            ],
           ),
         ),
       ),
