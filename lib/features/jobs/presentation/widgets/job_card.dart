@@ -31,7 +31,7 @@ class JobCard extends StatelessWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [Text(job.title), Text(job.company.name)],
+                      children: [Text(job.title), Text(job.company.name ?? '')],
                     ),
                   ),
                   IconButton(

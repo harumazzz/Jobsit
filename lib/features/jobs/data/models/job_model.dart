@@ -59,20 +59,20 @@ sealed class JobStatusResponse with _$JobStatusResponse {
 sealed class CompanyResponse with _$CompanyResponse {
   const factory CompanyResponse({
     required int id,
-    required String logo,
-    required String name,
-    required String tax,
-    required String email,
-    required String phone,
-    required String personnelSize,
-    required String website,
-    required String country,
-    required String province,
-    required String district,
-    required String createdDate,
-    required String location,
+    String? logo,
+    String? name,
+    String? tax,
+    String? email,
+    String? phone,
+    String? personnelSize,
+    String? website,
+    String? country,
+    String? province,
+    String? district,
+    String? createdDate,
+    String? location,
     @JsonKey(name: 'statusDTO') required JobStatusResponse status,
-    required String description,
+    String? description,
   }) = _CompanyResponse;
 
   factory CompanyResponse.fromJson(Map<String, dynamic> json) => _$CompanyResponseFromJson(json);

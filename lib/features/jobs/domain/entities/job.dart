@@ -37,20 +37,20 @@ sealed class JobStatus with _$JobStatus {
 sealed class Company with _$Company {
   const factory Company({
     required int id,
-    required String logo,
-    required String name,
-    required String tax,
-    required String email,
-    required String phone,
-    required String personnelSize,
-    required String website,
-    required String country,
-    required String province,
-    required String district,
-    required String createdDate,
-    required String location,
+    String? logo,
+    String? name,
+    String? tax,
+    String? email,
+    String? phone,
+    String? personnelSize,
+    String? website,
+    String? country,
+    String? province,
+    String? district,
+    String? createdDate,
+    String? location,
     required JobStatus status,
-    required String description,
+    String? description,
   }) = _Company;
 }
 
