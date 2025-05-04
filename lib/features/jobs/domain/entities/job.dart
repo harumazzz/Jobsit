@@ -7,9 +7,9 @@ sealed class Job with _$Job {
   const factory Job({
     required int id,
     required String title,
-    required List<int> positions,
-    required List<int> majors,
-    required List<int> schedules,
+    required List<Position> positions,
+    required List<Major> majors,
+    required List<Schedule> schedules,
     required int amount,
     required DateTime postingDate,
     required DateTime applicationDeadline,
