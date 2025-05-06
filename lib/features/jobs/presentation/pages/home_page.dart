@@ -451,7 +451,7 @@ class _FilterModal extends HookWidget {
 }
 
 class _SelectedOption extends StatelessWidget {
-  const _SelectedOption({super.key, required this.label, required this.index, required this.selection});
+  const _SelectedOption({required this.label, required this.index, required this.selection});
 
   final String label;
 
@@ -485,7 +485,7 @@ class _SelectedOption extends StatelessWidget {
 }
 
 class _LanguageSelector extends StatelessWidget {
-  const _LanguageSelector({super.key});
+  const _LanguageSelector();
 
   @override
   Widget build(BuildContext context) {

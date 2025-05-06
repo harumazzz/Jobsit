@@ -36,6 +36,7 @@ void main() {
         address: '123 Main St',
         avatar: 'avatar.png',
         birthDate: '1990-01-01',
+        mailReceive: true,
       ),
       jobInfo: JobInformation(
         university: University(id: 1, name: 'University of Example'),
@@ -46,6 +47,7 @@ void main() {
         desiredJob: 'Software Engineer',
         desiredWorkingProvince: 'Example Province',
         cv: 'cv.pdf',
+        searchable: false,
       ),
     );
     const tLoginParams = LoginUserParams(email: tEmail, password: tPassword);

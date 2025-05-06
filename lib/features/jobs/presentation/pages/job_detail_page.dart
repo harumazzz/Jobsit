@@ -109,7 +109,7 @@ class JobDetailPage extends StatelessWidget {
 }
 
 class _ApplyNavBar extends StatelessWidget {
-  const _ApplyNavBar({super.key});
+  const _ApplyNavBar();
 
   @override
   Widget build(BuildContext context) {

@@ -62,6 +62,7 @@ abstract class UserCreationResponse with _$UserCreationResponse {
     @JsonKey(name: 'birthDay') String? birthDate,
     @JsonKey(name: 'avatar') String? avatar,
     @JsonKey(name: 'location') String? address,
+    @JsonKey(name: 'mailReceive') required bool mailReceive,
     @JsonKey(name: 'roleDTO') required RoleResponse role,
     @JsonKey(name: 'statusDTO') required StatusResponse status,
   }) = _UserCreationResponse;
@@ -97,6 +98,7 @@ sealed class JobInformationResponse with _$JobInformationResponse {
     @JsonKey(name: 'scheduleDTOs') required List<ScheduleResponse> schedules,
     @JsonKey(name: 'desiredJob') String? desiredJob,
     @JsonKey(name: 'desiredWorkingProvince') String? desiredWorkingProvince,
+    @JsonKey(name: 'searchable') required bool searchable,
     @JsonKey(name: 'cv') String? cv,
   }) = _JobInformationResponse;
 
@@ -269,6 +271,7 @@ extension GetUserResponseMapper on GetUserResponse {
         gender: user.gender ?? false,
         birthDate: user.birthDate,
         address: user.address,
+        mailReceive: user.mailReceive,
       ),
       jobInfo: JobInformation(
         university: jobInfo.university?.toEntity(),
@@ -279,6 +282,7 @@ extension GetUserResponseMapper on GetUserResponse {
         desiredJob: jobInfo.desiredJob,
         desiredWorkingProvince: jobInfo.desiredWorkingProvince,
         cv: jobInfo.cv,
+        searchable: jobInfo.searchable,
       ),
     );
   }
