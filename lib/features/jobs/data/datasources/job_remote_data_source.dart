@@ -34,4 +34,7 @@ abstract class JobRemoteDataSource {
 
   @GET(ApiConstant.scheduleListEndpoint)
   Future<List<ScheduleResponse>> getSchedules();
+
+  @GET(ApiConstant.jobFilterEndpoint)
+  Future<JobListResponse> getFilteredJobs({@Body() required FormData formData});
 }

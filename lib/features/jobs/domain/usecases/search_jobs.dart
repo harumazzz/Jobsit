@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/services/location_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../data/repositories/job_repository_impl.dart';
 import '../entities/job.dart';
@@ -34,6 +35,12 @@ GetMajorUseCase getMajorUseCase(Ref ref) {
 GetScheduleUseCase getScheduleUseCase(Ref ref) {
   final jobRepository = ref.watch(jobRepositoryProvider);
   return GetScheduleUseCase(jobRepository);
+}
+
+@riverpod
+FilterJobUseCase filterJobUseCase(Ref ref) {
+  final jobRepository = ref.watch(jobRepositoryProvider);
+  return FilterJobUseCase(jobRepository);
 }
 
 @freezed
@@ -104,5 +111,37 @@ final class GetJobDetailUseCase implements UseCase<Job, GetJobDetailParams> {
   @override
   Future<Either<Failure, Job>> call(GetJobDetailParams params) async {
     return await _jobRepository.getJobById(params.jobId);
+  }
+}
+
+@freezed
+sealed class FilterJobUseCaseParams with _$FilterJobUseCaseParams {
+  const factory FilterJobUseCaseParams({
+    required int page,
+    required int limit,
+    String? title,
+    Schedule? schedule,
+    Position? position,
+    City? city,
+    Major? major,
+  }) = _FilterJobUseCaseParams;
+}
+
+final class FilterJobUseCase implements UseCase<List<Job>, FilterJobUseCaseParams> {
+  const FilterJobUseCase(this._jobRepository);
+
+  final JobRepository _jobRepository;
+
+  @override
+  Future<Either<Failure, List<Job>>> call(FilterJobUseCaseParams params) async {
+    return await _jobRepository.getFilteredJobs(
+      page: params.page,
+      limit: params.limit,
+      schedule: params.schedule,
+      position: params.position,
+      city: params.city,
+      major: params.major,
+      title: params.title,
+    );
   }
 }

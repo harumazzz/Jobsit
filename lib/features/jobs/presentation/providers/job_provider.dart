@@ -17,7 +17,7 @@ sealed class SearchJobsState with _$SearchJobsState {
   const factory SearchJobsState.error(String message) = SearchJobsError;
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class SearchJobsController extends _$SearchJobsController {
   @override
   SearchJobsState build() {
@@ -39,6 +39,38 @@ class SearchJobsController extends _$SearchJobsController {
       state = result.fold(
         ifLeft: (failure) => SearchJobsState.error(failure.message),
         ifRight: (value) => SearchJobsState.loaded(jobs: [...currentJobs, ...value], finished: value.isEmpty),
+      );
+    } catch (e) {
+      state = SearchJobsState.error(e.toString());
+    }
+  }
+
+  Future<void> filterJobs({
+    required int page,
+    required int limit,
+    required String title,
+    Position? position,
+    Schedule? schedule,
+    City? city,
+    Major? major,
+  }) async {
+    state = const SearchJobsState.loading();
+    try {
+      final filterJobUseCase = ref.read(filterJobUseCaseProvider);
+      final result = await filterJobUseCase(
+        FilterJobUseCaseParams(
+          page: page,
+          limit: limit,
+          position: position,
+          schedule: schedule,
+          city: city,
+          major: major,
+          title: title,
+        ),
+      );
+      state = result.fold(
+        ifLeft: (failure) => SearchJobsState.error(failure.message),
+        ifRight: (value) => SearchJobsState.loaded(jobs: value, finished: false),
       );
     } catch (e) {
       state = SearchJobsState.error(e.toString());
@@ -107,7 +139,7 @@ class DistrictsController extends _$DistrictsController {
     state = const DistrictsState.loading();
     try {
       final searchDistrictsUseCase = ref.read(searchDistrictsUseCaseProvider);
-      final result = await searchDistrictsUseCase(SearchDistrictsParams(depth: 1, code: code));
+      final result = await searchDistrictsUseCase(SearchDistrictsParams(depth: 2, code: code));
       state = result.fold(
         ifLeft: (failure) => DistrictsState.error(failure.message),
         ifRight: (districts) => DistrictsState.loaded(districts: districts),
@@ -232,6 +264,7 @@ sealed class JobFilterState with _$JobFilterState {
     required int scheduleIndex,
     required int positionscheduleIndex,
     required int majorIndex,
+    required String title,
     City? city,
   }) = JobFilterInitial;
 
@@ -239,6 +272,7 @@ sealed class JobFilterState with _$JobFilterState {
     required int scheduleIndex,
     required int positionscheduleIndex,
     required int majorIndex,
+    required String title,
     Schedule? schedule,
     Position? position,
     City? city,
@@ -250,13 +284,22 @@ sealed class JobFilterState with _$JobFilterState {
 class JobFilterController extends _$JobFilterController {
   @override
   JobFilterState build() {
-    return const JobFilterState.initial(scheduleIndex: 0, positionscheduleIndex: 0, majorIndex: 0);
+    return const JobFilterState.initial(scheduleIndex: 0, positionscheduleIndex: 0, majorIndex: 0, title: '');
+  }
+
+  bool get isEmpty {
+    return state is JobFilterInitial;
+  }
+
+  Future<void> resetFilter() async {
+    state = const JobFilterState.initial(scheduleIndex: 0, positionscheduleIndex: 0, majorIndex: 0, title: '');
   }
 
   Future<void> saveFilteredJob({
     required int scheduleIndex,
     required int positionscheduleIndex,
     required int majorIndex,
+    required String title,
     Schedule? schedule,
     Position? position,
     City? city,
@@ -270,7 +313,11 @@ class JobFilterController extends _$JobFilterController {
       position: position,
       city: city,
       major: major,
+      title: title,
     );
+    await ref
+        .read(searchJobsControllerProvider.notifier)
+        .filterJobs(page: 0, limit: 10, schedule: schedule, position: position, city: city, major: major, title: title);
   }
 }
 

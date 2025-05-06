@@ -37,6 +37,8 @@ final class ApiConstant extends Equatable {
   static const String positionListEndpoint = '/position';
 
   static const String scheduleListEndpoint = '/schedule';
+
+  static const String jobFilterEndpoint = '/job/filter';
 }
 
 String queryImage(String logo) {

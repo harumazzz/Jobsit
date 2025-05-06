@@ -56,10 +56,12 @@ class HomePage extends HookConsumerWidget {
 }
 
 class _JobPage extends HookConsumerWidget {
-  const _JobPage({super.key});
+  const _JobPage();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final controller = useTextEditingController(text: ref.read(jobFilterControllerProvider).title);
+    final node = useFocusNode();
     final page = useState(0);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final state = ref.read(searchJobsControllerProvider);
@@ -97,6 +99,8 @@ class _JobPage extends HookConsumerWidget {
                       keyboardType: TextInputType.text,
                       textInputAction: TextInputAction.search,
                       hintText: 'Search Job',
+                      focusNode: node,
+                      controller: controller,
                       hintStyle: WidgetStatePropertyAll(
                         Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.48),
@@ -144,6 +148,8 @@ class _JobPage extends HookConsumerWidget {
                               jobPositionIndex: jobFilterState.positionscheduleIndex,
                               jobMajorIndex: jobFilterState.majorIndex,
                               jobCity: jobFilterState.city,
+                              searchController: controller,
+                              searchNode: node,
                             );
                           },
                         );
@@ -183,7 +189,20 @@ class _JobPage extends HookConsumerWidget {
                       state: state,
                       fetchNextPage: () async {
                         final controller = ref.read(searchJobsControllerProvider.notifier);
-                        await controller.searchJobs(page: page.value, limit: 10);
+                        if (ref.read(jobFilterControllerProvider.notifier).isEmpty) {
+                          await controller.searchJobs(page: page.value, limit: 10);
+                        } else {
+                          final jobFilterState = ref.read(jobFilterControllerProvider) as JobFilterOnSearch;
+                          await controller.filterJobs(
+                            page: page.value,
+                            limit: 10,
+                            city: jobFilterState.city,
+                            schedule: jobFilterState.schedule,
+                            position: jobFilterState.position,
+                            major: jobFilterState.major,
+                            title: jobFilterState.title,
+                          );
+                        }
                         page.value++;
                       },
                       builderDelegate: PagedChildBuilderDelegate<Job>(
@@ -213,12 +232,17 @@ class _JobPage extends HookConsumerWidget {
 
 class _FilterModal extends HookWidget {
   const _FilterModal({
-    super.key,
+    required this.searchController,
+    required this.searchNode,
     required this.jobTypeIndex,
     required this.jobPositionIndex,
     required this.jobMajorIndex,
     this.jobCity,
   });
+
+  final TextEditingController searchController;
+
+  final FocusNode searchNode;
 
   final int jobTypeIndex;
 
@@ -396,11 +420,14 @@ class _FilterModal extends HookWidget {
                         scheduleIndex: jobTypeSelection.value,
                         positionscheduleIndex: jobPositionSelection.value,
                         majorIndex: majorSelection.value,
+                        title: searchController.text,
                       );
+                  if (searchNode.hasFocus) {
+                    searchNode.unfocus();
+                  }
                   if (context.mounted) {
                     Navigator.of(context).pop();
                   }
-                  // TODO(self): Implement filter
                 },
                 child: const Center(child: Text('Apply filter')),
               );
@@ -418,6 +445,8 @@ class _FilterModal extends HookWidget {
     properties.add(IntProperty('jobPositionIndex', jobPositionIndex));
     properties.add(IntProperty('jobMajorIndex', jobMajorIndex));
     properties.add(DiagnosticsProperty<City?>('jobCity', jobCity));
+    properties.add(DiagnosticsProperty<TextEditingController>('searchController', searchController));
+    properties.add(DiagnosticsProperty<FocusNode>('searchNode', searchNode));
   }
 }
 
