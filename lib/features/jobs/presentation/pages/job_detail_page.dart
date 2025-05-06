@@ -1,36 +1,45 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:intl/intl.dart';
 
+import '../../../../core/network/api_constant.dart';
+import '../../domain/entities/job.dart';
 import '../providers/job_provider.dart';
+import '../widgets/job_card.dart';
 
-class JobDetailPage extends StatelessWidget {
+class JobDetailPage extends HookWidget {
   const JobDetailPage({super.key, required this.jobId});
 
   final int jobId;
 
   @override
   Widget build(BuildContext context) {
+    final pageController = usePageController();
+    final selectedTabIndex = useState(0);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFefeff0),
+      backgroundColor: const Color(0xFff5fafd),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 38.0,
             floating: true,
-            backgroundColor: const Color(0xFFefeff0),
+            backgroundColor: const Color(0xFff5fafd),
             flexibleSpace: const FlexibleSpaceBar(title: Text('Job Detail'), centerTitle: true),
             actions: [
               Consumer(
                 builder: (context, ref, child) {
                   final state = ref.watch(jobDetailControllerProvider);
                   return switch (state) {
-                    JobDetailLoading _ => const Center(child: CircularProgressIndicator()),
-                    JobDetailError _ => const SizedBox.shrink(),
-                    JobDetailInitial _ => const SizedBox.shrink(),
-                    JobDetailLoaded _ => IconButton(
+                    JobDetailLoading() => const Center(child: CircularProgressIndicator()),
+                    JobDetailError() => const SizedBox.shrink(),
+                    JobDetailInitial() => const SizedBox.shrink(),
+                    JobDetailLoaded() => IconButton(
                       icon: const Icon(IconlyLight.bookmark),
                       tooltip: 'Bookmark',
                       iconSize: 30.0,
@@ -44,56 +53,301 @@ class JobDetailPage extends StatelessWidget {
               ),
             ],
           ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            sliver: SliverToBoxAdapter(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                spacing: 12.0,
-                children: [
-                  Consumer(
-                    builder: (context, ref, child) {
-                      final state = ref.watch(jobDetailControllerProvider);
-                      return switch (state) {
-                        JobDetailError _ => const SizedBox.shrink(),
-                        JobDetailInitial _ => const SizedBox.shrink(),
-                        JobDetailLoading _ => Shimmer.fromColors(
-                          baseColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-                          highlightColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          child: Container(
-                            width: 200,
-                            height: 16.0,
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
+          Consumer(
+            builder: (context, ref, child) {
+              final state = ref.watch(jobDetailControllerProvider);
+              return switch (state) {
+                JobDetailLoading() => const SliverFillRemaining(child: Center(child: CircularProgressIndicator())),
+                JobDetailError(message: final message) => SliverFillRemaining(
+                  child: Center(child: Text('Error: $message')),
+                ),
+                JobDetailInitial() => const SliverFillRemaining(child: Center(child: Text('No data available'))),
+                JobDetailLoaded(job: final job) => SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 16.0),
+                        job.company.logo != null
+                            ? Container(
+                              alignment: Alignment.center,
+                              width: 86.0,
+                              height: 86.0,
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: CachedNetworkImage(
+                                imageUrl: queryImage(job.company.logo!),
+                                fit: BoxFit.contain,
+                                placeholder: (context, url) {
+                                  return Shimmer.fromColors(
+                                    baseColor: Colors.grey[300]!,
+                                    highlightColor: Colors.grey[100]!,
+                                    child: Container(
+                                      width: 48.0,
+                                      height: 48.0,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8.0),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                errorWidget: (context, url, error) {
+                                  return Icon(
+                                    IconlyLight.image,
+                                    size: 48.0,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  );
+                                },
+                              ),
+                            )
+                            : Icon(IconlyLight.image, size: 48.0, color: Theme.of(context).colorScheme.primary),
+                        const SizedBox(height: 16.0),
+                        Text(
+                          job.title,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
-                        JobDetailLoaded it => Text(it.job.title, style: Theme.of(context).textTheme.titleLarge),
-                      };
-                    },
+                        const SizedBox(height: 12.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              job.company.name ?? 'Company Name',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSecondary,
+                              ),
+                            ),
+                            const SizedBox(width: 12.0),
+                            Icon(IconlyLight.location, size: 24.0, color: Theme.of(context).colorScheme.primary),
+                            const SizedBox(width: 4.0),
+                            Text(
+                              job.company.location ?? 'Location',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSecondary),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            ...job.positions.map(
+                              (position) => Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 5),
+                                padding: const EdgeInsets.all(5),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                                ),
+                                child: Text(
+                                  position.name,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            JobIntroduce(
+                              title: 'Position',
+                              content: job.positions.isNotEmpty ? job.positions[0].name : 'Not specified',
+                              child: Icon(
+                                IconlyLight.profile,
+                                size: 24.0,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            JobIntroduce(
+                              title: 'Type',
+                              content: job.schedules.isNotEmpty ? job.schedules[0].name : ' Not specified',
+                              child: Icon(IconlyLight.work, size: 24.0, color: Theme.of(context).colorScheme.primary),
+                            ),
+                            JobIntroduce(
+                              title: 'Salary',
+                              content: '\$${job.minInUSD}k - \$${job.maxInUSD}k',
+                              child: Icon(IconlyLight.wallet, size: 24.0, color: Theme.of(context).colorScheme.primary),
+                            ),
+                            JobIntroduce(
+                              title: 'Deadline',
+                              content: DateFormat('dd/MM/yyyy').format(job.applicationDeadline.toLocal()),
+                              child: Icon(
+                                IconlyLight.calendar,
+                                size: 24.0,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24.0),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () async {
+                                  selectedTabIndex.value = 0;
+                                  pageController.jumpToPage(0);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                  decoration: BoxDecoration(
+                                    color: selectedTabIndex.value == 0 ? Colors.white : Colors.transparent,
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(12.0),
+                                      bottomLeft: Radius.circular(12.0),
+                                    ),
+                                    border: Border.all(color: Colors.white),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'Description',
+                                    style: TextStyle(
+                                      fontWeight: selectedTabIndex.value == 0 ? FontWeight.bold : FontWeight.normal,
+                                      color:
+                                          selectedTabIndex.value == 0
+                                              ? Theme.of(context).colorScheme.primary
+                                              : Theme.of(context).colorScheme.onSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () async {
+                                  selectedTabIndex.value = 1;
+                                  pageController.jumpToPage(1);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                  decoration: BoxDecoration(
+                                    color: selectedTabIndex.value == 1 ? Colors.white : Colors.transparent,
+                                    borderRadius: const BorderRadius.only(
+                                      topRight: Radius.circular(12.0),
+                                      bottomRight: Radius.circular(12.0),
+                                    ),
+                                    border: Border.all(color: Colors.white),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'Company',
+                                    style: TextStyle(
+                                      fontWeight: selectedTabIndex.value == 1 ? FontWeight.bold : FontWeight.normal,
+                                      color:
+                                          selectedTabIndex.value == 1
+                                              ? Theme.of(context).colorScheme.primary
+                                              : Theme.of(context).colorScheme.onSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24.0),
+                        Container(
+                          padding: const EdgeInsets.all(16.0),
+                          height: 300,
+                          child: PageView(
+                            controller: pageController,
+                            onPageChanged: (index) async {
+                              selectedTabIndex.value = index;
+                            },
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Job Description',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 16.0),
+                                  Text(
+                                    job.description,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSecondary),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Company Overview',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 16.0),
+                                  Flexible(
+                                    child: Text(
+                                      job.company.description ?? 'No company details available',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSecondary),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16.0),
+                                  Text(
+                                    'Company Address',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 16.0),
+                                  Row(
+                                    spacing: 8.0,
+                                    children: [
+                                      Icon(
+                                        IconlyLight.location,
+                                        size: 24.0,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                      Text(
+                                        job.company.location ?? 'Location',
+                                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSecondary,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16.0),
+                                  Text(
+                                    'Other Jobs',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    spacing: 12.0,
-                    children: [
-                      Text('Company Name', style: Theme.of(context).textTheme.titleLarge),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        spacing: 8.0,
-                        children: [
-                          Icon(IconlyLight.location, size: 24.0, color: Theme.of(context).colorScheme.primary),
-                          Text('Location', style: Theme.of(context).textTheme.bodyLarge),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12.0),
-                  Text('Job Description', style: Theme.of(context).textTheme.bodyLarge),
-                ],
-              ),
-            ),
+                ),
+              };
+            },
           ),
         ],
       ),
@@ -117,16 +371,16 @@ class _ApplyNavBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(12.0), bottomRight: Radius.circular(12.0)),
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 5.0, offset: const Offset(0, -1))],
       ),
       child: Consumer(
         builder: (context, ref, child) {
           final state = ref.watch(jobDetailControllerProvider);
           return switch (state) {
-            JobDetailLoading _ => const Center(child: CircularProgressIndicator()),
-            JobDetailError _ => const SizedBox.shrink(),
-            JobDetailInitial _ => const SizedBox.shrink(),
-            JobDetailLoaded _ => ElevatedButton(
+            JobDetailLoading() => const Center(child: CircularProgressIndicator()),
+            JobDetailError() => const SizedBox.shrink(),
+            JobDetailInitial() => const SizedBox.shrink(),
+            JobDetailLoaded() => ElevatedButton(
               onPressed: () async {
                 // TODO(self): Implement apply functionality
               },
@@ -135,7 +389,7 @@ class _ApplyNavBar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 32.0),
                 shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
               ),
-              child: const Text('Apply Now', style: TextStyle(color: Colors.white)),
+              child: const Text('Apply Now', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           };
         },

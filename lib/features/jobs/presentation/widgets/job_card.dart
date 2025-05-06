@@ -253,3 +253,51 @@ class ShimmerCard extends StatelessWidget {
     );
   }
 }
+
+class JobIntroduce extends StatelessWidget {
+  const JobIntroduce({super.key, required this.title, required this.content, required this.child});
+
+  final String title;
+
+  final String content;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      spacing: 5.0,
+      children: [
+        Container(
+          width: 47.0,
+          height: 47.0,
+          padding: const EdgeInsets.all(10.0),
+          decoration: BoxDecoration(shape: BoxShape.circle, color: Theme.of(context).colorScheme.onPrimary),
+          child: child,
+        ),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSecondary,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        Text(
+          content,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+          softWrap: true,
+        ),
+      ],
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+    properties.add(StringProperty('content', content));
+  }
+}

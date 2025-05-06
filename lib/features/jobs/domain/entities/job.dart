@@ -68,3 +68,13 @@ sealed class Major with _$Major {
 sealed class Position with _$Position {
   const factory Position({required int id, required String name}) = _Position;
 }
+
+extension JobExtension on Job {
+  int get minInUSD {
+    return (minAllowance / 24.500).round();
+  }
+
+  int get maxInUSD {
+    return (maxAllowance / 24.500).round();
+  }
+}
