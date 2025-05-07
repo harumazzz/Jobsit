@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -62,7 +63,7 @@ class JobDetailPage extends HookWidget {
                   child: Center(child: Text('Error: $message')),
                 ),
                 JobDetailInitial() => const SliverFillRemaining(child: Center(child: Text('No data available'))),
-                JobDetailLoaded(job: final job) => SliverPadding(
+                JobDetailLoaded(job: final job, relatedJobs: final relatedJobs) => SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   sliver: SliverToBoxAdapter(
                     child: Column(
@@ -262,7 +263,7 @@ class JobDetailPage extends HookWidget {
                         const SizedBox(height: 24.0),
                         Container(
                           padding: const EdgeInsets.all(16.0),
-                          height: 300,
+                          height: 600,
                           child: PageView(
                             controller: pageController,
                             onPageChanged: (index) async {
@@ -337,6 +338,13 @@ class JobDetailPage extends HookWidget {
                                       context,
                                     ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                                   ),
+                                  const SizedBox(height: 16.0),
+                                  relatedJobs.isEmpty
+                                      ? const Center(child: Text('No related jobs available'))
+                                      : CarouselSlider(
+                                        options: CarouselOptions(height: 200.0, autoPlay: true),
+                                        items: [...relatedJobs.map((e) => JobCard(job: e, onPressed: () async {}))],
+                                      ),
                                 ],
                               ),
                             ],

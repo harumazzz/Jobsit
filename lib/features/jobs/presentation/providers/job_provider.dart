@@ -327,7 +327,7 @@ sealed class JobDetailState with _$JobDetailState {
 
   const factory JobDetailState.loading() = JobDetailLoading;
 
-  const factory JobDetailState.loaded({required Job job}) = JobDetailLoaded;
+  const factory JobDetailState.loaded({required Job job, required List<Job> relatedJobs}) = JobDetailLoaded;
 
   const factory JobDetailState.error(String message) = JobDetailError;
 }
@@ -344,9 +344,22 @@ class JobDetailController extends _$JobDetailController {
     try {
       final getJobDetailUseCase = ref.read(getJobDetailUseCaseProvider);
       final result = await getJobDetailUseCase(GetJobDetailParams(jobId: jobId));
+      var job = null as Job?;
       state = result.fold(
         ifLeft: (failure) => JobDetailState.error(failure.message),
-        ifRight: (job) => JobDetailState.loaded(job: job),
+        ifRight: (it) {
+          job = it;
+          return const JobDetailState.loading();
+        },
+      );
+      if (job == null) {
+        return;
+      }
+      final getJobByCompanyUseCase = ref.read(getJobByCompanyUseCaseProvider);
+      final otherJobs = await getJobByCompanyUseCase(GetJobByCompanyParams(company: job!.company, page: 0, limit: 5));
+      state = otherJobs.fold(
+        ifLeft: (failure) => JobDetailState.error(failure.message),
+        ifRight: (jobs) => JobDetailState.loaded(job: job!, relatedJobs: jobs),
       );
     } catch (e) {
       state = JobDetailState.error(e.toString());

@@ -30,6 +30,8 @@ final class ApiConstant extends Equatable {
 
   static const String jobListEndpoint = '/job';
 
+  static const String jobListByCompanyEndpoint = '/job/company/{companyId}';
+
   static const String jobDetailEndpoint = '/job/{jobId}';
 
   static const String majorListEndpoint = '/major';

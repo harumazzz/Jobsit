@@ -145,3 +145,26 @@ final class FilterJobUseCase implements UseCase<List<Job>, FilterJobUseCaseParam
     );
   }
 }
+
+@riverpod
+GetJobByCompanyUseCase getJobByCompanyUseCase(Ref ref) {
+  final jobRepository = ref.watch(jobRepositoryProvider);
+  return GetJobByCompanyUseCase(jobRepository);
+}
+
+@freezed
+sealed class GetJobByCompanyParams with _$GetJobByCompanyParams {
+  const factory GetJobByCompanyParams({required Company company, required int page, required int limit}) =
+      _GetJobByCompanyParams;
+}
+
+final class GetJobByCompanyUseCase implements UseCase<List<Job>, GetJobByCompanyParams> {
+  const GetJobByCompanyUseCase(this._jobRepository);
+
+  final JobRepository _jobRepository;
+
+  @override
+  Future<Either<Failure, List<Job>>> call(GetJobByCompanyParams params) async {
+    return await _jobRepository.getJobsByCompany(company: params.company, page: params.page, limit: params.limit);
+  }
+}

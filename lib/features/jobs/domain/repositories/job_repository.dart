@@ -24,4 +24,6 @@ abstract class JobRepository {
     Major? major,
     String? title,
   });
+
+  Future<Either<Failure, List<Job>>> getJobsByCompany({int page = 1, int limit = 5, required Company company});
 }

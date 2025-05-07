@@ -37,4 +37,11 @@ abstract class JobRemoteDataSource {
 
   @GET(ApiConstant.jobFilterEndpoint)
   Future<JobListResponse> getFilteredJobs({@Body() required FormData formData});
+
+  @GET(ApiConstant.jobListByCompanyEndpoint)
+  Future<JobListResponse> getJobsByCompany({
+    @Path('companyId') required int companyId,
+    @Query('no') int page = 0,
+    @Query('limit') int limit = 5,
+  });
 }
