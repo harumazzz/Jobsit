@@ -6,6 +6,13 @@ part 'user_model.freezed.dart';
 part 'user_model.g.dart';
 
 @freezed
+sealed class HttpResponse with _$HttpResponse {
+  const factory HttpResponse({required int httpCode, required String message, required String path}) = _HttpResponse;
+
+  factory HttpResponse.fromJson(Map<String, dynamic> json) => _$HttpResponseFromJson(json);
+}
+
+@freezed
 abstract class UserCreationRequest with _$UserCreationRequest {
   const factory UserCreationRequest({
     required String email,

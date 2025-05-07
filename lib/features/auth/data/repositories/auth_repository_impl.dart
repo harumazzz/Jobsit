@@ -162,4 +162,28 @@ final class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Success>> updateEmailNotification() async {
+    try {
+      await _authRemoteDataSource.updateEmailNotification();
+      return const Right(Success());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Success>> updateSearchableCandidate() async {
+    try {
+      await _authRemoteDataSource.updateSearchableCandidate();
+      return const Right(Success());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

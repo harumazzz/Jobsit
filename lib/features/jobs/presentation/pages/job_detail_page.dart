@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -9,6 +10,9 @@ import 'package:shimmer/shimmer.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/network/api_constant.dart';
+import '../../../../core/services/file_service.dart';
+import '../../../../shared/routes/app_router.dart';
+import '../../../../shared/widgets/custom_button.dart';
 import '../../domain/entities/job.dart';
 import '../providers/job_provider.dart';
 import '../widgets/job_card.dart';
@@ -365,7 +369,20 @@ class JobDetailPage extends HookConsumerWidget {
                                       )
                                       : CarouselSlider(
                                         options: CarouselOptions(height: 200.0, autoPlay: true),
-                                        items: [...relatedJobs.map((e) => JobCard(job: e, onPressed: () async {}))],
+                                        items: [
+                                          ...relatedJobs.map(
+                                            (e) => JobCard(
+                                              job: e,
+                                              onPressed: () async {
+                                                final jobDetailState = ref.read(jobDetailControllerProvider.notifier);
+                                                await jobDetailState.getJobDetail(jobId: e.id);
+                                                if (context.mounted) {
+                                                  JobDetailRoute(id: e.id).pushReplacement(context);
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                 ],
                               ),
@@ -412,7 +429,12 @@ class _ApplyNavBar extends StatelessWidget {
             JobDetailInitial() => const SizedBox.shrink(),
             JobDetailLoaded() => ElevatedButton(
               onPressed: () async {
-                // TODO(self): Implement apply functionality
+                await showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => const _ApplyModal(),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
@@ -423,6 +445,128 @@ class _ApplyNavBar extends StatelessWidget {
             ),
           };
         },
+      ),
+    );
+  }
+}
+
+class _ApplyModal extends HookWidget {
+  const _ApplyModal();
+
+  @override
+  Widget build(BuildContext context) {
+    final file = useState<FileSelectorResult?>(null);
+    final controller = useTextEditingController();
+    final text = useState<String>('Upload new CV');
+    return Container(
+      height: 450.0,
+      width: double.infinity,
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 24.0, bottom: 8.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: const BorderRadius.only(topLeft: Radius.circular(32.0), topRight: Radius.circular(32.0)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 20.0,
+        children: [
+          Text(
+            'Attached CV',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          Consumer(
+            builder: (context, ref, child) {
+              return TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                  padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 32.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                    side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    text.value,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSecondary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                onPressed: () async {
+                  final result = await ref.read(fileServiceProvider).uploadFile([
+                    const FileSelector(label: 'CV', extensions: ['pdf']),
+                  ]);
+                  result.fold(
+                    ifLeft: (error) {
+                      ElegantNotification.error(
+                        background: const Color(0xFFFCE8DB),
+                        description: Text(error.message),
+                      ).show(context);
+                    },
+                    ifRight: (e) {
+                      text.value = e.name;
+                      file.value = e;
+                    },
+                  );
+                },
+              );
+            },
+          ),
+          Text(
+            'Resume letter',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          TextField(
+            controller: controller,
+            minLines: 5,
+            maxLines: 5,
+            decoration: InputDecoration(
+              fillColor: Colors.white,
+              filled: true,
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+              ),
+              hintText: 'Write a brief introduce about yourself',
+              hintStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.5),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox.shrink(),
+          Consumer(
+            builder: (context, ref, child) {
+              return CustomButton(
+                onPressed: () async {
+                  // TODO(self): Implement submit functionality
+                },
+                child: Center(
+                  child: Text(
+                    'Submit',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

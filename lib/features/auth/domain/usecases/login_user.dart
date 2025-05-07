@@ -114,3 +114,37 @@ final class GetUserData implements UseCase<User, int> {
     return await _authRepository.getUser(userId: userId);
   }
 }
+
+@riverpod
+UpdateSearchableCandidateUseCase updateSearchableCandidateUseCase(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return UpdateSearchableCandidateUseCase(authRepository);
+}
+
+final class UpdateSearchableCandidateUseCase implements UseCase<Success, NoParams> {
+  const UpdateSearchableCandidateUseCase(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, Success>> call(NoParams params) async {
+    return await _authRepository.updateSearchableCandidate();
+  }
+}
+
+@riverpod
+UpdateEmailNotificationUseCase updateEmailNotificationUseCase(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return UpdateEmailNotificationUseCase(authRepository);
+}
+
+final class UpdateEmailNotificationUseCase implements UseCase<Success, NoParams> {
+  const UpdateEmailNotificationUseCase(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, Success>> call(NoParams params) async {
+    return await _authRepository.updateEmailNotification();
+  }
+}

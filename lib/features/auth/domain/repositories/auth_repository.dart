@@ -31,4 +31,8 @@ abstract class AuthRepository {
   Future<Either<Failure, String>> verifyOtp({required String otp});
 
   Future<Either<Failure, User>> getUser({required int userId});
+
+  Future<Either<Failure, Success>> updateSearchableCandidate();
+
+  Future<Either<Failure, Success>> updateEmailNotification();
 }

@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/login_user.dart';
 import '../../domain/usecases/register_user.dart';
@@ -175,6 +176,9 @@ class AuthController extends _$AuthController {
       state = currentState.copyWith(
         user: currentState.user.copyWith(jobInfo: currentState.user.jobInfo.copyWith(searchable: searchable)),
       );
+      final updateSearchableCandidateUseCase = ref.read(updateSearchableCandidateUseCaseProvider);
+      final result = await updateSearchableCandidateUseCase(const NoParams());
+      result.fold(ifRight: (_) => null, ifLeft: (e) => state = AuthState.error(e.message));
     }
   }
 
@@ -184,6 +188,9 @@ class AuthController extends _$AuthController {
       state = currentState.copyWith(
         user: currentState.user.copyWith(userInfo: currentState.user.userInfo.copyWith(mailReceive: mailReceive)),
       );
+      final updateEmailNotificationUseCase = ref.read(updateEmailNotificationUseCaseProvider);
+      final result = await updateEmailNotificationUseCase(const NoParams());
+      result.fold(ifRight: (_) => null, ifLeft: (e) => state = AuthState.error(e.message));
     }
   }
 }

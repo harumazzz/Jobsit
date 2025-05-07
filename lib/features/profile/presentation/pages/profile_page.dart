@@ -3,18 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/profile_info_tile.dart';
 
-class ProfilePage extends HookWidget {
+class ProfilePage extends HookConsumerWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final allowSearch = useState(true);
-    final emailNotification = useState(false);
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.read(authControllerProvider) is! AuthAuthorized) {
+      return const _ProfileShimmer();
+    }
+    final state = ref.read(authControllerProvider) as AuthAuthorized;
+    final allowSearch = useState(state.user.jobInfo.searchable);
+    final emailNotification = useState(state.user.userInfo.mailReceive);
     return CustomScrollView(
       slivers: [
         const SliverAppBar(
@@ -103,7 +108,7 @@ class ProfilePage extends HookWidget {
                   return;
                 }
                 allowSearch.value = value;
-                // TODO(self): Implement the logic to save the state
+                await ref.read(authControllerProvider.notifier).updateSearchable(searchable: value);
               },
             ),
           ),
@@ -133,7 +138,7 @@ class ProfilePage extends HookWidget {
                   return;
                 }
                 emailNotification.value = value;
-                // TODO(self): Implement the logic to save the state
+                await ref.read(authControllerProvider.notifier).updateMailReceive(mailReceive: value);
               },
             ),
           ),
@@ -373,5 +378,233 @@ class _CustomIcon extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
     properties.add(StringProperty('subtitle', subtitle));
+  }
+}
+
+class _ProfileShimmer extends StatelessWidget {
+  const _ProfileShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        const SliverAppBar(
+          expandedHeight: 38.0,
+          floating: true,
+          backgroundColor: Color(0xFFefeff0),
+          flexibleSpace: FlexibleSpaceBar(title: Text('Profile'), centerTitle: true),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 16.0)),
+        SliverPadding(
+          padding: const EdgeInsets.all(12.0),
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              spacing: 4.0,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 86.0,
+                  height: 86.0,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Theme.of(context).primaryColor, width: 2.0),
+                  ),
+                  child: Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: const _NoAvatar(),
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    width: 120.0,
+                    height: 16.0,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.0)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 12.0)),
+        SliverPadding(
+          padding: const EdgeInsets.all(12.0),
+          sliver: SliverToBoxAdapter(
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 16.0,
+              children: [
+                Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: _CustomIcon(
+                    title: 'Applied',
+                    subtitle: '0',
+                    icon: Icon(IconlyLight.profile, size: 24.0, color: Theme.of(context).colorScheme.onPrimary),
+                  ),
+                ),
+                Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: _CustomIcon(
+                    title: 'Saved',
+                    subtitle: '0',
+                    icon: Icon(IconlyLight.work, size: 24.0, color: Theme.of(context).colorScheme.onPrimary),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 12.0)),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          sliver: SliverToBoxAdapter(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                height: 56.0,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12.0)),
+              ),
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 8.0)),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          sliver: SliverToBoxAdapter(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                height: 56.0,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12.0)),
+              ),
+            ),
+          ),
+        ),
+
+        const SliverToBoxAdapter(child: SizedBox(height: 24.0)),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          sliver: SliverToBoxAdapter(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    width: 180.0,
+                    height: 20.0,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.0)),
+                  ),
+                ),
+                Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    width: 24.0,
+                    height: 24.0,
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 8.0)),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          sliver: SliverToBoxAdapter(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                height: 220.0,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12.0)),
+              ),
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 12.0)),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          sliver: SliverToBoxAdapter(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    width: 150.0,
+                    height: 20.0,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.0)),
+                  ),
+                ),
+                Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    width: 24.0,
+                    height: 24.0,
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 8.0)),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          sliver: SliverToBoxAdapter(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                height: 280.0,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12.0)),
+              ),
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 20.0)),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          sliver: SliverToBoxAdapter(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                height: 56.0,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12.0)),
+              ),
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 8.0)),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          sliver: SliverToBoxAdapter(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                height: 56.0,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12.0)),
+              ),
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 8.0)),
+      ],
+    );
   }
 }
