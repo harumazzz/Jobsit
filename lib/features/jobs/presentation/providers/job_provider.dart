@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/job.dart';
+import '../../domain/usecases/get_applied_jobs.dart';
 import '../../domain/usecases/get_saved_jobs.dart';
 import '../../domain/usecases/search_jobs.dart';
 
@@ -501,6 +502,46 @@ class JobDetailController extends _$JobDetailController {
       );
     } catch (e) {
       state = JobDetailState.error(e.toString());
+    }
+  }
+}
+
+@freezed
+sealed class ApplyJobState with _$ApplyJobState {
+  const factory ApplyJobState.initial() = ApplyJobInitial;
+
+  const factory ApplyJobState.loading() = ApplyJobLoading;
+
+  const factory ApplyJobState.loaded({required List<Job> jobs, required bool finished}) = ApplyJobLoaded;
+
+  const factory ApplyJobState.error(String message) = ApplyJobError;
+}
+
+@Riverpod(keepAlive: true)
+final class ApplyJobController extends _$ApplyJobController {
+  @override
+  ApplyJobState build() {
+    return const ApplyJobState.initial();
+  }
+
+  Future<void> getJobApplied({required int page}) async {
+    if (state is ApplyJobLoaded && (state as ApplyJobLoaded).finished) {
+      return;
+    }
+    final oldJobs = switch (state) {
+      ApplyJobLoaded(jobs: final jobs) => jobs,
+      _ => [],
+    };
+    state = const ApplyJobState.loading();
+    try {
+      final getAppliedJobsUseCase = ref.read(getAppliedJobsUseCaseProvider);
+      final result = await getAppliedJobsUseCase(AppliedJobParams(page: page, limit: 10));
+      state = result.fold(
+        ifLeft: (failure) => ApplyJobState.error(failure.message),
+        ifRight: (value) => ApplyJobState.loaded(jobs: [...oldJobs, ...value], finished: value.isEmpty),
+      );
+    } catch (e) {
+      state = ApplyJobState.error(e.toString());
     }
   }
 }

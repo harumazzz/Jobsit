@@ -13,6 +13,20 @@ sealed class HttpResponse with _$HttpResponse {
 }
 
 @freezed
+sealed class ChangePasswordRequest with _$ChangePasswordRequest {
+  const factory ChangePasswordRequest({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) = _ChangePasswordRequest;
+
+  factory ChangePasswordRequest.fromJson(Map<String, dynamic> json) => _$ChangePasswordRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
 abstract class UserCreationRequest with _$UserCreationRequest {
   const factory UserCreationRequest({
     required String email,

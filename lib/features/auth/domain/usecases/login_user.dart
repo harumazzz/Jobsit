@@ -148,3 +148,50 @@ final class UpdateEmailNotificationUseCase implements UseCase<Success, NoParams>
     return await _authRepository.updateEmailNotification();
   }
 }
+
+@riverpod
+LogOutUseCase logOutUseCase(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return LogOutUseCase(authRepository);
+}
+
+final class LogOutUseCase implements UseCase<Success, NoParams> {
+  const LogOutUseCase(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, Success>> call(NoParams params) async {
+    return await _authRepository.logOut();
+  }
+}
+
+@freezed
+sealed class ChangePasswordParams with _$ChangePasswordParams {
+  const factory ChangePasswordParams({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) = _ChangePasswordParams;
+}
+
+@riverpod
+ChangePasswordUseCase changePasswordUseCase(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return ChangePasswordUseCase(authRepository);
+}
+
+final class ChangePasswordUseCase implements UseCase<Success, ChangePasswordParams> {
+  const ChangePasswordUseCase(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, Success>> call(ChangePasswordParams params) async {
+    return await _authRepository.changePassword(
+      oldPassword: params.oldPassword,
+      newPassword: params.newPassword,
+      confirmPassword: params.confirmPassword,
+    );
+  }
+}

@@ -32,4 +32,6 @@ abstract class JobRepository {
   Future<Either<Failure, Success>> addSavedJob({required int jobId});
 
   Future<Either<Failure, Success>> deleteSavedJob({required int jobId});
+
+  Future<Either<Failure, List<Job>>> getAppliedJob({int page = 1, int limit = 10});
 }

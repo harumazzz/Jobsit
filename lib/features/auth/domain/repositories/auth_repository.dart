@@ -35,4 +35,12 @@ abstract class AuthRepository {
   Future<Either<Failure, Success>> updateSearchableCandidate();
 
   Future<Either<Failure, Success>> updateEmailNotification();
+
+  Future<Either<Failure, Success>> changePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  });
+
+  Future<Either<Failure, Success>> logOut();
 }

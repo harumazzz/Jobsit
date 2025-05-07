@@ -168,62 +168,147 @@ class PersonalInfoEditPage extends HookWidget {
                     },
                   ),
                   const SizedBox(height: 16.0),
-                  FormBuilderDropdown(
-                    name: 'gender',
-                    focusNode: genderFocusNode,
-                    decoration: const InputDecoration(
-                      labelText: 'Gender',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                      contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                    ),
-                    initialValue: selectedGender.value,
-                    items: [...genderOptions.map((gender) => DropdownMenuItem(value: gender, child: Text(gender)))],
-                    onChanged: (value) async {
-                      if (value != null) {
-                        selectedGender.value = value;
-                      }
-                      genderFocusNode.unfocus();
-                      FocusScope.of(context).requestFocus(cityFocusNode);
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return MenuAnchor(
+                        style: MenuStyle(
+                          minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
+                          maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
+                          elevation: WidgetStateProperty.all(4.0),
+                        ),
+                        crossAxisUnconstrained: false,
+                        alignmentOffset: const Offset(0, 8),
+                        builder: (context, controller, child) {
+                          return FormBuilderField(
+                            name: 'gender',
+                            focusNode: genderFocusNode,
+                            validator: (value) => null,
+                            builder: (FormFieldState<dynamic> field) {
+                              return InputDecorator(
+                                decoration: const InputDecoration(
+                                  labelText: 'Gender',
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                                  contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                                ),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    controller.open();
+                                  },
+                                  child: Text(selectedGender.value),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        menuChildren: [
+                          ...genderOptions.map((gender) {
+                            return MenuItemButton(
+                              onPressed: () async {
+                                selectedGender.value = gender;
+                                genderFocusNode.unfocus();
+                                FocusScope.of(context).requestFocus(cityFocusNode);
+                              },
+                              child: Text(gender),
+                            );
+                          }),
+                        ],
+                      );
                     },
                   ),
                   const SizedBox(height: 16.0),
-                  FormBuilderDropdown(
-                    name: 'city',
-                    focusNode: cityFocusNode,
-                    decoration: const InputDecoration(
-                      labelText: 'City',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                      contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                    ),
-                    initialValue: selectedCity.value,
-                    items: [...cityOptions.map((city) => DropdownMenuItem(value: city, child: Text(city)))],
-                    onChanged: (value) async {
-                      if (value != null) {
-                        selectedCity.value = value;
-                      }
-                      cityFocusNode.unfocus();
-                      FocusScope.of(context).requestFocus(districtFocusNode);
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return MenuAnchor(
+                        style: MenuStyle(
+                          minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
+                          maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
+                          elevation: WidgetStateProperty.all(4.0),
+                        ),
+                        crossAxisUnconstrained: false,
+                        alignmentOffset: const Offset(0, 8),
+                        builder: (context, controller, child) {
+                          return FormBuilderField(
+                            name: 'city',
+                            focusNode: cityFocusNode,
+                            validator: (value) => null,
+                            builder: (FormFieldState<dynamic> field) {
+                              return InputDecorator(
+                                decoration: const InputDecoration(
+                                  labelText: 'City',
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                                  contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                                ),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    controller.open();
+                                  },
+                                  child: Text(selectedCity.value),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        menuChildren: [
+                          ...cityOptions.map((city) {
+                            return MenuItemButton(
+                              onPressed: () async {
+                                selectedCity.value = city;
+                                cityFocusNode.unfocus();
+                                FocusScope.of(context).requestFocus(districtFocusNode);
+                              },
+                              child: Text(city),
+                            );
+                          }),
+                        ],
+                      );
                     },
                   ),
                   const SizedBox(height: 16.0),
-                  FormBuilderDropdown(
-                    name: 'district',
-                    focusNode: districtFocusNode,
-                    decoration: const InputDecoration(
-                      labelText: 'District',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                      contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                    ),
-                    initialValue: selectedDistrict.value,
-                    items: [
-                      ...districtOptions.map((district) => DropdownMenuItem(value: district, child: Text(district))),
-                    ],
-                    onChanged: (value) async {
-                      if (value != null) {
-                        selectedDistrict.value = value;
-                      }
-                      districtFocusNode.unfocus();
-                      FocusScope.of(context).requestFocus(addressFocusNode);
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return MenuAnchor(
+                        style: MenuStyle(
+                          minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
+                          maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
+                          elevation: WidgetStateProperty.all(4.0),
+                        ),
+                        crossAxisUnconstrained: false,
+                        alignmentOffset: const Offset(0, 8),
+                        builder: (context, controller, child) {
+                          return FormBuilderField(
+                            name: 'district',
+                            focusNode: districtFocusNode,
+                            validator: (value) => null,
+                            builder: (FormFieldState<dynamic> field) {
+                              return InputDecorator(
+                                decoration: const InputDecoration(
+                                  labelText: 'District',
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                                  contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                                ),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    controller.open();
+                                  },
+                                  child: Text(selectedDistrict.value),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        menuChildren: [
+                          ...districtOptions.map((district) {
+                            return MenuItemButton(
+                              onPressed: () {
+                                selectedDistrict.value = district;
+                                districtFocusNode.unfocus();
+                                FocusScope.of(context).requestFocus(addressFocusNode);
+                              },
+                              child: Text(district),
+                            );
+                          }),
+                        ],
+                      );
                     },
                   ),
                   const SizedBox(height: 16.0),
@@ -349,93 +434,177 @@ class JobInfoEditPage extends HookWidget {
                         ),
                         child: Wrap(
                           spacing: 8.0,
-                          children:
-                              positionOptions.map((position) {
-                                final isSelected = selectedPositions.value.contains(position);
-                                return FilterChip(
-                                  label: Text(position),
-                                  selected: isSelected,
-                                  onSelected: (value) {
-                                    List<String> updatedList = List.from(selectedPositions.value);
-                                    if (value) {
-                                      if (!updatedList.contains(position)) {
-                                        updatedList.add(position);
-                                      }
-                                    } else {
-                                      updatedList.remove(position);
+                          children: [
+                            ...positionOptions.map((position) {
+                              final isSelected = selectedPositions.value.contains(position);
+                              return FilterChip(
+                                label: Text(position),
+                                selected: isSelected,
+                                onSelected: (value) {
+                                  List<String> updatedList = List.from(selectedPositions.value);
+                                  if (value) {
+                                    if (!updatedList.contains(position)) {
+                                      updatedList.add(position);
                                     }
-                                    selectedPositions.value = updatedList;
-                                    field.didChange(updatedList);
-
-                                    // Handle focus after selection
-                                    if (positionFocusNode.hasFocus) {
-                                      positionFocusNode.unfocus();
-                                      FocusScope.of(context).requestFocus(majorFocusNode);
-                                    }
-                                  },
-                                );
-                              }).toList(),
+                                  } else {
+                                    updatedList.remove(position);
+                                  }
+                                  selectedPositions.value = updatedList;
+                                  field.didChange(updatedList);
+                                  if (positionFocusNode.hasFocus) {
+                                    positionFocusNode.unfocus();
+                                    FocusScope.of(context).requestFocus(majorFocusNode);
+                                  }
+                                },
+                              );
+                            }),
+                          ],
                         ),
                       );
                     },
                   ),
-                  const SizedBox(height: 16),
-                  FormBuilderDropdown(
-                    name: 'major',
-                    focusNode: majorFocusNode,
-                    decoration: const InputDecoration(
-                      labelText: 'Major',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                      contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                    ),
-                    initialValue: selectedMajor.value,
-                    items: [...majorOptions.map((major) => DropdownMenuItem(value: major, child: Text(major)))],
-                    onChanged: (value) async {
-                      if (value != null) {
-                        selectedMajor.value = value;
-                      }
-                      majorFocusNode.unfocus();
-                      FocusScope.of(context).requestFocus(jobTypeFocusNode);
+                  const SizedBox(height: 16.0),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return MenuAnchor(
+                        style: MenuStyle(
+                          minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8.0, 0.0)),
+                          maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8.0, double.infinity)),
+                          elevation: WidgetStateProperty.all(4.0),
+                        ),
+                        crossAxisUnconstrained: false,
+                        alignmentOffset: const Offset(0, 8),
+                        builder: (context, controller, child) {
+                          return FormBuilderField(
+                            name: 'major',
+                            focusNode: majorFocusNode,
+                            validator: (value) => null,
+                            builder: (FormFieldState<dynamic> field) {
+                              return InputDecorator(
+                                decoration: const InputDecoration(
+                                  labelText: 'Major',
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                                  contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                                ),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    controller.open();
+                                  },
+                                  child: Text(selectedMajor.value),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        menuChildren: [
+                          ...majorOptions.map((major) {
+                            return MenuItemButton(
+                              onPressed: () async {
+                                selectedMajor.value = major;
+                                majorFocusNode.unfocus();
+                                FocusScope.of(context).requestFocus(jobTypeFocusNode);
+                              },
+                              child: Text(major),
+                            );
+                          }),
+                        ],
+                      );
                     },
                   ),
                   const SizedBox(height: 16.0),
-                  FormBuilderDropdown(
-                    name: 'job_type',
-                    focusNode: jobTypeFocusNode,
-                    decoration: const InputDecoration(
-                      labelText: 'Job Type',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                      contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                    ),
-                    initialValue: selectedJobType.value,
-                    items: [...jobTypeOptions.map((jobType) => DropdownMenuItem(value: jobType, child: Text(jobType)))],
-                    onChanged: (value) async {
-                      if (value != null) {
-                        selectedJobType.value = value;
-                      }
-                      jobTypeFocusNode.unfocus();
-                      FocusScope.of(context).requestFocus(locationFocusNode);
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return MenuAnchor(
+                        style: MenuStyle(
+                          minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
+                          maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
+                          elevation: WidgetStateProperty.all(4.0),
+                        ),
+                        crossAxisUnconstrained: false,
+                        alignmentOffset: const Offset(0, 8),
+                        builder: (context, controller, child) {
+                          return FormBuilderField(
+                            name: 'job_type',
+                            focusNode: jobTypeFocusNode,
+                            validator: (value) => null,
+                            builder: (FormFieldState<dynamic> field) {
+                              return InputDecorator(
+                                decoration: const InputDecoration(
+                                  labelText: 'Job Type',
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                                  contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                                ),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    controller.open();
+                                  },
+                                  child: Text(selectedJobType.value),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        menuChildren: [
+                          ...jobTypeOptions.map((jobType) {
+                            return MenuItemButton(
+                              onPressed: () async {
+                                selectedJobType.value = jobType;
+                                jobTypeFocusNode.unfocus();
+                                FocusScope.of(context).requestFocus(locationFocusNode);
+                              },
+                              child: Text(jobType),
+                            );
+                          }),
+                        ],
+                      );
                     },
                   ),
                   const SizedBox(height: 16.0),
-                  FormBuilderDropdown(
-                    name: 'location',
-                    focusNode: locationFocusNode,
-                    decoration: const InputDecoration(
-                      labelText: 'Location',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                      contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                    ),
-                    initialValue: selectedLocation.value,
-                    items: [
-                      ...locationOptions.map((location) => DropdownMenuItem(value: location, child: Text(location))),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        selectedLocation.value = value;
-                      }
-                      locationFocusNode.unfocus();
-                      FocusScope.of(context).requestFocus(cvFocusNode);
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return MenuAnchor(
+                        style: MenuStyle(
+                          minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
+                          maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
+                          elevation: WidgetStateProperty.all(4.0),
+                        ),
+                        crossAxisUnconstrained: false,
+                        alignmentOffset: const Offset(0, 8),
+                        builder: (context, controller, child) {
+                          return FormBuilderField(
+                            name: 'location',
+                            focusNode: locationFocusNode,
+                            validator: (value) => null,
+                            builder: (FormFieldState<dynamic> field) {
+                              return InputDecorator(
+                                decoration: const InputDecoration(
+                                  labelText: 'Location',
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                                  contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                                ),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    controller.open();
+                                  },
+                                  child: Text(selectedLocation.value),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        menuChildren: [
+                          ...locationOptions.map((location) {
+                            return MenuItemButton(
+                              onPressed: () async {
+                                selectedLocation.value = location;
+                                locationFocusNode.unfocus();
+                                FocusScope.of(context).requestFocus(cvFocusNode);
+                              },
+                              child: Text(location),
+                            );
+                          }),
+                        ],
+                      );
                     },
                   ),
                   const SizedBox(height: 16.0),

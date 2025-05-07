@@ -186,4 +186,39 @@ final class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Success>> changePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      await _authRemoteDataSource.changePassword(
+        ChangePasswordRequest(oldPassword: oldPassword, newPassword: newPassword, confirmPassword: confirmPassword),
+      );
+      return const Right(Success());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Success>> logOut() async {
+    try {
+      final token = await _authStorageService.getToken();
+      if (token == null) {
+        return const Left(CacheFailure('Token not found'));
+      }
+      await _authRemoteDataSource.logOut(token);
+      await _authStorageService.deleteToken();
+      return const Right(Success());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

@@ -52,4 +52,10 @@ abstract class AuthRemoteDataSource {
 
   @PUT(ApiConstant.emailNotificationEndpoint)
   Future<HttpResponse> updateEmailNotification();
+
+  @PUT(ApiConstant.changePasswordEndpoint)
+  Future<HttpResponse> changePassword(@Body() ChangePasswordRequest request);
+
+  @POST(ApiConstant.logOutEndpoint)
+  Future<HttpResponse> logOut(@Query('token') String token);
 }

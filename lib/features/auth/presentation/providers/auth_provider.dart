@@ -127,6 +127,36 @@ class AuthController extends _$AuthController {
     }
   }
 
+  Future<void> logOut() async {
+    try {
+      final logOutUseCase = ref.read(logOutUseCaseProvider);
+      final result = await logOutUseCase(const NoParams());
+      state = result.fold(ifRight: (_) => const AuthState.initial(), ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      final changePasswordUseCase = ref.read(changePasswordUseCaseProvider);
+      final result = await changePasswordUseCase(
+        ChangePasswordParams(oldPassword: oldPassword, newPassword: newPassword, confirmPassword: confirmPassword),
+      );
+      state = result.fold(ifRight: (_) => const AuthState.initial(), ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
   Future<void> resetPassword({
     required String resetToken,
     required String password,

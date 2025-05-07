@@ -53,4 +53,7 @@ abstract class JobRemoteDataSource {
 
   @DELETE(ApiConstant.jobSaveEndpoint)
   Future<HttpResponse> deleteSavedJob({@Query('idJob') required int jobId});
+
+  @GET(ApiConstant.jobAppliedEndpoint)
+  Future<SavedJobListResponse> getAppliedJob({@Query('no') int page = 0, @Query('limit') int limit = 10});
 }
