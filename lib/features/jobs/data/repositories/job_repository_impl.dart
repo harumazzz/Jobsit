@@ -148,4 +148,28 @@ final class JobRepositoryImpl implements JobRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Success>> addSavedJob({required int jobId}) async {
+    try {
+      await _jobRemoteDataSource.addSavedJob(jobId: jobId);
+      return const Right(Success());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Success>> deleteSavedJob({required int jobId}) async {
+    try {
+      await _jobRemoteDataSource.deleteSavedJob(jobId: jobId);
+      return const Right(Success());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

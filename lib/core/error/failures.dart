@@ -21,6 +21,10 @@ final class InvalidEmailFailure extends Failure {
   const InvalidEmailFailure(super.message);
 }
 
+final class StorageFailure extends Failure {
+  const StorageFailure(super.message);
+}
+
 final class ShortPasswordFailure extends Failure {
   const ShortPasswordFailure(super.message);
 }

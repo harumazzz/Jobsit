@@ -6,6 +6,13 @@ part 'job_model.freezed.dart';
 part 'job_model.g.dart';
 
 @freezed
+sealed class HttpResponse with _$HttpResponse {
+  const factory HttpResponse({required int httpCode, required String message, required String path}) = _HttpResponse;
+
+  factory HttpResponse.fromJson(Map<String, dynamic> json) => _$HttpResponseFromJson(json);
+}
+
+@freezed
 sealed class JobListResponse with _$JobListResponse {
   const factory JobListResponse({
     required List<JobResponse> contents,

@@ -168,4 +168,22 @@ class AuthController extends _$AuthController {
       state = AuthState.error(e.toString());
     }
   }
+
+  Future<void> updateSearchable({required bool searchable}) async {
+    if (state is AuthAuthorized) {
+      final currentState = state as AuthAuthorized;
+      state = currentState.copyWith(
+        user: currentState.user.copyWith(jobInfo: currentState.user.jobInfo.copyWith(searchable: searchable)),
+      );
+    }
+  }
+
+  Future<void> updateMailReceive({required bool mailReceive}) async {
+    if (state is AuthAuthorized) {
+      final currentState = state as AuthAuthorized;
+      state = currentState.copyWith(
+        user: currentState.user.copyWith(userInfo: currentState.user.userInfo.copyWith(mailReceive: mailReceive)),
+      );
+    }
+  }
 }

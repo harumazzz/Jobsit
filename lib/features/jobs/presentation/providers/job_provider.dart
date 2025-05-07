@@ -158,6 +158,9 @@ class SavedJobController extends _$SavedJobController {
       newJobs.remove(jobId);
       state = SavedJobState.loaded(jobs: newJobs, finished: finished);
       ref.read(searchJobsControllerProvider.notifier).update();
+      final deleteSavedJobUseCase = ref.read(deleteSavedJobUseCaseProvider);
+      final result = await deleteSavedJobUseCase(DeleteSavedJobParams(jobId: jobId));
+      result.fold(ifLeft: (failure) => SavedJobState.error(failure.message), ifRight: (_) => null);
     }
   }
 
@@ -174,6 +177,9 @@ class SavedJobController extends _$SavedJobController {
       newJobs[job.id] = job;
       state = SavedJobState.loaded(jobs: newJobs, finished: finished);
       ref.read(searchJobsControllerProvider.notifier).update();
+      final addSavedJobUseCase = ref.read(addSavedJobUseCaseProvider);
+      final result = await addSavedJobUseCase(AddSavedJobParams(jobId: job.id));
+      result.fold(ifLeft: (failure) => SavedJobState.error(failure.message), ifRight: (_) => null);
     }
   }
 
