@@ -26,4 +26,6 @@ abstract class JobRepository {
   });
 
   Future<Either<Failure, List<Job>>> getJobsByCompany({int page = 1, int limit = 5, required Company company});
+
+  Future<Either<Failure, List<Job>>> getSavedJobs({int page = 1, int limit = 10});
 }

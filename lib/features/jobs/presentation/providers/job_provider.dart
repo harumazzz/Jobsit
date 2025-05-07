@@ -1,9 +1,12 @@
+import 'dart:collection';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/location_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/job.dart';
+import '../../domain/usecases/get_saved_jobs.dart';
 import '../../domain/usecases/search_jobs.dart';
 
 part 'job_provider.freezed.dart';
@@ -34,6 +37,7 @@ class SearchJobsController extends _$SearchJobsController {
     }
     state = const SearchJobsState.loading();
     try {
+      await ref.read(savedJobControllerProvider.notifier).getSavedJobs();
       final searchJobUseCase = ref.read(searchJobsUseCaseProvider);
       final result = await searchJobUseCase(SearchJobsUseCaseParams(page: page, limit: limit));
       state = result.fold(
@@ -42,6 +46,19 @@ class SearchJobsController extends _$SearchJobsController {
       );
     } catch (e) {
       state = SearchJobsState.error(e.toString());
+    }
+  }
+
+  void update() {
+    if (state is SearchJobsLoaded) {
+      final (jobs, finished) = switch (state) {
+        SearchJobsLoaded(jobs: final jobs, finished: final finished) => (jobs, finished),
+        _ => (null, false),
+      };
+      if (jobs == null) {
+        return;
+      }
+      state = SearchJobsState.loaded(jobs: jobs, finished: finished);
     }
   }
 
@@ -74,6 +91,121 @@ class SearchJobsController extends _$SearchJobsController {
       );
     } catch (e) {
       state = SearchJobsState.error(e.toString());
+    }
+  }
+}
+
+@freezed
+sealed class SavedJobState with _$SavedJobState {
+  const factory SavedJobState.initial() = SavedJobInitial;
+
+  const factory SavedJobState.loading() = SavedJobLoading;
+
+  const factory SavedJobState.loaded({required Map<int, Job> jobs, required bool finished}) = SavedJobLoaded;
+
+  const factory SavedJobState.error(String message) = SavedJobError;
+}
+
+@Riverpod(keepAlive: true)
+class SavedJobController extends _$SavedJobController {
+  @override
+  SavedJobState build() {
+    return const SavedJobState.initial();
+  }
+
+  Future<void> getSavedJobs() async {
+    if (state is SavedJobLoaded) {
+      return;
+    }
+    await _getJobs(page: 0, limit: 10);
+  }
+
+  bool contains(int jobId) {
+    if (state is SavedJobLoaded) {
+      return switch (state) {
+        SavedJobLoaded(jobs: final jobs) => jobs.containsKey(jobId),
+        _ => false,
+      };
+    }
+    return false;
+  }
+
+  Future<void> getMoreJob({required int page}) async {
+    if (state is! SavedJobLoaded) {
+      return;
+    }
+    await _getJobs(page: page, limit: 10);
+  }
+
+  Future<void> resetJobs({required int page}) async {
+    if (state is! SavedJobLoaded) {
+      return;
+    }
+    state = const SavedJobLoaded(jobs: {}, finished: false);
+    await _getJobs(page: 0, limit: 10);
+  }
+
+  Future<void> removeJob({required int jobId}) async {
+    if (state is! SavedJobLoaded) {
+      return;
+    }
+    final (jobs, finished) = switch (state) {
+      SavedJobLoaded(jobs: final jobs, finished: final finished) => (jobs, finished),
+      _ => (null, null),
+    };
+    if (jobs != null && finished != null) {
+      final newJobs = HashMap<int, Job>.from(jobs);
+      newJobs.remove(jobId);
+      state = SavedJobState.loaded(jobs: newJobs, finished: finished);
+      ref.read(searchJobsControllerProvider.notifier).update();
+    }
+  }
+
+  Future<void> addJob({required Job job}) async {
+    if (state is! SavedJobLoaded) {
+      return;
+    }
+    final (jobs, finished) = switch (state) {
+      SavedJobLoaded(jobs: final jobs, finished: final finished) => (jobs, finished),
+      _ => (null, null),
+    };
+    if (jobs != null && finished != null) {
+      final newJobs = HashMap<int, Job>.from(jobs);
+      newJobs[job.id] = job;
+      state = SavedJobState.loaded(jobs: newJobs, finished: finished);
+      ref.read(searchJobsControllerProvider.notifier).update();
+    }
+  }
+
+  Future<void> _getJobs({required int page, required int limit}) async {
+    var oldJobs = null as Map<int, Job>?;
+    if (state is SavedJobLoaded && (state as SavedJobLoaded).finished) {
+      oldJobs = switch (state) {
+        SavedJobLoaded(jobs: final jobs) => jobs,
+        _ => null,
+      };
+    }
+    state = const SavedJobState.loading();
+    try {
+      final getSavedJobsUseCase = ref.read(getSavedJobsUseCaseProvider);
+      final result = await getSavedJobsUseCase(SavedJobParams(page: page, limit: limit));
+      final jobs = HashMap<int, Job>();
+      if (oldJobs != null) {
+        for (final job in oldJobs.values) {
+          jobs[job.id] = job;
+        }
+      }
+      state = result.fold(
+        ifLeft: (failure) => SavedJobState.error(failure.message),
+        ifRight: (newJobs) {
+          return SavedJobState.loaded(
+            jobs: jobs..addAll({for (final e in newJobs) e.id: e}),
+            finished: newJobs.isEmpty,
+          );
+        },
+      );
+    } catch (e) {
+      state = SavedJobState.error(e.toString());
     }
   }
 }
@@ -359,7 +491,7 @@ class JobDetailController extends _$JobDetailController {
       final otherJobs = await getJobByCompanyUseCase(GetJobByCompanyParams(company: job!.company, page: 0, limit: 5));
       state = otherJobs.fold(
         ifLeft: (failure) => JobDetailState.error(failure.message),
-        ifRight: (jobs) => JobDetailState.loaded(job: job!, relatedJobs: jobs),
+        ifRight: (jobs) => JobDetailState.loaded(job: job!, relatedJobs: jobs.where((e) => e.id != job!.id).toList()),
       );
     } catch (e) {
       state = JobDetailState.error(e.toString());

@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:intl/intl.dart';
 
@@ -13,14 +13,15 @@ import '../../domain/entities/job.dart';
 import '../providers/job_provider.dart';
 import '../widgets/job_card.dart';
 
-class JobDetailPage extends HookWidget {
+class JobDetailPage extends HookConsumerWidget {
   const JobDetailPage({super.key, required this.jobId});
 
   final int jobId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final pageController = usePageController();
+    final isSelected = useState(ref.read(savedJobControllerProvider.notifier).contains(jobId));
     final selectedTabIndex = useState(0);
 
     return Scaffold(
@@ -40,13 +41,19 @@ class JobDetailPage extends HookWidget {
                     JobDetailLoading() => const Center(child: CircularProgressIndicator()),
                     JobDetailError() => const SizedBox.shrink(),
                     JobDetailInitial() => const SizedBox.shrink(),
-                    JobDetailLoaded() => IconButton(
-                      icon: const Icon(IconlyLight.bookmark),
+                    JobDetailLoaded(job: final job) => IconButton(
+                      icon: Icon(isSelected.value ? IconlyBold.bookmark : IconlyLight.bookmark),
                       tooltip: 'Bookmark',
                       iconSize: 30.0,
                       color: Theme.of(context).colorScheme.primary,
                       onPressed: () async {
-                        // TODO(self): Implement bookmark functionality
+                        await Future.delayed(const Duration(milliseconds: 100));
+                        isSelected.value = !isSelected.value;
+                        if (ref.read(savedJobControllerProvider.notifier).contains(state.job.id)) {
+                          await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: jobId);
+                        } else {
+                          await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
+                        }
                       },
                     ),
                   };
@@ -212,7 +219,9 @@ class JobDetailPage extends HookWidget {
                                       topLeft: Radius.circular(12.0),
                                       bottomLeft: Radius.circular(12.0),
                                     ),
-                                    border: Border.all(color: Colors.white),
+                                    border: Border.all(
+                                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
+                                    ),
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
@@ -242,7 +251,9 @@ class JobDetailPage extends HookWidget {
                                       topRight: Radius.circular(12.0),
                                       bottomRight: Radius.circular(12.0),
                                     ),
-                                    border: Border.all(color: Colors.white),
+                                    border: Border.all(
+                                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
+                                    ),
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
@@ -340,7 +351,18 @@ class JobDetailPage extends HookWidget {
                                   ),
                                   const SizedBox(height: 16.0),
                                   relatedJobs.isEmpty
-                                      ? const Center(child: Text('No related jobs available'))
+                                      ? SizedBox(
+                                        height: 200.0,
+                                        child: Center(
+                                          child: Text(
+                                            'No other jobs available.',
+                                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                              color: Theme.of(context).colorScheme.onSecondary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      )
                                       : CarouselSlider(
                                         options: CarouselOptions(height: 200.0, autoPlay: true),
                                         items: [...relatedJobs.map((e) => JobCard(job: e, onPressed: () async {}))],

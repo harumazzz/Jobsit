@@ -44,4 +44,7 @@ abstract class JobRemoteDataSource {
     @Query('no') int page = 0,
     @Query('limit') int limit = 5,
   });
+
+  @GET(ApiConstant.jobSaveEndpoint)
+  Future<SavedJobListResponse> getSavedJobs({@Query('no') int page = 0, @Query('limit') int limit = 10});
 }

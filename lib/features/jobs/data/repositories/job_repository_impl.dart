@@ -136,4 +136,16 @@ final class JobRepositoryImpl implements JobRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<Job>>> getSavedJobs({int page = 1, int limit = 10}) async {
+    try {
+      final result = await _jobRemoteDataSource.getSavedJobs(page: page, limit: limit);
+      return Right([...result.contents.map((e) => e.job.toEntity())]);
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

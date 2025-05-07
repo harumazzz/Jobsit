@@ -1,13 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/network/api_constant.dart';
 import '../../domain/entities/job.dart';
+import '../providers/job_provider.dart';
 
-class JobCard extends StatelessWidget {
+class JobCard extends HookConsumerWidget {
   const JobCard({super.key, required this.job, required this.onPressed});
 
   final Job job;
@@ -15,7 +18,9 @@ class JobCard extends StatelessWidget {
   final Future<void> Function() onPressed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(jobDetailControllerProvider);
+    final isHighlight = useState(ref.read(savedJobControllerProvider.notifier).contains(job.id));
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(12.0),
@@ -60,9 +65,19 @@ class JobCard extends StatelessWidget {
                   IconButton(
                     tooltip: 'Bookmark',
                     onPressed: () async {
-                      // TODO(self): Implement bookmark functionality
+                      await Future.delayed(const Duration(milliseconds: 100));
+                      isHighlight.value = !isHighlight.value;
+                      if (ref.read(savedJobControllerProvider.notifier).contains(job.id)) {
+                        await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: job.id);
+                      } else {
+                        await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
+                      }
                     },
-                    icon: Icon(IconlyLight.bookmark, size: 24.0, color: Theme.of(context).colorScheme.primary),
+                    icon: Icon(
+                      isHighlight.value ? IconlyBold.bookmark : IconlyLight.bookmark,
+                      size: 24.0,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                 ],
               ),

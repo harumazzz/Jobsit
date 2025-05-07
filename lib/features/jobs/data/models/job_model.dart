@@ -21,6 +21,29 @@ sealed class JobListResponse with _$JobListResponse {
 }
 
 @freezed
+sealed class SavedJobListResponse with _$SavedJobListResponse {
+  const factory SavedJobListResponse({
+    required List<SavedJobResponse> contents,
+    required int totalPages,
+    required int totalItems,
+    required int limit,
+    required int no,
+    required bool last,
+    required bool first,
+  }) = _SavedJobListResponse;
+
+  factory SavedJobListResponse.fromJson(Map<String, dynamic> json) => _$SavedJobListResponseFromJson(json);
+}
+
+@freezed
+sealed class SavedJobResponse with _$SavedJobResponse {
+  const factory SavedJobResponse({required int id, @JsonKey(name: 'jobDTO') required JobResponse job}) =
+      _SavedJobResponse;
+
+  factory SavedJobResponse.fromJson(Map<String, dynamic> json) => _$SavedJobResponseFromJson(json);
+}
+
+@freezed
 sealed class JobResponse with _$JobResponse {
   const factory JobResponse({
     required int id,
@@ -169,5 +192,17 @@ extension MajorResponseExtension on MajorResponse {
 extension PositionResponseExtension on PositionResponse {
   Position toEntity() {
     return Position(id: id, name: name);
+  }
+}
+
+extension SavedJobListResponseExtension on SavedJobListResponse {
+  List<Job> toEntity() {
+    return contents.map((e) => e.job.toEntity()).toList();
+  }
+}
+
+extension SavedJobResponseExtension on SavedJobResponse {
+  Job toEntity() {
+    return job.toEntity();
   }
 }

@@ -78,3 +78,8 @@ extension JobExtension on Job {
     return (maxAllowance / 24.500).round();
   }
 }
+
+@freezed
+sealed class SavedJob with _$SavedJob {
+  const factory SavedJob({required int id, required Job job}) = _SavedJob;
+}
