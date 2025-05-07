@@ -10,6 +10,8 @@ import '../../features/auth/presentation/pages/otp_verification_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/jobs/presentation/pages/home_page.dart';
 import '../../features/jobs/presentation/pages/job_detail_page.dart';
+import '../../features/profile/presentation/pages/change_password_page.dart';
+import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../injection_container.dart';
 
 part 'app_router.g.dart';
@@ -39,6 +41,12 @@ class AppRouter extends Equatable {
 
   static const String jobDetailName = 'job_detail';
 
+  static const String changePasswordName = 'change_password';
+
+  static const String editProfileName = 'edit_profile';
+
+  static const String editJobName = 'edit_job';
+
   static const String homeRoute = '/';
 
   static const String loginRoute = '/$loginName';
@@ -61,6 +69,12 @@ class AppRouter extends Equatable {
 
   static const String jobDetailRoute = '/$jobDetailName/:id';
 
+  static const String changePasswordRoute = '/$changePasswordName';
+
+  static const String editProfileRoute = '/$editProfileName';
+
+  static const String editJobRoute = '/$editJobName';
+
   static GoRouter get router => _router;
 
   @override
@@ -68,7 +82,7 @@ class AppRouter extends Equatable {
 }
 
 @TypedGoRoute<LoginRoute>(path: AppRouter.loginRoute, name: AppRouter.loginName)
-class LoginRoute extends GoRouteData {
+final class LoginRoute extends GoRouteData {
   const LoginRoute();
 
   @override
@@ -76,7 +90,7 @@ class LoginRoute extends GoRouteData {
 }
 
 @TypedGoRoute<RegisterRoute>(path: AppRouter.registerRoute, name: AppRouter.registerName)
-class RegisterRoute extends GoRouteData {
+final class RegisterRoute extends GoRouteData {
   const RegisterRoute();
 
   @override
@@ -84,7 +98,7 @@ class RegisterRoute extends GoRouteData {
 }
 
 @TypedGoRoute<ForgotPasswordRoute>(path: AppRouter.forgotPasswordRoute, name: AppRouter.forgotPasswordName)
-class ForgotPasswordRoute extends GoRouteData {
+final class ForgotPasswordRoute extends GoRouteData {
   const ForgotPasswordRoute();
 
   @override
@@ -92,7 +106,7 @@ class ForgotPasswordRoute extends GoRouteData {
 }
 
 @TypedGoRoute<ResetPasswordRoute>(path: AppRouter.resetPasswordRoute, name: AppRouter.resetPasswordName)
-class ResetPasswordRoute extends GoRouteData {
+final class ResetPasswordRoute extends GoRouteData {
   const ResetPasswordRoute({required this.resetToken});
   final String resetToken;
 
@@ -103,7 +117,7 @@ class ResetPasswordRoute extends GoRouteData {
 }
 
 @TypedGoRoute<OtpVerificationRoute>(path: AppRouter.otpVerificationRoute, name: AppRouter.otpVerificationName)
-class OtpVerificationRoute extends GoRouteData {
+final class OtpVerificationRoute extends GoRouteData {
   const OtpVerificationRoute({required this.email});
   final String email;
 
@@ -114,7 +128,7 @@ class OtpVerificationRoute extends GoRouteData {
 }
 
 @TypedGoRoute<OtpVerifiedRoute>(path: AppRouter.otpVerifiedRoute, name: AppRouter.otpVerifiedName)
-class OtpVerifiedRoute extends GoRouteData {
+final class OtpVerifiedRoute extends GoRouteData {
   const OtpVerifiedRoute();
 
   @override
@@ -122,7 +136,7 @@ class OtpVerifiedRoute extends GoRouteData {
 }
 
 @TypedGoRoute<HomeRoute>(path: AppRouter.homeRoute, name: AppRouter.homeName)
-class HomeRoute extends GoRouteData {
+final class HomeRoute extends GoRouteData {
   const HomeRoute();
 
   @override
@@ -130,12 +144,36 @@ class HomeRoute extends GoRouteData {
 }
 
 @TypedGoRoute<JobDetailRoute>(path: AppRouter.jobDetailRoute, name: AppRouter.jobDetailName)
-class JobDetailRoute extends GoRouteData {
+final class JobDetailRoute extends GoRouteData {
   const JobDetailRoute({required this.id});
   final int id;
 
   @override
   Widget build(BuildContext context, GoRouterState state) => JobDetailPage(jobId: id);
+}
+
+@TypedGoRoute<ChangePasswordRoute>(path: AppRouter.changePasswordRoute, name: AppRouter.changePasswordName)
+final class ChangePasswordRoute extends GoRouteData {
+  const ChangePasswordRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ChangePasswordPage();
+}
+
+@TypedGoRoute<EditProfileRoute>(path: AppRouter.editProfileRoute, name: AppRouter.editProfileName)
+final class EditProfileRoute extends GoRouteData {
+  const EditProfileRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const PersonalInfoEditPage();
+}
+
+@TypedGoRoute<EditJobRoute>(path: AppRouter.editJobRoute, name: AppRouter.editJobName)
+final class EditJobRoute extends GoRouteData {
+  const EditJobRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const JobInfoEditPage();
 }
 
 final _router = GoRouter(

@@ -165,7 +165,7 @@ class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField>
                 : _isEmailAvailable &&
                     widget.controller.text.isNotEmpty &&
                     InputConverter.validateEmail(widget.controller.text) == null
-                ? const Icon(Icons.check_circle, color: Colors.green)
+                ? const Icon(Icons.check_circle_outline, color: Colors.green)
                 : null,
       ),
       validator: (value) {

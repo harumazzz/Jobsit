@@ -5,6 +5,7 @@ import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/profile_info_tile.dart';
@@ -159,7 +160,7 @@ class ProfilePage extends HookConsumerWidget {
                 IconButton(
                   tooltip: 'Edit',
                   onPressed: () async {
-                    // TODO(self): Implement the logic to edit the profile
+                    await const EditProfileRoute().push(context);
                   },
                   icon: Icon(IconlyLight.editSquare, size: 24.0, color: Theme.of(context).colorScheme.primary),
                 ),
@@ -218,7 +219,7 @@ class ProfilePage extends HookConsumerWidget {
                 IconButton(
                   tooltip: 'Edit',
                   onPressed: () async {
-                    // TODO(self): Implement the logic to edit the profile
+                    await const EditJobRoute().push(context);
                   },
                   icon: Icon(IconlyLight.editSquare, size: 24.0, color: Theme.of(context).colorScheme.primary),
                 ),
@@ -310,7 +311,7 @@ class ProfilePage extends HookConsumerWidget {
             child: CustomButton(
               color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.24),
               onPressed: () async {
-                // TODO(self): Implement the logic to change password
+                await const ChangePasswordRoute().push(context);
               },
               child: const Text('Change Password'),
             ),
