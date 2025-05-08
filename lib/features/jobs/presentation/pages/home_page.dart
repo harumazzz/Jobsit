@@ -188,6 +188,9 @@ class _JobPage extends HookConsumerWidget {
                     return PagedSliverList<int, Job>(
                       state: state,
                       fetchNextPage: () async {
+                        if (!context.mounted) {
+                          return;
+                        }
                         final controller = ref.read(searchJobsControllerProvider.notifier);
                         if (ref.read(jobFilterControllerProvider.notifier).isEmpty) {
                           await controller.searchJobs(page: page.value, limit: 10);

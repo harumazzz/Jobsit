@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../jobs/presentation/providers/job_provider.dart';
 import '../widgets/profile_info_tile.dart';
 
 class ProfilePage extends HookConsumerWidget {
@@ -323,7 +324,15 @@ class ProfilePage extends HookConsumerWidget {
           sliver: SliverToBoxAdapter(
             child: CustomButton(
               onPressed: () async {
-                // TODO(self): Implement the logic to logout
+                await ref.read(authControllerProvider.notifier).logOut();
+                ref.invalidate(searchJobsControllerProvider);
+                ref.invalidate(savedJobControllerProvider);
+                ref.invalidate(jobFilterControllerProvider);
+                ref.invalidate(searchJobsControllerProvider);
+                ref.invalidate(applyJobControllerProvider);
+                if (context.mounted) {
+                  const LoginRoute().go(context);
+                }
               },
               child: const Text('Log Out'),
             ),

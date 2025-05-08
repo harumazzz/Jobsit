@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/widgets/custom_button.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 class ChangePasswordPage extends HookWidget {
   const ChangePasswordPage({super.key});
@@ -132,14 +133,20 @@ class ChangePasswordPage extends HookWidget {
                           confirmPasswordFocusNode.unfocus();
                         }
                         if (formKey.currentState!.validate()) {
-                          // TODO(self): Implement the password change logic here
-
-                          // Show success notification
-                          ElegantNotification.success(
-                            background: const Color(0xFFDEF2ED),
-                            description: const Text('Password changed successfully!'),
-                          ).show(context);
-                          context.pop();
+                          await ref
+                              .read(authControllerProvider.notifier)
+                              .changePassword(
+                                oldPassword: currentPasswordController.text,
+                                newPassword: newPasswordController.text,
+                                confirmPassword: confirmPasswordController.text,
+                              );
+                          if (context.mounted) {
+                            ElegantNotification.success(
+                              background: const Color(0xFFDEF2ED),
+                              description: const Text('Password changed successfully!'),
+                            ).show(context);
+                            context.pop();
+                          }
                         }
                       },
                       child: const Padding(padding: EdgeInsets.symmetric(vertical: 8.0), child: Text('Change')),
