@@ -1,8 +1,10 @@
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/services/file_service.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/job.dart';
@@ -272,9 +274,6 @@ class DistrictsController extends _$DistrictsController {
   }
 
   Future<void> getDistricts({required int code}) async {
-    if (state is DistrictsLoaded) {
-      return;
-    }
     state = const DistrictsState.loading();
     try {
       final searchDistrictsUseCase = ref.read(searchDistrictsUseCaseProvider);
@@ -283,6 +282,7 @@ class DistrictsController extends _$DistrictsController {
         ifLeft: (failure) => DistrictsState.error(failure.message),
         ifRight: (districts) => DistrictsState.loaded(districts: districts),
       );
+      debugPrint(state.toString());
     } catch (e) {
       state = DistrictsState.error(e.toString());
     }
@@ -539,6 +539,26 @@ final class ApplyJobController extends _$ApplyJobController {
       state = result.fold(
         ifLeft: (failure) => ApplyJobState.error(failure.message),
         ifRight: (value) => ApplyJobState.loaded(jobs: [...oldJobs, ...value], finished: value.isEmpty),
+      );
+    } catch (e) {
+      state = ApplyJobState.error(e.toString());
+    }
+  }
+
+  Future<void> applyJob({required int jobId, required String referenceLetter, required FileSelectorResult cv}) async {
+    final (oldJobs, finished) = switch (state) {
+      ApplyJobLoaded(jobs: final jobs, finished: final finished) => (jobs, finished),
+      _ => ([], false),
+    };
+    state = const ApplyJobState.loading();
+    try {
+      final applyJobUseCase = ref.read(applyJobUseCaseProvider);
+      final result = await applyJobUseCase(
+        ApplyJobParams(jobId: jobId, referenceLetter: referenceLetter, cv: FileRequest(name: cv.name, data: cv.data)),
+      );
+      state = result.fold(
+        ifLeft: (failure) => ApplyJobState.error(failure.message),
+        ifRight: (job) => ApplyJobState.loaded(jobs: [...oldJobs, job], finished: finished),
       );
     } catch (e) {
       state = ApplyJobState.error(e.toString());

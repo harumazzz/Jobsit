@@ -97,7 +97,7 @@ final class LocationRepositoryImpl implements ILocationRepository {
   Future<Either<Failure, List<District>>> getDistricts(int cityCode, int depth) async {
     try {
       final response = await _locationService.getDistricts(cityCode, depth);
-      return Right(response.map((e) => e.toEntity()).toList());
+      return Right(response.districts.map((e) => e.toEntity()).toList());
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {
@@ -121,13 +121,27 @@ sealed class CityResponse with _$CityResponse {
 }
 
 @freezed
+sealed class DistrictCityResponse with _$DistrictCityResponse {
+  const factory DistrictCityResponse({
+    required int code,
+    required String name,
+    required String codename,
+    @JsonKey(name: 'division_type') required String divisionType,
+    @JsonKey(name: 'phone_code') required int phoneCode,
+    @JsonKey(name: 'districts') required List<DistrictResponse> districts,
+  }) = _DistrictCityResponse;
+
+  factory DistrictCityResponse.fromJson(Map<String, dynamic> json) => _$DistrictCityResponseFromJson(json);
+}
+
+@freezed
 sealed class DistrictResponse with _$DistrictResponse {
   const factory DistrictResponse({
     required int code,
     required String name,
     required String codename,
     @JsonKey(name: 'division_type') required String divisionType,
-    @JsonKey(name: 'short_codename') required String phoneCode,
+    @JsonKey(name: 'province_code') required int provinceCode,
     required List<WardResponse> wards,
   }) = _DistrictResponse;
 
@@ -155,7 +169,7 @@ abstract class ILocationService {
   Future<List<CityResponse>> getCities(@Query('depth') int depth);
 
   @GET('/p/{cityCode}')
-  Future<List<DistrictResponse>> getDistricts(@Path() int cityCode, @Query('depth') int depth);
+  Future<DistrictCityResponse> getDistricts(@Path() int cityCode, @Query('depth') int depth);
 }
 
 @freezed
@@ -178,7 +192,7 @@ sealed class District with _$District {
     required String name,
     required String codename,
     required String divisionType,
-    required String phoneCode,
+    required int provinceCode,
     required List<Ward> wards,
   }) = _District;
 }
@@ -207,7 +221,7 @@ extension DistrictResponseExtension on DistrictResponse {
       name: name,
       codename: codename,
       divisionType: divisionType,
-      phoneCode: phoneCode,
+      provinceCode: provinceCode,
       wards: wards.map((e) => e.toEntity()).toList(),
     );
   }

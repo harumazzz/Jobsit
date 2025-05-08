@@ -56,4 +56,7 @@ abstract class JobRemoteDataSource {
 
   @GET(ApiConstant.jobAppliedEndpoint)
   Future<SavedJobListResponse> getAppliedJob({@Query('no') int page = 0, @Query('limit') int limit = 10});
+
+  @POST(ApiConstant.jobAppliedEndpoint)
+  Future<AppliedJobResponse> applyJob({@Body() required FormData formData});
 }

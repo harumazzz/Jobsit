@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../core/services/file_service.dart';
+import '../../../auth/data/models/user_model.dart';
 import '../../domain/entities/job.dart';
 
 part 'job_model.freezed.dart';
@@ -209,6 +211,45 @@ extension SavedJobListResponseExtension on SavedJobListResponse {
 }
 
 extension SavedJobResponseExtension on SavedJobResponse {
+  Job toEntity() {
+    return job.toEntity();
+  }
+}
+
+@freezed
+sealed class JobRequest with _$JobRequest {
+  const factory JobRequest({required int id}) = _JobRequest;
+
+  factory JobRequest.fromJson(Map<String, dynamic> json) => _$JobRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+sealed class CandidateApplicationRequest with _$CandidateApplicationRequest {
+  const factory CandidateApplicationRequest({required JobRequest candidateApplication, required FileRequest fileCV}) =
+      _CandidateApplicationRequest;
+}
+
+@freezed
+sealed class AppliedJobResponse with _$AppliedJobResponse {
+  const factory AppliedJobResponse({
+    required int id,
+    @JsonKey(name: 'jobDTO') required JobResponse job,
+    @JsonKey(name: 'candidateDTO') required GetUserResponse candidate,
+    required String appliedDate,
+    required String referenceLetter,
+    required String email,
+    required String fullName,
+    required String phone,
+    required String cv,
+  }) = _AppliedJobResponse;
+
+  factory AppliedJobResponse.fromJson(Map<String, dynamic> json) => _$AppliedJobResponseFromJson(json);
+}
+
+extension AppliedJobResponseExtension on AppliedJobResponse {
   Job toEntity() {
     return job.toEntity();
   }

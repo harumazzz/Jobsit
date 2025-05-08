@@ -53,6 +53,12 @@ final class ApiConstant extends Equatable {
   static const String logOutEndpoint = '/logout';
 
   static const String jobAppliedEndpoint = '/candidate-application';
+
+  static const String candidateUpdateEndpoint = '/candidate/profile/personal';
+
+  static const String jobUpdateEndpoint = '/candidate/profile/job';
+
+  static const String universityEndpoint = '/university';
 }
 
 String queryImage(String logo) {

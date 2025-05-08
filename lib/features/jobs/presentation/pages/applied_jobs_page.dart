@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
@@ -28,7 +27,7 @@ class AppliedJobsPage extends HookConsumerWidget {
             expandedHeight: 38.0,
             floating: true,
             backgroundColor: Color(0xFFefeff0),
-            flexibleSpace: FlexibleSpaceBar(title: Text('Saved Jobs'), centerTitle: true),
+            flexibleSpace: FlexibleSpaceBar(title: Text('Applied Jobs'), centerTitle: true),
           ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

@@ -161,7 +161,11 @@ class ProfilePage extends HookConsumerWidget {
                 IconButton(
                   tooltip: 'Edit',
                   onPressed: () async {
-                    await const EditProfileRoute().push(context);
+                    await ref.read(citiesControllerProvider.notifier).fetchCities();
+                    await ref.read(universityControllerProvider.notifier).getUniversities();
+                    if (context.mounted) {
+                      await const EditProfileRoute().push(context);
+                    }
                   },
                   icon: Icon(IconlyLight.editSquare, size: 24.0, color: Theme.of(context).colorScheme.primary),
                 ),
@@ -256,7 +260,7 @@ class ProfilePage extends HookConsumerWidget {
                           count: state.user.jobInfo.positions.length,
                           emptyBuilder: (_) => const Text('No positions available'),
                           builder: (context, index) {
-                            return DisabledButton(title: state.user.jobInfo.positions[index].toString());
+                            return DisabledButton(title: state.user.jobInfo.positions[index].name);
                           },
                         ),
                         CarouselJobTile(
@@ -264,7 +268,7 @@ class ProfilePage extends HookConsumerWidget {
                           count: state.user.jobInfo.majors.length,
                           emptyBuilder: (_) => const Text('No majors available'),
                           builder: (context, index) {
-                            return DisabledButton(title: state.user.jobInfo.positions[index].toString());
+                            return DisabledButton(title: state.user.jobInfo.positions[index].name);
                           },
                         ),
                         CarouselJobTile(
@@ -272,7 +276,7 @@ class ProfilePage extends HookConsumerWidget {
                           count: state.user.jobInfo.schedules.length,
                           emptyBuilder: (_) => const Text('No job type available'),
                           builder: (context, index) {
-                            return DisabledButton(title: state.user.jobInfo.schedules[index].toString());
+                            return DisabledButton(title: state.user.jobInfo.schedules[index].name);
                           },
                         ),
                         JobTile(

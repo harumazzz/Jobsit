@@ -25,6 +25,11 @@ sealed class FileSelectorResult with _$FileSelectorResult {
       _FileSelectorResult;
 }
 
+@freezed
+sealed class FileRequest with _$FileRequest {
+  const factory FileRequest({required String name, required Uint8List data}) = _FileRequest;
+}
+
 @riverpod
 FileService fileService(Ref ref) {
   final nativeChannel = ref.watch(nativeChannelProvider);

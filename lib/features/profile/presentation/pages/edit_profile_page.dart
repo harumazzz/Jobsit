@@ -4,24 +4,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 
+import '../../../../core/services/file_service.dart';
+import '../../../../core/services/location_service.dart';
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/widgets/custom_button.dart';
+import '../../../auth/domain/entities/user.dart' show University;
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../jobs/domain/entities/job.dart';
+import '../../../jobs/presentation/providers/job_provider.dart';
 
-class PersonalInfoEditPage extends HookWidget {
+class PersonalInfoEditPage extends HookConsumerWidget {
   const PersonalInfoEditPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.read(authControllerProvider) is! AuthAuthorized) {
+      return const Center(child: Text('You are not authorized to view this page.'));
+    }
+    final currentState = ref.read(authControllerProvider) as AuthAuthorized;
     final formKey = useMemoized(GlobalKey<FormBuilderState>.new);
-    final firstNameController = useTextEditingController();
-    final lastNameController = useTextEditingController();
-    final emailController = useTextEditingController();
-    final phoneController = useTextEditingController();
-    final addressController = useTextEditingController();
-    final universityController = useTextEditingController();
+    final image = useState<FileSelectorResult?>(null);
+    final firstNameController = useTextEditingController(text: currentState.user.userInfo.firstName);
+    final lastNameController = useTextEditingController(text: currentState.user.userInfo.lastName);
+    final emailController = useTextEditingController(text: currentState.user.userInfo.email);
+    final phoneController = useTextEditingController(text: currentState.user.userInfo.phone);
+    final addressController = useTextEditingController(text: currentState.user.userInfo.address);
+    final selectedUniversity = useState<University?>(
+      currentState.user.jobInfo.university != null
+          ? (ref.read(universityControllerProvider) as UniversityLoaded).universities.firstWhere(
+            (university) => university.id == currentState.user.jobInfo.university!.id,
+          )
+          : null,
+    );
     final firstNameFocusNode = useFocusNode();
     final lastNameFocusNode = useFocusNode();
     final emailFocusNode = useFocusNode();
@@ -32,13 +50,17 @@ class PersonalInfoEditPage extends HookWidget {
     final districtFocusNode = useFocusNode();
     final addressFocusNode = useFocusNode();
     final universityFocusNode = useFocusNode();
+    final file = useState<FileSelectorResult?>(null);
     final genderOptions = ['Male', 'Female'];
-    final cityOptions = ['Ho Chi Minh'];
-    final districtOptions = ['District 1', 'District 2', 'District 3'];
-    final selectedGender = useState('Male');
-    final selectedCity = useState('Ho Chi Minh');
-    final selectedDistrict = useState('District 1');
-    final selectedDate = useState<DateTime?>(DateTime(2000));
+    final cityOptions = (ref.read(citiesControllerProvider) as CitiesLoaded).cities;
+    final selectedGender = useState(currentState.user.userInfo.gender ? 'Male' : 'Female');
+    final selectedCity = useState<City?>(null);
+    final selectedDistrict = useState<District?>(null);
+    final selectedDate = useState<DateTime?>(
+      currentState.user.userInfo.birthDate != null
+          ? DateFormat('dd-MM-yyyy').parse(currentState.user.userInfo.birthDate!)
+          : DateTime.now(),
+    );
     return Scaffold(
       appBar: AppBar(
         title: const Text('Personal Information', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -70,9 +92,10 @@ class PersonalInfoEditPage extends HookWidget {
                       child: Container(
                         decoration: BoxDecoration(color: Theme.of(context).primaryColor, shape: BoxShape.circle),
                         child: IconButton(
-                          icon: const Icon(IconlyLight.camera, color: Colors.white, size: 16),
+                          icon: Icon(IconlyLight.edit, color: Theme.of(context).colorScheme.onPrimary, size: 16.0),
                           onPressed: () async {
-                            // TODO(self): Implement image selection
+                            final result = await ref.read(fileServiceProvider).uploadImage();
+                            result.fold(ifLeft: (value) => null, ifRight: (value) => image.value = value);
                           },
                         ),
                       ),
@@ -241,7 +264,7 @@ class PersonalInfoEditPage extends HookWidget {
                               onTap: () async {
                                 controller.open();
                               },
-                              child: Text(selectedCity.value),
+                              child: Text(selectedCity.value != null ? selectedCity.value!.name : 'Select City'),
                             ),
                           );
                         },
@@ -252,10 +275,15 @@ class PersonalInfoEditPage extends HookWidget {
                         return MenuItemButton(
                           onPressed: () async {
                             selectedCity.value = city;
+                            await ref
+                                .read(districtsControllerProvider.notifier)
+                                .getDistricts(code: selectedCity.value!.code);
                             cityFocusNode.unfocus();
-                            FocusScope.of(context).requestFocus(districtFocusNode);
+                            if (context.mounted) {
+                              FocusScope.of(context).requestFocus(districtFocusNode);
+                            }
                           },
-                          child: Text(city),
+                          child: Text(city.name),
                         );
                       }),
                     ],
@@ -265,6 +293,7 @@ class PersonalInfoEditPage extends HookWidget {
               const SizedBox(height: 16.0),
               LayoutBuilder(
                 builder: (context, constraints) {
+                  final state = ref.watch(districtsControllerProvider);
                   return MenuAnchor(
                     style: MenuStyle(
                       minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
@@ -286,24 +315,26 @@ class PersonalInfoEditPage extends HookWidget {
                               contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                             ),
                             child: GestureDetector(
-                              onTap: () {
+                              onTap: () async {
                                 controller.open();
                               },
-                              child: Text(selectedDistrict.value),
+                              child: Text(
+                                selectedDistrict.value != null ? selectedDistrict.value!.name : 'Select District',
+                              ),
                             ),
                           );
                         },
                       );
                     },
                     menuChildren: [
-                      ...districtOptions.map((district) {
+                      ...(state is DistrictsLoaded ? state.districts : []).map((district) {
                         return MenuItemButton(
-                          onPressed: () {
+                          onPressed: () async {
                             selectedDistrict.value = district;
                             districtFocusNode.unfocus();
                             FocusScope.of(context).requestFocus(addressFocusNode);
                           },
-                          child: Text(district),
+                          child: Text(district.name),
                         );
                       }),
                     ],
@@ -327,17 +358,53 @@ class PersonalInfoEditPage extends HookWidget {
                 },
               ),
               const SizedBox(height: 16.0),
-              FormBuilderTextField(
-                name: 'university',
-                controller: universityController,
-                focusNode: universityFocusNode,
-                decoration: const InputDecoration(
-                  labelText: 'University',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                  contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                ),
-                onSubmitted: (_) async {
-                  universityFocusNode.unfocus();
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final state = ref.watch(universityControllerProvider);
+                  return MenuAnchor(
+                    style: MenuStyle(
+                      minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
+                      maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
+                      elevation: WidgetStateProperty.all(4.0),
+                    ),
+                    crossAxisUnconstrained: false,
+                    alignmentOffset: const Offset(0, 8),
+                    menuChildren: [
+                      ...(state is UniversityLoaded ? state.universities : []).map((university) {
+                        return MenuItemButton(
+                          onPressed: () async {
+                            selectedUniversity.value = university;
+                            universityFocusNode.unfocus();
+                          },
+                          child: Text(university.name),
+                        );
+                      }),
+                    ],
+                    builder: (context, controller, child) {
+                      return FormBuilderField(
+                        name: 'university',
+                        focusNode: universityFocusNode,
+                        validator: (value) => null,
+                        builder: (FormFieldState<dynamic> field) {
+                          return InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'University',
+                              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                              contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                            ),
+                            child: GestureDetector(
+                              onTap: () async {
+                                controller.open();
+                              },
+                              child: Text(
+                                selectedUniversity.value != null ? selectedUniversity.value!.name : 'Select University',
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  );
                 },
               ),
             ],
@@ -345,19 +412,34 @@ class PersonalInfoEditPage extends HookWidget {
         ),
       ),
       bottomNavigationBar: SafeArea(
-        child: _CustomNavbar(
-          onPressed: () async {
-            FocusScope.of(context).unfocus();
-            if (formKey.currentState!.validate()) {
-              formKey.currentState!.save();
-              // TODO(self): Implement saving personal information to API
-
-              ElegantNotification.success(
-                background: const Color(0xFFDEF2ED),
-                description: const Text('Personal information updated successfully!'),
-              ).show(context);
-              context.pop();
-            }
+        child: Consumer(
+          builder: (context, ref, child) {
+            return _CustomNavbar(
+              onPressed: () async {
+                FocusScope.of(context).unfocus();
+                if (formKey.currentState!.validate()) {
+                  formKey.currentState!.save();
+                  await ref
+                      .read(authControllerProvider.notifier)
+                      .updateUserInfo(
+                        firstName: firstNameController.text,
+                        lastName: lastNameController.text,
+                        phone: phoneController.text,
+                        birthDay: DateFormat('yyyy-MM-dd').format(selectedDate.value!),
+                        gender: 1,
+                        location: '',
+                        avatar: file.value,
+                      );
+                  if (context.mounted) {
+                    ElegantNotification.success(
+                      background: const Color(0xFFDEF2ED),
+                      description: const Text('Personal information updated successfully!'),
+                    ).show(context);
+                    context.pop();
+                  }
+                }
+              },
+            );
           },
         ),
       ),
@@ -381,14 +463,7 @@ class JobInfoEditPage extends HookWidget {
     final locationFocusNode = useFocusNode();
     final cvFocusNode = useFocusNode();
     final coverLetterFocusNode = useFocusNode();
-    final positionOptions = ['Option 1', 'Option 2', 'Option 3'];
-    final majorOptions = ['Option 1', 'Option 2', 'Option 3'];
-    final jobTypeOptions = ['Option 1', 'Option 2', 'Option 3'];
-    final locationOptions = ['Ho Chi Minh city'];
-    final selectedPositions = useState<List<String>>(['Option 2']);
-    final selectedMajor = useState<String>('Option 1');
-    final selectedJobType = useState<String>('Option 1');
-    final selectedLocation = useState(locationOptions[0]);
+    final selectedMajor = useState<Major?>(null);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Job Information', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -418,192 +493,163 @@ class JobInfoEditPage extends HookWidget {
                     },
                   ),
                   const SizedBox(height: 16.0),
-                  FormBuilderField(
-                    name: 'position',
-                    focusNode: positionFocusNode,
-                    validator: (value) => null,
-                    builder: (FormFieldState<dynamic> field) {
-                      return InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Position',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                          contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                        ),
-                        child: Wrap(
-                          spacing: 8.0,
-                          children: [
-                            ...positionOptions.map((position) {
-                              final isSelected = selectedPositions.value.contains(position);
-                              return FilterChip(
-                                label: Text(position),
-                                selected: isSelected,
-                                onSelected: (value) {
-                                  List<String> updatedList = List.from(selectedPositions.value);
-                                  if (value) {
-                                    if (!updatedList.contains(position)) {
-                                      updatedList.add(position);
-                                    }
-                                  } else {
-                                    updatedList.remove(position);
-                                  }
-                                  selectedPositions.value = updatedList;
-                                  field.didChange(updatedList);
-                                  if (positionFocusNode.hasFocus) {
-                                    positionFocusNode.unfocus();
-                                    FocusScope.of(context).requestFocus(majorFocusNode);
-                                  }
-                                },
-                              );
-                            }),
-                          ],
-                        ),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Consumer(
+                        builder: (context, ref, child) {
+                          final state = ref.watch(majorControllerProvider);
+                          return switch (state) {
+                            MajorInitial() => const SizedBox.shrink(),
+                            MajorLoading() => const SizedBox.shrink(),
+                            MajorError() => const SizedBox.shrink(),
+                            MajorLoaded(majors: final majors) => MenuAnchor(
+                              style: MenuStyle(
+                                minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8.0, 0.0)),
+                                maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8.0, double.infinity)),
+                                elevation: WidgetStateProperty.all(4.0),
+                              ),
+                              crossAxisUnconstrained: false,
+                              alignmentOffset: const Offset(0, 8),
+                              builder: (context, controller, child) {
+                                return FormBuilderField(
+                                  name: 'major',
+                                  focusNode: majorFocusNode,
+                                  validator: (value) => null,
+                                  builder: (FormFieldState<dynamic> field) {
+                                    return InputDecorator(
+                                      decoration: const InputDecoration(
+                                        labelText: 'Major',
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                                        ),
+                                        contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                                      ),
+                                      child: GestureDetector(
+                                        onTap: () async {
+                                          controller.open();
+                                        },
+                                        child: Text(
+                                          selectedMajor.value != null ? selectedMajor.value!.name : 'Select Major',
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              menuChildren: [
+                                ...majors.map((major) {
+                                  return MenuItemButton(
+                                    onPressed: () async {
+                                      selectedMajor.value = major;
+                                      majorFocusNode.unfocus();
+                                      FocusScope.of(context).requestFocus(jobTypeFocusNode);
+                                    },
+                                    child: Text(major.name),
+                                  );
+                                }),
+                              ],
+                            ),
+                          };
+                        },
                       );
                     },
                   ),
                   const SizedBox(height: 16.0),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      return MenuAnchor(
-                        style: MenuStyle(
-                          minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8.0, 0.0)),
-                          maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8.0, double.infinity)),
-                          elevation: WidgetStateProperty.all(4.0),
-                        ),
-                        crossAxisUnconstrained: false,
-                        alignmentOffset: const Offset(0, 8),
-                        builder: (context, controller, child) {
-                          return FormBuilderField(
-                            name: 'major',
-                            focusNode: majorFocusNode,
-                            validator: (value) => null,
-                            builder: (FormFieldState<dynamic> field) {
-                              return InputDecorator(
-                                decoration: const InputDecoration(
-                                  labelText: 'Major',
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                                  contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                                ),
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    controller.open();
-                                  },
-                                  child: Text(selectedMajor.value),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        menuChildren: [
-                          ...majorOptions.map((major) {
-                            return MenuItemButton(
-                              onPressed: () async {
-                                selectedMajor.value = major;
-                                majorFocusNode.unfocus();
-                                FocusScope.of(context).requestFocus(jobTypeFocusNode);
-                              },
-                              child: Text(major),
-                            );
-                          }),
-                        ],
-                      );
-                    },
-                  ),
+                  // LayoutBuilder(
+                  //   builder: (context, constraints) {
+                  //     return MenuAnchor(
+                  //       style: MenuStyle(
+                  //         minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
+                  //         maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
+                  //         elevation: WidgetStateProperty.all(4.0),
+                  //       ),
+                  //       crossAxisUnconstrained: false,
+                  //       alignmentOffset: const Offset(0, 8),
+                  //       builder: (context, controller, child) {
+                  //         return FormBuilderField(
+                  //           name: 'job_type',
+                  //           focusNode: jobTypeFocusNode,
+                  //           validator: (value) => null,
+                  //           builder: (FormFieldState<dynamic> field) {
+                  //             return InputDecorator(
+                  //               decoration: const InputDecoration(
+                  //                 labelText: 'Job Type',
+                  //                 border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                  //                 contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  //               ),
+                  //               child: GestureDetector(
+                  //                 onTap: () async {
+                  //                   controller.open();
+                  //                 },
+                  //                 child: Text(selectedJobType.value),
+                  //               ),
+                  //             );
+                  //           },
+                  //         );
+                  //       },
+                  //       menuChildren: [
+                  //         ...jobTypeOptions.map((jobType) {
+                  //           return MenuItemButton(
+                  //             onPressed: () async {
+                  //               selectedJobType.value = jobType;
+                  //               jobTypeFocusNode.unfocus();
+                  //               FocusScope.of(context).requestFocus(locationFocusNode);
+                  //             },
+                  //             child: Text(jobType),
+                  //           );
+                  //         }),
+                  //       ],
+                  //     );
+                  //   },
+                  // ),
                   const SizedBox(height: 16.0),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      return MenuAnchor(
-                        style: MenuStyle(
-                          minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
-                          maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
-                          elevation: WidgetStateProperty.all(4.0),
-                        ),
-                        crossAxisUnconstrained: false,
-                        alignmentOffset: const Offset(0, 8),
-                        builder: (context, controller, child) {
-                          return FormBuilderField(
-                            name: 'job_type',
-                            focusNode: jobTypeFocusNode,
-                            validator: (value) => null,
-                            builder: (FormFieldState<dynamic> field) {
-                              return InputDecorator(
-                                decoration: const InputDecoration(
-                                  labelText: 'Job Type',
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                                  contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                                ),
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    controller.open();
-                                  },
-                                  child: Text(selectedJobType.value),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        menuChildren: [
-                          ...jobTypeOptions.map((jobType) {
-                            return MenuItemButton(
-                              onPressed: () async {
-                                selectedJobType.value = jobType;
-                                jobTypeFocusNode.unfocus();
-                                FocusScope.of(context).requestFocus(locationFocusNode);
-                              },
-                              child: Text(jobType),
-                            );
-                          }),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16.0),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      return MenuAnchor(
-                        style: MenuStyle(
-                          minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
-                          maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
-                          elevation: WidgetStateProperty.all(4.0),
-                        ),
-                        crossAxisUnconstrained: false,
-                        alignmentOffset: const Offset(0, 8),
-                        builder: (context, controller, child) {
-                          return FormBuilderField(
-                            name: 'location',
-                            focusNode: locationFocusNode,
-                            validator: (value) => null,
-                            builder: (FormFieldState<dynamic> field) {
-                              return InputDecorator(
-                                decoration: const InputDecoration(
-                                  labelText: 'Location',
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                                  contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                                ),
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    controller.open();
-                                  },
-                                  child: Text(selectedLocation.value),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        menuChildren: [
-                          ...locationOptions.map((location) {
-                            return MenuItemButton(
-                              onPressed: () async {
-                                selectedLocation.value = location;
-                                locationFocusNode.unfocus();
-                                FocusScope.of(context).requestFocus(cvFocusNode);
-                              },
-                              child: Text(location),
-                            );
-                          }),
-                        ],
-                      );
-                    },
-                  ),
+                  // LayoutBuilder(
+                  //   builder: (context, constraints) {
+                  //     return MenuAnchor(
+                  //       style: MenuStyle(
+                  //         minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
+                  //         maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
+                  //         elevation: WidgetStateProperty.all(4.0),
+                  //       ),
+                  //       crossAxisUnconstrained: false,
+                  //       alignmentOffset: const Offset(0, 8),
+                  //       builder: (context, controller, child) {
+                  //         return FormBuilderField(
+                  //           name: 'location',
+                  //           focusNode: locationFocusNode,
+                  //           validator: (value) => null,
+                  //           builder: (FormFieldState<dynamic> field) {
+                  //             return InputDecorator(
+                  //               decoration: const InputDecoration(
+                  //                 labelText: 'Location',
+                  //                 border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                  //                 contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  //               ),
+                  //               child: GestureDetector(
+                  //                 onTap: () async {
+                  //                   controller.open();
+                  //                 },
+                  //                 child: Text(selectedLocation.value),
+                  //               ),
+                  //             );
+                  //           },
+                  //         );
+                  //       },
+                  //       menuChildren: [
+                  //         ...locationOptions.map((location) {
+                  //           return MenuItemButton(
+                  //             onPressed: () async {
+                  //               selectedLocation.value = location;
+                  //               locationFocusNode.unfocus();
+                  //               FocusScope.of(context).requestFocus(cvFocusNode);
+                  //             },
+                  //             child: Text(location),
+                  //           );
+                  //         }),
+                  //       ],
+                  //     );
+                  //   },
+                  // ),
                   const SizedBox(height: 16.0),
                   FormBuilderTextField(
                     name: 'cv',

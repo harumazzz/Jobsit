@@ -1,6 +1,7 @@
 import 'package:dart_either/dart_either.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/services/file_service.dart';
 import '../entities/user.dart';
 
 abstract class AuthRepository {
@@ -43,4 +44,26 @@ abstract class AuthRepository {
   });
 
   Future<Either<Failure, Success>> logOut();
+
+  Future<Either<Failure, User>> updateUserInfo({
+    required String firstName,
+    required String lastName,
+    required String birthDay,
+    required String phone,
+    required int gender,
+    required String location,
+    FileRequest? avatar,
+  });
+
+  Future<Either<Failure, User>> updateJobInfo({
+    required String desiredJob,
+    required String desiredWorkingProvince,
+    required String referenceLetter,
+    required List<Position> positions,
+    required List<Major> majors,
+    required List<Schedule> schedules,
+    FileRequest? cv,
+  });
+
+  Future<Either<Failure, List<University>>> getUniversities();
 }

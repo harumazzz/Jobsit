@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/services/file_service.dart';
 import '../../../../core/services/location_service.dart';
 import '../../domain/entities/job.dart';
 import '../../domain/repositories/job_repository.dart';
@@ -178,6 +179,26 @@ final class JobRepositoryImpl implements JobRepository {
     try {
       final result = await _jobRemoteDataSource.getAppliedJob(page: page, limit: limit);
       return Right([...result.contents.map((e) => e.job.toEntity())]);
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Job>> applyJob({
+    required int jobId,
+    required String coverLetter,
+    required FileRequest cv,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'candidateApplication': {'id': jobId, 'coverLetter': coverLetter},
+        'fileCV': MultipartFile.fromBytes(cv.data, filename: cv.name),
+      });
+      final result = await _jobRemoteDataSource.applyJob(formData: formData);
+      return Right(result.toEntity());
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {

@@ -308,3 +308,77 @@ extension GetUserResponseMapper on GetUserResponse {
     );
   }
 }
+
+@freezed
+sealed class UniversityRequest with _$UniversityRequest {
+  const factory UniversityRequest({required int id}) = _UniversityRequest;
+
+  factory UniversityRequest.fromJson(Map<String, dynamic> json) => _$UniversityRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+sealed class UserUpdateRequest with _$UserUpdateRequest {
+  const factory UserUpdateRequest({
+    required String firstName,
+    required String lastName,
+    required String birthDay,
+    required String phone,
+    required int gender,
+    required String location,
+  }) = _UserUpdateRequest;
+
+  factory UserUpdateRequest.fromJson(Map<String, dynamic> json) => _$UserUpdateRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+sealed class PositionRequest with _$PositionRequest {
+  const factory PositionRequest({required int id}) = _PositionRequest;
+
+  factory PositionRequest.fromJson(Map<String, dynamic> json) => _$PositionRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+sealed class MajorRequest with _$MajorRequest {
+  const factory MajorRequest({required int id}) = _MajorRequest;
+
+  factory MajorRequest.fromJson(Map<String, dynamic> json) => _$MajorRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+sealed class ScheduleRequest with _$ScheduleRequest {
+  const factory ScheduleRequest({required int id}) = _ScheduleRequest;
+
+  factory ScheduleRequest.fromJson(Map<String, dynamic> json) => _$ScheduleRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+sealed class OtherInfoRequest with _$OtherInfoRequest {
+  const factory OtherInfoRequest({
+    required String desiredJob,
+    required String desiredWorkingProvince,
+    required String referenceLetter,
+    required List<PositionRequest> positionDTOs,
+    required List<MajorRequest> majorDTOs,
+    required List<ScheduleRequest> scheduleDTOs,
+  }) = _OtherInfoRequest;
+
+  factory OtherInfoRequest.fromJson(Map<String, dynamic> json) => _$OtherInfoRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}

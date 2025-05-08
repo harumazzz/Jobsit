@@ -398,7 +398,7 @@ class JobDetailPage extends HookConsumerWidget {
           ),
         ],
       ),
-      bottomNavigationBar: const _ApplyNavBar(),
+      bottomNavigationBar: _ApplyNavBar(jobId: jobId),
     );
   }
 
@@ -410,7 +410,9 @@ class JobDetailPage extends HookConsumerWidget {
 }
 
 class _ApplyNavBar extends StatelessWidget {
-  const _ApplyNavBar();
+  const _ApplyNavBar({required this.jobId});
+
+  final int jobId;
 
   @override
   Widget build(BuildContext context) {
@@ -433,7 +435,7 @@ class _ApplyNavBar extends StatelessWidget {
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
-                  builder: (context) => const _ApplyModal(),
+                  builder: (context) => _ApplyModal(jobId: jobId),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -448,10 +450,18 @@ class _ApplyNavBar extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('jobId', jobId));
+  }
 }
 
 class _ApplyModal extends HookWidget {
-  const _ApplyModal();
+  const _ApplyModal({required this.jobId});
+
+  final int jobId;
 
   @override
   Widget build(BuildContext context) {
@@ -552,7 +562,19 @@ class _ApplyModal extends HookWidget {
             builder: (context, ref, child) {
               return CustomButton(
                 onPressed: () async {
-                  // TODO(self): Implement submit functionality
+                  if (file.value == null) {
+                    return;
+                  }
+                  await ref
+                      .read(applyJobControllerProvider.notifier)
+                      .applyJob(jobId: jobId, referenceLetter: controller.text, cv: file.value!);
+                  if (context.mounted) {
+                    ElegantNotification.success(
+                      background: const Color(0xFFDEF2ED),
+                      description: const Text('Your application has been submitted successfully!'),
+                    ).show(context);
+                    Navigator.pop(context);
+                  }
                 },
                 child: Center(
                   child: Text(
@@ -569,5 +591,11 @@ class _ApplyModal extends HookWidget {
         ],
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('jobId', jobId));
   }
 }

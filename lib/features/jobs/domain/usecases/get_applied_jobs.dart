@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/services/file_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../data/repositories/job_repository_impl.dart';
 import '../entities/job.dart';
@@ -31,5 +32,28 @@ final class GetAppliedJobsUseCase implements UseCase<List<Job>, AppliedJobParams
   @override
   Future<Either<Failure, List<Job>>> call(AppliedJobParams params) async {
     return await _jobRepository.getAppliedJob(page: params.page, limit: params.limit);
+  }
+}
+
+@riverpod
+ApplyJobUseCase applyJobUseCase(Ref ref) {
+  final jobRepository = ref.watch(jobRepositoryProvider);
+  return ApplyJobUseCase(jobRepository);
+}
+
+@freezed
+sealed class ApplyJobParams with _$ApplyJobParams {
+  const factory ApplyJobParams({required int jobId, required String referenceLetter, required FileRequest cv}) =
+      _ApplyJobParams;
+}
+
+final class ApplyJobUseCase implements UseCase<Job, ApplyJobParams> {
+  const ApplyJobUseCase(this._jobRepository);
+
+  final JobRepository _jobRepository;
+
+  @override
+  Future<Either<Failure, Job>> call(ApplyJobParams params) async {
+    return await _jobRepository.applyJob(jobId: params.jobId, coverLetter: params.referenceLetter, cv: params.cv);
   }
 }

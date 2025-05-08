@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dart_either/dart_either.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/services/file_service.dart';
 import '../../../../core/services/shared_prefs_service.dart';
 import '../../../../injection_container.dart';
 import '../../domain/entities/user.dart';
@@ -215,6 +218,85 @@ final class AuthRepositoryImpl implements AuthRepository {
       await _authRemoteDataSource.logOut(token);
       await _authStorageService.deleteToken();
       return const Right(Success());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> updateJobInfo({
+    required String desiredJob,
+    required String desiredWorkingProvince,
+    required String referenceLetter,
+    required List<Position> positions,
+    required List<Major> majors,
+    required List<Schedule> schedules,
+    FileRequest? cv,
+  }) async {
+    try {
+      final Map<String, dynamic> value = {
+        'candidateProfileDTO': jsonEncode({
+          'desiredJob': desiredJob,
+          'desiredWorkingProvince': desiredWorkingProvince,
+          'referenceLetter': referenceLetter,
+          'positionsDTOs': [...positions.map((e) => PositionRequest(id: e.id))],
+          'majorsDTOs': [...majors.map((e) => MajorRequest(id: e.id))],
+          'schedulesDTOs': [...schedules.map((e) => ScheduleRequest(id: e.id))],
+        }),
+      };
+      if (cv != null) {
+        value['cv'] = MultipartFile.fromBytes(cv.data, filename: cv.name);
+      }
+      final result = await _authRemoteDataSource.updateJobInfo(FormData.fromMap(value));
+      return Right(result.toEntity());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> updateUserInfo({
+    required String firstName,
+    required String lastName,
+    required String birthDay,
+    required String phone,
+    required int gender,
+    required String location,
+    FileRequest? avatar,
+  }) async {
+    try {
+      final Map<String, dynamic> value = {
+        'candidateProfileDTO': jsonEncode({
+          'firstName': firstName,
+          'lastName': lastName,
+          'birthDay': birthDay,
+          'phone': phone,
+          'gender': gender,
+          'location': location,
+        }),
+      };
+      if (avatar != null) {
+        value['avatar'] = MultipartFile.fromBytes(avatar.data, filename: avatar.name);
+      }
+      final data = FormData.fromMap(value);
+      final result = await _authRemoteDataSource.updateUser(data);
+      return Right(result.toEntity());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message.toString()));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<University>>> getUniversities() async {
+    try {
+      final result = await _authRemoteDataSource.getUniversities();
+      return Right(result.map((university) => university.toEntity()).toList());
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {
