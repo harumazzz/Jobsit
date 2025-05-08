@@ -2,6 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/services/file_service.dart';
+import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/login_user.dart';
 import '../../domain/usecases/register_user.dart';
@@ -126,6 +128,36 @@ class AuthController extends _$AuthController {
     }
   }
 
+  Future<void> logOut() async {
+    try {
+      final logOutUseCase = ref.read(logOutUseCaseProvider);
+      final result = await logOutUseCase(const NoParams());
+      state = result.fold(ifRight: (_) => const AuthState.initial(), ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      final changePasswordUseCase = ref.read(changePasswordUseCaseProvider);
+      final result = await changePasswordUseCase(
+        ChangePasswordParams(oldPassword: oldPassword, newPassword: newPassword, confirmPassword: confirmPassword),
+      );
+      state = result.fold(ifRight: (_) => const AuthState.initial(), ifLeft: (e) => AuthState.error(e.message));
+    } on ServerException catch (e) {
+      state = AuthState.error(e.message);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
   Future<void> resetPassword({
     required String resetToken,
     required String password,
@@ -166,6 +198,117 @@ class AuthController extends _$AuthController {
       state = AuthState.error(e.message);
     } catch (e) {
       state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> updateSearchable({required bool searchable}) async {
+    if (state is AuthAuthorized) {
+      final currentState = state as AuthAuthorized;
+      state = currentState.copyWith(
+        user: currentState.user.copyWith(jobInfo: currentState.user.jobInfo.copyWith(searchable: searchable)),
+      );
+      final updateSearchableCandidateUseCase = ref.read(updateSearchableCandidateUseCaseProvider);
+      final result = await updateSearchableCandidateUseCase(const NoParams());
+      result.fold(ifRight: (_) => null, ifLeft: (e) => state = AuthState.error(e.message));
+    }
+  }
+
+  Future<void> updateMailReceive({required bool mailReceive}) async {
+    if (state is AuthAuthorized) {
+      final currentState = state as AuthAuthorized;
+      state = currentState.copyWith(
+        user: currentState.user.copyWith(userInfo: currentState.user.userInfo.copyWith(mailReceive: mailReceive)),
+      );
+      final updateEmailNotificationUseCase = ref.read(updateEmailNotificationUseCaseProvider);
+      final result = await updateEmailNotificationUseCase(const NoParams());
+      result.fold(ifRight: (_) => null, ifLeft: (e) => state = AuthState.error(e.message));
+    }
+  }
+
+  Future<void> updateUserInfo({
+    required String firstName,
+    required String lastName,
+    required String birthDay,
+    required String phone,
+    required int gender,
+    required String location,
+    FileSelectorResult? avatar,
+  }) async {
+    if (state is AuthAuthorized) {
+      final updateUserInfoUseCase = ref.read(updateUserInfoUseCaseProvider);
+      final result = await updateUserInfoUseCase(
+        UpdateUserInfoParams(
+          firstName: firstName,
+          lastName: lastName,
+          birthDay: birthDay,
+          phone: phone,
+          gender: gender,
+          location: location,
+          avatar: avatar != null ? FileRequest(name: avatar.name, data: avatar.data) : null,
+        ),
+      );
+      state = result.fold(ifRight: AuthState.authorized, ifLeft: (e) => state = AuthState.error(e.message));
+    }
+  }
+
+  Future<void> updateJobInfo({
+    required String desiredJob,
+    required String desiredWorkingProvince,
+    required String referenceLetter,
+    required List<Position> positions,
+    required List<Major> majors,
+    required List<Schedule> schedules,
+    FileSelectorResult? cv,
+  }) async {
+    if (state is AuthAuthorized) {
+      final updateJobInfoUseCase = ref.read(updateJobInfoUseCaseProvider);
+      final result = await updateJobInfoUseCase(
+        UpdateJobInfoParams(
+          desiredJob: desiredJob,
+          desiredWorkingProvince: desiredWorkingProvince,
+          referenceLetter: referenceLetter,
+          positions: positions,
+          majors: majors,
+          schedules: schedules,
+          cv: cv != null ? FileRequest(name: cv.name, data: cv.data) : null,
+        ),
+      );
+      state = result.fold(ifRight: AuthState.authorized, ifLeft: (e) => state = AuthState.error(e.message));
+    }
+  }
+}
+
+@freezed
+sealed class UniversityState with _$UniversityState {
+  const factory UniversityState.initial() = UniversityInitial;
+
+  const factory UniversityState.loading() = UniversityLoading;
+
+  const factory UniversityState.loaded(List<University> universities) = UniversityLoaded;
+
+  const factory UniversityState.error(String message) = UniversityError;
+}
+
+@Riverpod(keepAlive: true)
+class UniversityController extends _$UniversityController {
+  @override
+  UniversityState build() {
+    return const UniversityState.initial();
+  }
+
+  Future<void> getUniversities() async {
+    if (state is UniversityLoaded) {
+      return;
+    }
+    state = const UniversityState.loading();
+    try {
+      final getUniversityUseCase = ref.read(getUniversityUseCaseProvider);
+      final result = await getUniversityUseCase(const NoParams());
+      state = result.fold(ifRight: UniversityState.loaded, ifLeft: (e) => UniversityState.error(e.message));
+    } on ServerException catch (e) {
+      state = UniversityState.error(e.message);
+    } catch (e) {
+      state = UniversityState.error(e.toString());
     }
   }
 }

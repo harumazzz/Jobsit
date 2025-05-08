@@ -201,9 +201,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 const Text.rich(
                   textAlign: TextAlign.center,
                   TextSpan(
-                    text: 'Already have an account? ',
                     children: [
-                      TextSpan(text: 'By clicking the \'Register\' button, I agree to the '),
+                      TextSpan(text: 'By clicking the \'Register\' button, I agree to the\n'),
                       TextSpan(text: 'Terms of Use', style: TextStyle(fontWeight: FontWeight.bold)),
                       TextSpan(text: ' and '),
                       TextSpan(text: 'Privacy Policy', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -269,22 +268,26 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 30.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Already have an Account?'),
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      onTap: () async => const LoginRoute().go(context),
-                      child: const Text(' Sign In', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ),
               ],
             ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 30.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Already have an Account?'),
+              InkWell(
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                onTap: () async => const LoginRoute().go(context),
+                child: const Text(' Sign In', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
           ),
         ),
       ),

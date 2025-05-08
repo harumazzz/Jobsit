@@ -5,6 +5,7 @@ import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
+import '../../../../core/services/location_service.dart';
 import '../../../../core/services/shared_prefs_service.dart';
 import '../../../../injection_container.dart';
 import '../../../../shared/routes/app_router.dart';
@@ -55,10 +56,12 @@ class HomePage extends HookConsumerWidget {
 }
 
 class _JobPage extends HookConsumerWidget {
-  const _JobPage({super.key});
+  const _JobPage();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final controller = useTextEditingController(text: ref.read(jobFilterControllerProvider).title);
+    final node = useFocusNode();
     final page = useState(0);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final state = ref.read(searchJobsControllerProvider);
@@ -96,6 +99,8 @@ class _JobPage extends HookConsumerWidget {
                       keyboardType: TextInputType.text,
                       textInputAction: TextInputAction.search,
                       hintText: 'Search Job',
+                      focusNode: node,
+                      controller: controller,
                       hintStyle: WidgetStatePropertyAll(
                         Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.48),
@@ -124,13 +129,31 @@ class _JobPage extends HookConsumerWidget {
                     ),
                     elevation: 2.0,
                     onPressed: () async {
-                      await showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (context) {
-                          return const _FilterModal();
-                        },
-                      );
+                      final citiesController = ref.read(citiesControllerProvider.notifier);
+                      final scheduleController = ref.read(scheduleControllerProvider.notifier);
+                      final positionController = ref.read(positionControllerProvider.notifier);
+                      final majorController = ref.read(majorControllerProvider.notifier);
+                      await citiesController.fetchCities();
+                      await scheduleController.getSchedules();
+                      await positionController.getPositions();
+                      await majorController.getMajors();
+                      final jobFilterState = ref.read(jobFilterControllerProvider);
+                      if (context.mounted) {
+                        await showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (context) {
+                            return _FilterModal(
+                              jobTypeIndex: jobFilterState.scheduleIndex,
+                              jobPositionIndex: jobFilterState.positionscheduleIndex,
+                              jobMajorIndex: jobFilterState.majorIndex,
+                              jobCity: jobFilterState.city,
+                              searchController: controller,
+                              searchNode: node,
+                            );
+                          },
+                        );
+                      }
                     },
                     child: Icon(IconlyLight.filter, color: Theme.of(context).colorScheme.primaryContainer),
                   ),
@@ -165,8 +188,24 @@ class _JobPage extends HookConsumerWidget {
                     return PagedSliverList<int, Job>(
                       state: state,
                       fetchNextPage: () async {
+                        if (!context.mounted) {
+                          return;
+                        }
                         final controller = ref.read(searchJobsControllerProvider.notifier);
-                        await controller.searchJobs(page: page.value, limit: 10);
+                        if (ref.read(jobFilterControllerProvider.notifier).isEmpty) {
+                          await controller.searchJobs(page: page.value, limit: 10);
+                        } else {
+                          final jobFilterState = ref.read(jobFilterControllerProvider) as JobFilterOnSearch;
+                          await controller.filterJobs(
+                            page: page.value,
+                            limit: 10,
+                            city: jobFilterState.city,
+                            schedule: jobFilterState.schedule,
+                            position: jobFilterState.position,
+                            major: jobFilterState.major,
+                            title: jobFilterState.title,
+                          );
+                        }
                         page.value++;
                       },
                       builderDelegate: PagedChildBuilderDelegate<Job>(
@@ -174,7 +213,11 @@ class _JobPage extends HookConsumerWidget {
                           return JobCard(
                             job: item,
                             onPressed: () async {
-                              JobDetailRoute(id: item.id).go(context);
+                              final jobDetailState = ref.read(jobDetailControllerProvider.notifier);
+                              await jobDetailState.getJobDetail(jobId: item.id);
+                              if (context.mounted) {
+                                await JobDetailRoute(id: item.id).push(context);
+                              }
                             },
                           );
                         },
@@ -191,13 +234,33 @@ class _JobPage extends HookConsumerWidget {
 }
 
 class _FilterModal extends HookWidget {
-  const _FilterModal({super.key});
+  const _FilterModal({
+    required this.searchController,
+    required this.searchNode,
+    required this.jobTypeIndex,
+    required this.jobPositionIndex,
+    required this.jobMajorIndex,
+    this.jobCity,
+  });
+
+  final TextEditingController searchController;
+
+  final FocusNode searchNode;
+
+  final int jobTypeIndex;
+
+  final int jobPositionIndex;
+
+  final int jobMajorIndex;
+
+  final City? jobCity;
 
   @override
   Widget build(BuildContext context) {
-    final jobTypeSelection = useState<int>(0);
-    final jobPositionSelection = useState<int>(0);
-    final majorSelection = useState<int>(0);
+    final jobTypeSelection = useState<int>(jobTypeIndex);
+    final jobPositionSelection = useState<int>(jobPositionIndex);
+    final majorSelection = useState<int>(jobMajorIndex);
+    final citySelection = useState<City?>(jobCity);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       height: MediaQuery.of(context).size.height * 0.7,
@@ -219,15 +282,28 @@ class _FilterModal extends HookWidget {
             ],
           ),
           const SizedBox(height: 16.0),
-          DropdownButtonField<String>(
-            items: [
-              ...['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng'].map((String value) {
-                return DropdownMenuItem<String>(value: value, child: Text(value));
-              }),
-            ],
-            label: '-Choose a location-',
-            onChanged: (String? value) {
-              // TODO(self): Implement location filter functionality
+          Consumer(
+            builder: (context, ref, child) {
+              final state = ref.watch(citiesControllerProvider);
+              return switch (state) {
+                CitiesInitial() => const Center(child: Text('No location found')),
+                CitiesLoading() => const Center(child: CircularProgressIndicator()),
+                CitiesError() => Center(child: Text(state.message, style: Theme.of(context).textTheme.bodyLarge)),
+                CitiesLoaded(cities: final cities) => DropdownButtonField<City>(
+                  value: citySelection.value,
+                  items: [...cities.map((City value) => DropdownMenuItem<City>(value: value, child: Text(value.name)))],
+                  label: '-Choose a location-',
+                  textBuilder: () {
+                    if (citySelection.value != null) {
+                      return citySelection.value!.name;
+                    }
+                    return '-Choose a location-';
+                  },
+                  onChanged: (City? value) async {
+                    citySelection.value = value;
+                  },
+                ),
+              };
             },
           ),
           const SizedBox(height: 24.0),
@@ -239,16 +315,26 @@ class _FilterModal extends HookWidget {
             ),
           ),
           const SizedBox(height: 12.0),
-          SizedBox(
-            height: 42.0,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (_, index) {
-                return _SelectedOption(label: 'Option $index', index: index, selection: jobTypeSelection);
-              },
-              separatorBuilder: (_, _) => const SizedBox(width: 12.0),
-              itemCount: 3,
-            ),
+          Consumer(
+            builder: (context, ref, child) {
+              final state = ref.watch(scheduleControllerProvider);
+              return switch (state) {
+                ScheduleInitial() => const Center(child: Text('No schedule found')),
+                ScheduleLoading() => const Center(child: CircularProgressIndicator()),
+                ScheduleError() => Center(child: Text(state.message, style: Theme.of(context).textTheme.bodyLarge)),
+                ScheduleLoaded(schedules: final schedules) => SizedBox(
+                  height: 42.0,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (_, index) {
+                      return _SelectedOption(label: schedules[index].name, index: index, selection: jobTypeSelection);
+                    },
+                    separatorBuilder: (_, _) => const SizedBox(width: 12.0),
+                    itemCount: schedules.length,
+                  ),
+                ),
+              };
+            },
           ),
           const SizedBox(height: 24.0),
           Text(
@@ -259,16 +345,30 @@ class _FilterModal extends HookWidget {
             ),
           ),
           const SizedBox(height: 12.0),
-          SizedBox(
-            height: 42.0,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (_, index) {
-                return _SelectedOption(label: 'Option $index', index: index, selection: jobPositionSelection);
-              },
-              separatorBuilder: (_, _) => const SizedBox(width: 12.0),
-              itemCount: 3,
-            ),
+          Consumer(
+            builder: (context, ref, child) {
+              final state = ref.watch(positionControllerProvider);
+              return switch (state) {
+                PositionInitial() => const Center(child: Text('No position found')),
+                PositionLoading() => const Center(child: CircularProgressIndicator()),
+                PositionError() => Center(child: Text(state.message, style: Theme.of(context).textTheme.bodyLarge)),
+                PositionLoaded(positions: final positions) => SizedBox(
+                  height: 42.0,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (_, index) {
+                      return _SelectedOption(
+                        label: positions[index].name,
+                        index: index,
+                        selection: jobPositionSelection,
+                      );
+                    },
+                    separatorBuilder: (_, _) => const SizedBox(width: 12.0),
+                    itemCount: positions.length,
+                  ),
+                ),
+              };
+            },
           ),
           const SizedBox(height: 24.0),
           Text(
@@ -279,33 +379,82 @@ class _FilterModal extends HookWidget {
             ),
           ),
           const SizedBox(height: 12.0),
-          SizedBox(
-            height: 42.0,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (_, index) {
-                return _SelectedOption(label: 'Option $index', index: index, selection: majorSelection);
-              },
-              separatorBuilder: (_, _) => const SizedBox(width: 12.0),
-              itemCount: 3,
-            ),
+          Consumer(
+            builder: (context, ref, child) {
+              final state = ref.watch(majorControllerProvider);
+              return switch (state) {
+                MajorInitial() => const Center(child: Text('No major found')),
+                MajorLoading() => const Center(child: CircularProgressIndicator()),
+                MajorError() => Center(child: Text(state.message, style: Theme.of(context).textTheme.bodyLarge)),
+                MajorLoaded(majors: final majors) => SizedBox(
+                  height: 42.0,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (_, index) {
+                      return _SelectedOption(label: majors[index].name, index: index, selection: majorSelection);
+                    },
+                    separatorBuilder: (_, _) => const SizedBox(width: 12.0),
+                    itemCount: majors.length,
+                  ),
+                ),
+              };
+            },
           ),
           const SizedBox(height: 50.0),
-          CustomButton(
-            onPressed: () async {
-              // TODO(self): Implement filter
-              Navigator.of(context).pop();
+          Consumer(
+            builder: (context, ref, child) {
+              return CustomButton(
+                onPressed: () async {
+                  final majorState = ref.read(majorControllerProvider);
+                  final positionState = ref.read(positionControllerProvider);
+                  final scheduleState = ref.read(scheduleControllerProvider);
+                  final Major? major = majorState is MajorLoaded ? majorState.majors[majorSelection.value] : null;
+                  final Position? position =
+                      positionState is PositionLoaded ? positionState.positions[jobPositionSelection.value] : null;
+                  final Schedule? schedule =
+                      scheduleState is ScheduleLoaded ? scheduleState.schedules[jobTypeSelection.value] : null;
+                  await ref
+                      .read(jobFilterControllerProvider.notifier)
+                      .saveFilteredJob(
+                        major: major,
+                        city: citySelection.value,
+                        position: position,
+                        schedule: schedule,
+                        scheduleIndex: jobTypeSelection.value,
+                        positionscheduleIndex: jobPositionSelection.value,
+                        majorIndex: majorSelection.value,
+                        title: searchController.text,
+                      );
+                  if (searchNode.hasFocus) {
+                    searchNode.unfocus();
+                  }
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: const Center(child: Text('Apply filter')),
+              );
             },
-            child: const Center(child: Text('Apply filter')),
           ),
         ],
       ),
     );
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('jobTypeIndex', jobTypeIndex));
+    properties.add(IntProperty('jobPositionIndex', jobPositionIndex));
+    properties.add(IntProperty('jobMajorIndex', jobMajorIndex));
+    properties.add(DiagnosticsProperty<City?>('jobCity', jobCity));
+    properties.add(DiagnosticsProperty<TextEditingController>('searchController', searchController));
+    properties.add(DiagnosticsProperty<FocusNode>('searchNode', searchNode));
+  }
 }
 
 class _SelectedOption extends StatelessWidget {
-  const _SelectedOption({super.key, required this.label, required this.index, required this.selection});
+  const _SelectedOption({required this.label, required this.index, required this.selection});
 
   final String label;
 
@@ -339,7 +488,7 @@ class _SelectedOption extends StatelessWidget {
 }
 
 class _LanguageSelector extends StatelessWidget {
-  const _LanguageSelector({super.key});
+  const _LanguageSelector();
 
   @override
   Widget build(BuildContext context) {

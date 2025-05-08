@@ -6,6 +6,27 @@ part 'user_model.freezed.dart';
 part 'user_model.g.dart';
 
 @freezed
+sealed class HttpResponse with _$HttpResponse {
+  const factory HttpResponse({required int httpCode, required String message, required String path}) = _HttpResponse;
+
+  factory HttpResponse.fromJson(Map<String, dynamic> json) => _$HttpResponseFromJson(json);
+}
+
+@freezed
+sealed class ChangePasswordRequest with _$ChangePasswordRequest {
+  const factory ChangePasswordRequest({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) = _ChangePasswordRequest;
+
+  factory ChangePasswordRequest.fromJson(Map<String, dynamic> json) => _$ChangePasswordRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
 abstract class UserCreationRequest with _$UserCreationRequest {
   const factory UserCreationRequest({
     required String email,
@@ -62,6 +83,7 @@ abstract class UserCreationResponse with _$UserCreationResponse {
     @JsonKey(name: 'birthDay') String? birthDate,
     @JsonKey(name: 'avatar') String? avatar,
     @JsonKey(name: 'location') String? address,
+    @JsonKey(name: 'mailReceive') required bool mailReceive,
     @JsonKey(name: 'roleDTO') required RoleResponse role,
     @JsonKey(name: 'statusDTO') required StatusResponse status,
   }) = _UserCreationResponse;
@@ -70,15 +92,34 @@ abstract class UserCreationResponse with _$UserCreationResponse {
 }
 
 @freezed
+sealed class MajorResponse with _$MajorResponse {
+  const factory MajorResponse({required int id, required String name}) = _MajorResponse;
+  factory MajorResponse.fromJson(Map<String, dynamic> json) => _$MajorResponseFromJson(json);
+}
+
+@freezed
+sealed class PositionResponse with _$PositionResponse {
+  const factory PositionResponse({required int id, required String name}) = _PositionResponse;
+  factory PositionResponse.fromJson(Map<String, dynamic> json) => _$PositionResponseFromJson(json);
+}
+
+@freezed
+sealed class ScheduleResponse with _$ScheduleResponse {
+  const factory ScheduleResponse({required int id, required String name}) = _ScheduleResponse;
+  factory ScheduleResponse.fromJson(Map<String, dynamic> json) => _$ScheduleResponseFromJson(json);
+}
+
+@freezed
 sealed class JobInformationResponse with _$JobInformationResponse {
   const factory JobInformationResponse({
     @JsonKey(name: 'universityDTO') UniversityResponse? university,
     @JsonKey(name: 'referenceLetter') String? referenceLetter,
-    @JsonKey(name: 'positionDTOs') required List<int> positions,
-    @JsonKey(name: 'majorDTOs') required List<int> majors,
-    @JsonKey(name: 'scheduleDTOs') required List<int> schedules,
+    @JsonKey(name: 'positionDTOs') required List<PositionResponse> positions,
+    @JsonKey(name: 'majorDTOs') required List<MajorResponse> majors,
+    @JsonKey(name: 'scheduleDTOs') required List<ScheduleResponse> schedules,
     @JsonKey(name: 'desiredJob') String? desiredJob,
     @JsonKey(name: 'desiredWorkingProvince') String? desiredWorkingProvince,
+    @JsonKey(name: 'searchable') required bool searchable,
     @JsonKey(name: 'cv') String? cv,
   }) = _JobInformationResponse;
 
@@ -201,6 +242,24 @@ extension UserCreationResponseMapper on UserCreationResponse {
   }
 }
 
+extension MajorResponseMapper on MajorResponse {
+  Major toEntity() {
+    return Major(id: id, name: name);
+  }
+}
+
+extension PositionResponseMapper on PositionResponse {
+  Position toEntity() {
+    return Position(id: id, name: name);
+  }
+}
+
+extension ScheduleResponseMapper on ScheduleResponse {
+  Schedule toEntity() {
+    return Schedule(id: id, name: name);
+  }
+}
+
 extension RoleResponseMapper on RoleResponse {
   Role toEntity() {
     return Role(id: id, name: name);
@@ -233,17 +292,93 @@ extension GetUserResponseMapper on GetUserResponse {
         gender: user.gender ?? false,
         birthDate: user.birthDate,
         address: user.address,
+        mailReceive: user.mailReceive,
       ),
       jobInfo: JobInformation(
         university: jobInfo.university?.toEntity(),
         referenceLetter: jobInfo.referenceLetter,
-        positions: jobInfo.positions,
-        majors: jobInfo.majors,
-        schedules: jobInfo.schedules,
+        positions: jobInfo.positions.map((position) => position.toEntity()).toList(),
+        majors: jobInfo.majors.map((major) => major.toEntity()).toList(),
+        schedules: jobInfo.schedules.map((schedule) => schedule.toEntity()).toList(),
         desiredJob: jobInfo.desiredJob,
         desiredWorkingProvince: jobInfo.desiredWorkingProvince,
         cv: jobInfo.cv,
+        searchable: jobInfo.searchable,
       ),
     );
   }
+}
+
+@freezed
+sealed class UniversityRequest with _$UniversityRequest {
+  const factory UniversityRequest({required int id}) = _UniversityRequest;
+
+  factory UniversityRequest.fromJson(Map<String, dynamic> json) => _$UniversityRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+sealed class UserUpdateRequest with _$UserUpdateRequest {
+  const factory UserUpdateRequest({
+    required String firstName,
+    required String lastName,
+    required String birthDay,
+    required String phone,
+    required int gender,
+    required String location,
+  }) = _UserUpdateRequest;
+
+  factory UserUpdateRequest.fromJson(Map<String, dynamic> json) => _$UserUpdateRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+sealed class PositionRequest with _$PositionRequest {
+  const factory PositionRequest({required int id}) = _PositionRequest;
+
+  factory PositionRequest.fromJson(Map<String, dynamic> json) => _$PositionRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+sealed class MajorRequest with _$MajorRequest {
+  const factory MajorRequest({required int id}) = _MajorRequest;
+
+  factory MajorRequest.fromJson(Map<String, dynamic> json) => _$MajorRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+sealed class ScheduleRequest with _$ScheduleRequest {
+  const factory ScheduleRequest({required int id}) = _ScheduleRequest;
+
+  factory ScheduleRequest.fromJson(Map<String, dynamic> json) => _$ScheduleRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+sealed class OtherInfoRequest with _$OtherInfoRequest {
+  const factory OtherInfoRequest({
+    required String desiredJob,
+    required String desiredWorkingProvince,
+    required String referenceLetter,
+    required List<PositionRequest> positionDTOs,
+    required List<MajorRequest> majorDTOs,
+    required List<ScheduleRequest> scheduleDTOs,
+  }) = _OtherInfoRequest;
+
+  factory OtherInfoRequest.fromJson(Map<String, dynamic> json) => _$OtherInfoRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
 }

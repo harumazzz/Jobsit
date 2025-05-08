@@ -7,9 +7,9 @@ sealed class Job with _$Job {
   const factory Job({
     required int id,
     required String title,
-    required List<int> positions,
-    required List<int> majors,
-    required List<int> schedules,
+    required List<Position> positions,
+    required List<Major> majors,
+    required List<Schedule> schedules,
     required int amount,
     required DateTime postingDate,
     required DateTime applicationDeadline,
@@ -37,19 +37,49 @@ sealed class JobStatus with _$JobStatus {
 sealed class Company with _$Company {
   const factory Company({
     required int id,
-    required String logo,
-    required String name,
-    required String tax,
-    required String email,
-    required String phone,
-    required String personnelSize,
-    required String website,
-    required String country,
-    required String province,
-    required String district,
-    required String createdDate,
-    required String location,
+    String? logo,
+    String? name,
+    String? tax,
+    String? email,
+    String? phone,
+    String? personnelSize,
+    String? website,
+    String? country,
+    String? province,
+    String? district,
+    String? createdDate,
+    String? location,
     required JobStatus status,
-    required String description,
+    String? description,
   }) = _Company;
+}
+
+@freezed
+sealed class Schedule with _$Schedule {
+  const factory Schedule({required int id, required String name}) = _Schedule;
+}
+
+@freezed
+sealed class Major with _$Major {
+  const factory Major({required int id, required String name}) = _Major;
+}
+
+@freezed
+sealed class Position with _$Position {
+  const factory Position({required int id, required String name}) = _Position;
+}
+
+extension JobExtension on Job {
+  int get minInUSD {
+    return (minAllowance / 24.500).round();
+  }
+
+  int get maxInUSD {
+    return (maxAllowance / 24.500).round();
+  }
+}
+
+@freezed
+sealed class SavedJob with _$SavedJob {
+  const factory SavedJob({required int id, required Job job}) = _SavedJob;
 }

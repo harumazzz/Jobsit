@@ -38,6 +38,7 @@ sealed class UserInformation with _$UserInformation {
     required String lastName,
     required String phone,
     required bool gender,
+    required bool mailReceive,
     String? birthDate,
     String? address,
     String? avatar,
@@ -45,13 +46,29 @@ sealed class UserInformation with _$UserInformation {
 }
 
 @freezed
+sealed class Major with _$Major {
+  const factory Major({required int id, required String name}) = _Major;
+}
+
+@freezed
+sealed class Position with _$Position {
+  const factory Position({required int id, required String name}) = _Position;
+}
+
+@freezed
+sealed class Schedule with _$Schedule {
+  const factory Schedule({required int id, required String name}) = _Schedule;
+}
+
+@freezed
 sealed class JobInformation with _$JobInformation {
   const factory JobInformation({
     University? university,
     String? referenceLetter,
-    required List<int> positions,
-    required List<int> majors,
-    required List<int> schedules,
+    required List<Position> positions,
+    required List<Major> majors,
+    required List<Schedule> schedules,
+    required bool searchable,
     String? desiredJob,
     String? desiredWorkingProvince,
     String? cv,

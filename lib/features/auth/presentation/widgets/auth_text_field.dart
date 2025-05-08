@@ -2,15 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../core/utils/input_converter.dart';
 import '../providers/auth_provider.dart';
 
-class AuthTextField extends HookWidget {
+class AuthTextField extends StatelessWidget {
   const AuthTextField({
     super.key,
     required this.controller,
@@ -54,7 +52,6 @@ class AuthTextField extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final obscureText = useState(true);
     return FormBuilderTextField(
       name: name,
       focusNode: focusNode,
@@ -64,49 +61,13 @@ class AuthTextField extends HookWidget {
         border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
         labelText: label,
         contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-        suffixIcon: _VisibilityButton(
-          obscureText: obscureText.value,
-          onPressed: () async {
-            obscureText.value = !obscureText.value;
-            if (obscureText.value) {
-              focusNode.requestFocus();
-            } else {
-              focusNode.unfocus();
-            }
-          },
-        ),
       ),
       controller: controller,
-      obscureText: obscureText.value,
+      obscureText: true,
       autovalidateMode: autovalidateMode,
       validator: validator,
       onSubmitted: onFieldSubmitted,
     );
-  }
-}
-
-class _VisibilityButton extends StatelessWidget {
-  const _VisibilityButton({required this.obscureText, required this.onPressed});
-
-  final bool obscureText;
-
-  final void Function() onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(obscureText ? IconlyLight.show : IconlyLight.hide),
-      onPressed: onPressed,
-      tooltip: obscureText ? 'Show password' : 'Hide password',
-      highlightColor: Colors.transparent,
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<bool>('obscureText', obscureText));
-    properties.add(ObjectFlagProperty<void Function()>.has('onPressed', onPressed));
   }
 }
 
@@ -204,7 +165,7 @@ class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField>
                 : _isEmailAvailable &&
                     widget.controller.text.isNotEmpty &&
                     InputConverter.validateEmail(widget.controller.text) == null
-                ? const Icon(Icons.check_circle, color: Colors.green)
+                ? const Icon(Icons.check_circle_outline, color: Colors.green)
                 : null,
       ),
       validator: (value) {

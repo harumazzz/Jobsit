@@ -36,16 +36,18 @@ void main() {
         address: '123 Main St',
         avatar: 'avatar.png',
         birthDate: '1990-01-01',
+        mailReceive: true,
       ),
       jobInfo: JobInformation(
         university: University(id: 1, name: 'University of Example'),
         referenceLetter: 'reference_letter.pdf',
-        positions: [1, 2],
-        majors: [1],
-        schedules: [1],
+        positions: [Position(id: 1, name: 'Software Engineer'), Position(id: 2, name: 'Data Scientist')],
+        majors: [],
+        schedules: [],
         desiredJob: 'Software Engineer',
         desiredWorkingProvince: 'Example Province',
         cv: 'cv.pdf',
+        searchable: false,
       ),
     );
     const tLoginParams = LoginUserParams(email: tEmail, password: tPassword);

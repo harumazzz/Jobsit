@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/services/file_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../entities/user.dart';
@@ -112,5 +113,179 @@ final class GetUserData implements UseCase<User, int> {
   @override
   Future<Either<Failure, User>> call(int userId) async {
     return await _authRepository.getUser(userId: userId);
+  }
+}
+
+@riverpod
+UpdateSearchableCandidateUseCase updateSearchableCandidateUseCase(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return UpdateSearchableCandidateUseCase(authRepository);
+}
+
+final class UpdateSearchableCandidateUseCase implements UseCase<Success, NoParams> {
+  const UpdateSearchableCandidateUseCase(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, Success>> call(NoParams params) async {
+    return await _authRepository.updateSearchableCandidate();
+  }
+}
+
+@riverpod
+UpdateEmailNotificationUseCase updateEmailNotificationUseCase(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return UpdateEmailNotificationUseCase(authRepository);
+}
+
+final class UpdateEmailNotificationUseCase implements UseCase<Success, NoParams> {
+  const UpdateEmailNotificationUseCase(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, Success>> call(NoParams params) async {
+    return await _authRepository.updateEmailNotification();
+  }
+}
+
+@riverpod
+LogOutUseCase logOutUseCase(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return LogOutUseCase(authRepository);
+}
+
+final class LogOutUseCase implements UseCase<Success, NoParams> {
+  const LogOutUseCase(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, Success>> call(NoParams params) async {
+    return await _authRepository.logOut();
+  }
+}
+
+@freezed
+sealed class ChangePasswordParams with _$ChangePasswordParams {
+  const factory ChangePasswordParams({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) = _ChangePasswordParams;
+}
+
+@riverpod
+ChangePasswordUseCase changePasswordUseCase(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return ChangePasswordUseCase(authRepository);
+}
+
+final class ChangePasswordUseCase implements UseCase<Success, ChangePasswordParams> {
+  const ChangePasswordUseCase(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, Success>> call(ChangePasswordParams params) async {
+    return await _authRepository.changePassword(
+      oldPassword: params.oldPassword,
+      newPassword: params.newPassword,
+      confirmPassword: params.confirmPassword,
+    );
+  }
+}
+
+@riverpod
+UpdateUserInfoUseCase updateUserInfoUseCase(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return UpdateUserInfoUseCase(authRepository);
+}
+
+@freezed
+sealed class UpdateUserInfoParams with _$UpdateUserInfoParams {
+  const factory UpdateUserInfoParams({
+    required String firstName,
+    required String lastName,
+    required String birthDay,
+    required String phone,
+    required int gender,
+    required String location,
+    FileRequest? avatar,
+  }) = _UpdateUserInfoParams;
+}
+
+final class UpdateUserInfoUseCase implements UseCase<User, UpdateUserInfoParams> {
+  const UpdateUserInfoUseCase(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, User>> call(UpdateUserInfoParams params) async {
+    return await _authRepository.updateUserInfo(
+      firstName: params.firstName,
+      lastName: params.lastName,
+      birthDay: params.birthDay,
+      phone: params.phone,
+      gender: params.gender,
+      location: params.location,
+      avatar: params.avatar,
+    );
+  }
+}
+
+@riverpod
+UpdateJobInfoUseCase updateJobInfoUseCase(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return UpdateJobInfoUseCase(authRepository);
+}
+
+@freezed
+sealed class UpdateJobInfoParams with _$UpdateJobInfoParams {
+  const factory UpdateJobInfoParams({
+    required String desiredJob,
+    required String desiredWorkingProvince,
+    required String referenceLetter,
+    required List<Position> positions,
+    required List<Major> majors,
+    required List<Schedule> schedules,
+    FileRequest? cv,
+  }) = _UpdateJobInfoParams;
+}
+
+final class UpdateJobInfoUseCase implements UseCase<User, UpdateJobInfoParams> {
+  const UpdateJobInfoUseCase(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, User>> call(UpdateJobInfoParams params) async {
+    return await _authRepository.updateJobInfo(
+      desiredJob: params.desiredJob,
+      desiredWorkingProvince: params.desiredWorkingProvince,
+      referenceLetter: params.referenceLetter,
+      positions: params.positions,
+      majors: params.majors,
+      schedules: params.schedules,
+      cv: params.cv,
+    );
+  }
+}
+
+@riverpod
+GetUniversityUseCase getUniversityUseCase(Ref ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return GetUniversityUseCase(authRepository);
+}
+
+final class GetUniversityUseCase implements UseCase<List<University>, NoParams> {
+  const GetUniversityUseCase(this._authRepository);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Future<Either<Failure, List<University>>> call(NoParams params) async {
+    return await _authRepository.getUniversities();
   }
 }

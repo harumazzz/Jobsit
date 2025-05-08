@@ -2,6 +2,7 @@ import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/input_converter.dart';
@@ -57,18 +58,17 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
       if (next is AuthVerified) {
         const OtpVerifiedRoute().go(context);
       }
-      if (next is AuthSendedMail) {
+      if (next is AuthSendedMail && context.mounted) {
         ElegantNotification.success(
           background: const Color(0xFFDEF2ED),
           description: const Text('Verification code sent to your email. Please check your inbox.'),
         ).show(context);
       }
-      if (next is AuthError) {
+      if (next is AuthError && context.mounted) {
         ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
       }
     });
     return Scaffold(
-      backgroundColor: const Color(0xFFefeff0),
       body: FormBuilder(
         key: _formKey,
         child: Padding(
@@ -199,8 +199,12 @@ class OtpVerifiedPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ElegantNotification.success(
+      background: const Color(0xFFDEF2ED),
+      description: const Text('Registered successfully! Please login to your account.'),
+    ).show(context);
+    useDebounced(() async => const HomeRoute().go(context), const Duration(seconds: 5));
     return Scaffold(
-      backgroundColor: const Color(0xFFefeff0),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

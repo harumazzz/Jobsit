@@ -55,7 +55,6 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
       }
     });
     return Scaffold(
-      backgroundColor: const Color(0xFFefeff0),
       body: FormBuilder(
         key: _formKey,
         child: Padding(
@@ -190,12 +189,11 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
         ).show(context);
         const LoginRoute().go(context);
       }
-      if (next is AuthError) {
+      if (next is AuthError && context.mounted) {
         ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
       }
     });
     return Scaffold(
-      backgroundColor: const Color(0xFFefeff0),
       body: FormBuilder(
         key: _formKey,
         child: Padding(

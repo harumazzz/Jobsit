@@ -46,4 +46,25 @@ abstract class AuthRemoteDataSource {
 
   @GET(ApiConstant.getUserEndpoint)
   Future<GetUserResponse> getUser(@Path() int userId);
+
+  @PUT(ApiConstant.searchableCandidateEndpoint)
+  Future<HttpResponse> updateSearchableCandidate();
+
+  @PUT(ApiConstant.emailNotificationEndpoint)
+  Future<HttpResponse> updateEmailNotification();
+
+  @PUT(ApiConstant.changePasswordEndpoint)
+  Future<HttpResponse> changePassword(@Body() ChangePasswordRequest request);
+
+  @POST(ApiConstant.logOutEndpoint)
+  Future<HttpResponse> logOut(@Query('token') String token);
+
+  @PUT(ApiConstant.candidateUpdateEndpoint)
+  Future<GetUserResponse> updateUser(@Body() FormData request);
+
+  @PUT(ApiConstant.jobUpdateEndpoint)
+  Future<GetUserResponse> updateJobInfo(@Body() FormData request);
+
+  @GET(ApiConstant.universityEndpoint)
+  Future<List<UniversityResponse>> getUniversities();
 }

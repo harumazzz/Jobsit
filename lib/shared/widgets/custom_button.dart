@@ -16,7 +16,7 @@ class CustomButton extends StatelessWidget {
     return ElevatedButton(
       style: ButtonStyle(
         backgroundColor: WidgetStatePropertyAll(color ?? Theme.of(context).colorScheme.primary),
-        padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0)),
+        padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 20.0, horizontal: 32.0)),
         shape: const WidgetStatePropertyAll(
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
         ),
@@ -35,12 +35,20 @@ class CustomButton extends StatelessWidget {
 }
 
 class DropdownButtonField<T> extends StatefulWidget {
-  const DropdownButtonField({super.key, required this.label, this.value, required this.items, required this.onChanged});
+  const DropdownButtonField({
+    super.key,
+    required this.label,
+    this.value,
+    required this.items,
+    required this.onChanged,
+    this.textBuilder,
+  });
 
   final String label;
   final T? value;
   final List<DropdownMenuItem<T>> items;
   final void Function(T? value) onChanged;
+  final String Function()? textBuilder;
 
   @override
   State<DropdownButtonField<T>> createState() => _DropdownButtonFieldState<T>();
@@ -51,6 +59,7 @@ class DropdownButtonField<T> extends StatefulWidget {
     properties.add(ObjectFlagProperty<void Function(T? value)>.has('onChanged', onChanged));
     properties.add(StringProperty('label', label));
     properties.add(DiagnosticsProperty<T>('value', value));
+    properties.add(ObjectFlagProperty<String Function()?>.has('textBuilder', textBuilder));
   }
 }
 
@@ -68,7 +77,7 @@ class _DropdownButtonFieldState<T> extends State<DropdownButtonField<T>> {
     }
     _controller = TextEditingController();
     if (widget.value != null) {
-      _controller.text = _selectedValue.toString();
+      _controller.text = widget.textBuilder != null ? widget.textBuilder!.call() : _selectedValue.toString();
     }
   }
 
@@ -98,7 +107,8 @@ class _DropdownButtonFieldState<T> extends State<DropdownButtonField<T>> {
                   if (item.value != null) {
                     setState(() => _selectedValue = item.value as T);
                     widget.onChanged(item.value);
-                    _controller.text = _selectedValue.toString();
+                    _controller.text =
+                        widget.textBuilder != null ? widget.textBuilder!.call() : _selectedValue.toString();
                   }
                   _focusNode.unfocus();
                 },

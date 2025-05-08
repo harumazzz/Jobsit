@@ -1,9 +1,18 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../core/services/file_service.dart';
+import '../../../auth/data/models/user_model.dart';
 import '../../domain/entities/job.dart';
 
 part 'job_model.freezed.dart';
 part 'job_model.g.dart';
+
+@freezed
+sealed class HttpResponse with _$HttpResponse {
+  const factory HttpResponse({required int httpCode, required String message, required String path}) = _HttpResponse;
+
+  factory HttpResponse.fromJson(Map<String, dynamic> json) => _$HttpResponseFromJson(json);
+}
 
 @freezed
 sealed class JobListResponse with _$JobListResponse {
@@ -21,13 +30,36 @@ sealed class JobListResponse with _$JobListResponse {
 }
 
 @freezed
+sealed class SavedJobListResponse with _$SavedJobListResponse {
+  const factory SavedJobListResponse({
+    required List<SavedJobResponse> contents,
+    required int totalPages,
+    required int totalItems,
+    required int limit,
+    required int no,
+    required bool last,
+    required bool first,
+  }) = _SavedJobListResponse;
+
+  factory SavedJobListResponse.fromJson(Map<String, dynamic> json) => _$SavedJobListResponseFromJson(json);
+}
+
+@freezed
+sealed class SavedJobResponse with _$SavedJobResponse {
+  const factory SavedJobResponse({required int id, @JsonKey(name: 'jobDTO') required JobResponse job}) =
+      _SavedJobResponse;
+
+  factory SavedJobResponse.fromJson(Map<String, dynamic> json) => _$SavedJobResponseFromJson(json);
+}
+
+@freezed
 sealed class JobResponse with _$JobResponse {
   const factory JobResponse({
     required int id,
     required String title,
-    @JsonKey(name: 'positionDTOS') required List<int> positions,
-    @JsonKey(name: 'majorDTOS') required List<int> majors,
-    @JsonKey(name: 'scheduleDTOS') required List<int> schedules,
+    @JsonKey(name: 'positionDTOS') required List<PositionResponse> positions,
+    @JsonKey(name: 'majorDTOS') required List<MajorResponse> majors,
+    @JsonKey(name: 'scheduleDTOS') required List<ScheduleResponse> schedules,
     required int amount,
     required DateTime postingDate,
     required DateTime applicationDeadline,
@@ -59,23 +91,44 @@ sealed class JobStatusResponse with _$JobStatusResponse {
 sealed class CompanyResponse with _$CompanyResponse {
   const factory CompanyResponse({
     required int id,
-    required String logo,
-    required String name,
-    required String tax,
-    required String email,
-    required String phone,
-    required String personnelSize,
-    required String website,
-    required String country,
-    required String province,
-    required String district,
-    required String createdDate,
-    required String location,
+    String? logo,
+    String? name,
+    String? tax,
+    String? email,
+    String? phone,
+    String? personnelSize,
+    String? website,
+    String? country,
+    String? province,
+    String? district,
+    String? createdDate,
+    String? location,
     @JsonKey(name: 'statusDTO') required JobStatusResponse status,
-    required String description,
+    String? description,
   }) = _CompanyResponse;
 
   factory CompanyResponse.fromJson(Map<String, dynamic> json) => _$CompanyResponseFromJson(json);
+}
+
+@freezed
+sealed class ScheduleResponse with _$ScheduleResponse {
+  const factory ScheduleResponse({required int id, required String name}) = _ScheduleResponse;
+
+  factory ScheduleResponse.fromJson(Map<String, dynamic> json) => _$ScheduleResponseFromJson(json);
+}
+
+@freezed
+sealed class MajorResponse with _$MajorResponse {
+  const factory MajorResponse({required int id, required String name}) = _MajorResponse;
+
+  factory MajorResponse.fromJson(Map<String, dynamic> json) => _$MajorResponseFromJson(json);
+}
+
+@freezed
+sealed class PositionResponse with _$PositionResponse {
+  const factory PositionResponse({required int id, required String name}) = _PositionResponse;
+
+  factory PositionResponse.fromJson(Map<String, dynamic> json) => _$PositionResponseFromJson(json);
 }
 
 extension JobResponseExtension on JobResponse {
@@ -83,9 +136,9 @@ extension JobResponseExtension on JobResponse {
     return Job(
       id: id,
       title: title,
-      positions: positions,
-      majors: majors,
-      schedules: schedules,
+      positions: positions.map((e) => e.toEntity()).toList(),
+      majors: majors.map((e) => e.toEntity()).toList(),
+      schedules: schedules.map((e) => e.toEntity()).toList(),
       amount: amount,
       postingDate: postingDate,
       applicationDeadline: applicationDeadline,
@@ -130,5 +183,74 @@ extension CompanyResponseExtension on CompanyResponse {
       status: status.toEntity(),
       description: description,
     );
+  }
+}
+
+extension ScheduleResponseExtension on ScheduleResponse {
+  Schedule toEntity() {
+    return Schedule(id: id, name: name);
+  }
+}
+
+extension MajorResponseExtension on MajorResponse {
+  Major toEntity() {
+    return Major(id: id, name: name);
+  }
+}
+
+extension PositionResponseExtension on PositionResponse {
+  Position toEntity() {
+    return Position(id: id, name: name);
+  }
+}
+
+extension SavedJobListResponseExtension on SavedJobListResponse {
+  List<Job> toEntity() {
+    return contents.map((e) => e.job.toEntity()).toList();
+  }
+}
+
+extension SavedJobResponseExtension on SavedJobResponse {
+  Job toEntity() {
+    return job.toEntity();
+  }
+}
+
+@freezed
+sealed class JobRequest with _$JobRequest {
+  const factory JobRequest({required int id}) = _JobRequest;
+
+  factory JobRequest.fromJson(Map<String, dynamic> json) => _$JobRequestFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson();
+}
+
+@freezed
+sealed class CandidateApplicationRequest with _$CandidateApplicationRequest {
+  const factory CandidateApplicationRequest({required JobRequest candidateApplication, required FileRequest fileCV}) =
+      _CandidateApplicationRequest;
+}
+
+@freezed
+sealed class AppliedJobResponse with _$AppliedJobResponse {
+  const factory AppliedJobResponse({
+    required int id,
+    @JsonKey(name: 'jobDTO') required JobResponse job,
+    @JsonKey(name: 'candidateDTO') required GetUserResponse candidate,
+    required String appliedDate,
+    required String referenceLetter,
+    required String email,
+    required String fullName,
+    required String phone,
+    required String cv,
+  }) = _AppliedJobResponse;
+
+  factory AppliedJobResponse.fromJson(Map<String, dynamic> json) => _$AppliedJobResponseFromJson(json);
+}
+
+extension AppliedJobResponseExtension on AppliedJobResponse {
+  Job toEntity() {
+    return job.toEntity();
   }
 }
