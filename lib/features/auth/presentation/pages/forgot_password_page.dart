@@ -23,6 +23,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
   late FocusNode _emailFocusNode;
 
+  late TextEditingController _emailController;
+
   @override
   void initState() {
     _formKey = GlobalKey<FormBuilderState>();
@@ -35,6 +37,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
   @override
   void dispose() {
+    _emailController.dispose();
     _emailFocusNode.dispose();
     super.dispose();
   }
@@ -48,7 +51,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           background: const Color(0xFFDEF2ED),
           description: const Text('Verification code sent to your email. Please check your inbox.'),
         ).show(context);
-        // TODO(self): Navigate to OTP verification page for reset password
+        VerifyForgotPasswordOTPRoute().go(context);
       }
       if (next is AuthError) {
         ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
@@ -82,6 +85,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               ),
               FormBuilderTextField(
                 name: 'email',
+                controller: _emailController,
                 focusNode: _emailFocusNode,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
@@ -105,7 +109,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                   child: CustomButton(
                     onPressed: () {
                       if (_formKey.currentState!.saveAndValidate()) {
-                        final email = _formKey.currentState!.value['email'] as String;
+                        final email = _emailController.text;
                         ref.read(authControllerProvider.notifier).forgotPassword(email: email);
                       }
                     },

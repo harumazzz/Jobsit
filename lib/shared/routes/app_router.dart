@@ -47,6 +47,8 @@ class AppRouter extends Equatable {
 
   static const String editJobName = 'edit_job';
 
+  static const String forgotPasswordOtpName = 'forgot_password_otp';
+
   static const String homeRoute = '/';
 
   static const String loginRoute = '/$loginName';
@@ -74,6 +76,8 @@ class AppRouter extends Equatable {
   static const String editProfileRoute = '/$editProfileName';
 
   static const String editJobRoute = '/$editJobName';
+
+  static const String forgotPasswordOtpRoute = '/$forgotPasswordOtpName';
 
   static GoRouter get router => _router;
 
@@ -174,6 +178,16 @@ final class EditJobRoute extends GoRouteData {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const JobInfoEditPage();
+}
+
+@TypedGoRoute<VerifyForgotPasswordOTPRoute>(path: AppRouter.forgotPasswordOtpRoute, name: AppRouter.forgotPasswordName)
+final class VerifyForgotPasswordOTPRoute extends GoRouteData {
+  const VerifyForgotPasswordOTPRoute({required this.email});
+
+  final String email;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => ForgotPasswordOTP(email: email);
 }
 
 final _router = GoRouter(

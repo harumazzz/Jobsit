@@ -221,3 +221,113 @@ class OtpVerifiedPage extends StatelessWidget {
     );
   }
 }
+
+class ForgotPasswordOTP extends ConsumerStatefulWidget {
+  const ForgotPasswordOTP({super.key, required this.email});
+
+  final String email;
+
+  @override
+  ConsumerState<ForgotPasswordOTP> createState() => _ForgotPasswordOTPState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('email', email));
+  }
+}
+
+class _ForgotPasswordOTPState extends ConsumerState<ForgotPasswordOTP> {
+  late TextEditingController _otpController;
+
+  late FocusNode _otpFocusNode;
+
+  late GlobalKey<FormBuilderState> _formKey;
+
+  @override
+  void initState() {
+    _otpController = TextEditingController();
+    _otpFocusNode = FocusNode();
+    _formKey = GlobalKey<FormBuilderState>();
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _otpFocusNode.requestFocus();
+      await ref.read(authControllerProvider.notifier).sendMail(email: widget.email);
+    });
+  }
+
+  @override
+  void dispose() {
+    _otpController.dispose();
+    _otpFocusNode.dispose();
+    _formKey.currentState?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<AuthState>(authControllerProvider, (previous, next) async {
+      if (next is AuthVerified) {
+        const OtpVerifiedRoute().go(context);
+      }
+      if (next is AuthError && context.mounted) {
+        ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
+      }
+    });
+    return Scaffold(
+      body: FormBuilder(
+        key: _formKey,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const _Stepper(),
+                  const SizedBox(height: 30.0),
+                  const Text('VERIFICATION'),
+                  const SizedBox(height: 20.0),
+                  const Text('Enter the OTP code that we send you via Email'),
+                  const SizedBox(height: 30.0),
+                  _OtpField(controller: _otpController, focusNode: _otpFocusNode),
+                  const SizedBox(height: 20.0),
+                  Row(
+                    spacing: 4.0,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Didn\'t receive the code?'),
+                      InkWell(
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        onTap: () async {
+                          _otpFocusNode.unfocus();
+                          await ref.read(authControllerProvider.notifier).forgotPassword(email: widget.email);
+                        },
+                        child: const Text('Resend', style: TextStyle(color: Colors.red)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20.0),
+                  SizedBox(
+                    width: double.infinity,
+                    child: CustomButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          _otpFocusNode.unfocus();
+                          await ref.read(authControllerProvider.notifier).verifyOtp(otp: _otpController.text);
+                        }
+                      },
+                      child: const Text('Verify'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
