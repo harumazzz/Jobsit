@@ -690,7 +690,10 @@ class _CustomNavbar extends StatelessWidget {
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 5.0, offset: const Offset(0, -1))],
       ),
-      child: CustomButton(onPressed: onPressed, child: const Text('Save')),
+      child: CustomButton(
+        onPressed: onPressed,
+        child: const Padding(padding: EdgeInsets.symmetric(vertical: 8.0), child: Text('Save')),
+      ),
     );
   }
 

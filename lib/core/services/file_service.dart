@@ -107,13 +107,13 @@ final class FileService implements IFileService {
     if (pickedFile == null) {
       return const Left(StorageFailure('Image selection failed'));
     } else {
-      return Right(
-        FileSelectorResult(
-          name: p.basename(pickedFile.path),
-          path: pickedFile.path,
-          data: await pickedFile.readAsBytes(),
-        ),
-      );
+      var path = pickedFile.path;
+      if (Platform.isAndroid) {
+        path = (await _nativeChannel.resolveUri(
+          path,
+        )).fold(ifLeft: (error) => throw Exception('Failed to resolve URI: $error'), ifRight: (value) => value);
+      }
+      return Right(FileSelectorResult(name: p.basename(path), path: path, data: await pickedFile.readAsBytes()));
     }
   }
 }
