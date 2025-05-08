@@ -464,6 +464,7 @@ class JobInfoEditPage extends HookWidget {
     final cvFocusNode = useFocusNode();
     final coverLetterFocusNode = useFocusNode();
     final selectedMajor = useState<Major?>(null);
+    final cv = useState<FileSelectorResult?>(null);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Job Information', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -665,17 +666,23 @@ class JobInfoEditPage extends HookWidget {
                           return IconButton(
                             icon: const Icon(IconlyLight.upload),
                             onPressed: () async {
-                              // TODO(self): Implement CV upload
+                              final result = await ref.read(fileServiceProvider).uploadFile([
+                                const FileSelector(label: 'CV', extensions: ['pdf', 'docx']),
+                              ]);
+                              result.fold(
+                                ifLeft: (value) => null,
+                                ifRight: (value) {
+                                  cv.value = value;
+                                  cvPlaceholderController.text = value.name;
+                                  cvFocusNode.unfocus();
+                                  FocusScope.of(context).requestFocus(coverLetterFocusNode);
+                                },
+                              );
                             },
                           );
                         },
                       ),
                     ),
-                    onTap: () async {
-                      // TODO(self): Implement CV selection
-                      cvFocusNode.unfocus();
-                      FocusScope.of(context).requestFocus(coverLetterFocusNode);
-                    },
                   ),
                   const SizedBox(height: 16.0),
                   FormBuilderTextField(
@@ -701,21 +708,26 @@ class JobInfoEditPage extends HookWidget {
         ),
       ),
       bottomNavigationBar: SafeArea(
-        child: _CustomNavbar(
-          onPressed: () async {
-            FocusScope.of(context).unfocus();
-            if (formKey.currentState!.validate()) {
-              formKey.currentState!.save();
+        child: Consumer(
+          builder: (context, ref, child) {
+            return _CustomNavbar(
+              onPressed: () async {
+                FocusScope.of(context).unfocus();
+                if (formKey.currentState!.validate()) {
+                  formKey.currentState!.save();
+                  // ref
+                  //     .read(authControllerProvider.notifier)
+                  //     .updateJobInfo(
 
-              // TODO(self): Implement saving job information to API
-
-              // Show success notification
-              ElegantNotification.success(
-                background: const Color(0xFFDEF2ED),
-                description: const Text('Job information updated successfully!'),
-              ).show(context);
-              context.pop();
-            }
+                  //     );
+                  ElegantNotification.success(
+                    background: const Color(0xFFDEF2ED),
+                    description: const Text('Job information updated successfully!'),
+                  ).show(context);
+                  context.pop();
+                }
+              },
+            );
           },
         ),
       ),

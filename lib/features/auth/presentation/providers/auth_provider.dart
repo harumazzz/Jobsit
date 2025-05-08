@@ -304,7 +304,7 @@ class UniversityController extends _$UniversityController {
     try {
       final getUniversityUseCase = ref.read(getUniversityUseCaseProvider);
       final result = await getUniversityUseCase(const NoParams());
-      state = result.fold(ifRight: (e) => UniversityState.loaded(e), ifLeft: (e) => UniversityState.error(e.message));
+      state = result.fold(ifRight: UniversityState.loaded, ifLeft: (e) => UniversityState.error(e.message));
     } on ServerException catch (e) {
       state = UniversityState.error(e.message);
     } catch (e) {
