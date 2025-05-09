@@ -59,7 +59,7 @@ final class FileService implements IFileService {
       ifLeft: (error) => throw Exception('Failed to check storage permission: $error'),
       ifRight: (value) => value,
     );
-    if (permission) {
+    if (!permission) {
       permission = (await _nativeChannel.requestStoragePermission()).fold(
         ifLeft: (error) => throw Exception('Failed to request storage permission: $error'),
         ifRight: (value) => value,

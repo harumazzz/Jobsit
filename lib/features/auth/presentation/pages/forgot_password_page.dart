@@ -51,7 +51,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           background: const Color(0xFFDEF2ED),
           description: const Text('Verification code sent to your email. Please check your inbox.'),
         ).show(context);
-        VerifyForgotPasswordOTPRoute().go(context);
+        VerifyForgotPasswordOTPRoute(email: _emailController.text).go(context);
       }
       if (next is AuthError) {
         ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);

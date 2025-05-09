@@ -180,7 +180,10 @@ final class EditJobRoute extends GoRouteData {
   Widget build(BuildContext context, GoRouterState state) => const JobInfoEditPage();
 }
 
-@TypedGoRoute<VerifyForgotPasswordOTPRoute>(path: AppRouter.forgotPasswordOtpRoute, name: AppRouter.forgotPasswordName)
+@TypedGoRoute<VerifyForgotPasswordOTPRoute>(
+  path: AppRouter.forgotPasswordOtpRoute,
+  name: AppRouter.forgotPasswordOtpName,
+)
 final class VerifyForgotPasswordOTPRoute extends GoRouteData {
   const VerifyForgotPasswordOTPRoute({required this.email});
 

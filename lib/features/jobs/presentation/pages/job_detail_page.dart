@@ -469,7 +469,7 @@ class _ApplyModal extends HookWidget {
     final controller = useTextEditingController();
     final text = useState<String>('Upload new CV');
     return Container(
-      height: 450.0,
+      height: 500.0,
       width: double.infinity,
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 24.0, bottom: 8.0),
       decoration: BoxDecoration(

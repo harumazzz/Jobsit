@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/network/api_constant.dart';
 import '../../../../core/services/file_service.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../core/utils/input_converter.dart';
@@ -50,7 +52,6 @@ class PersonalInfoEditPage extends HookConsumerWidget {
     final districtFocusNode = useFocusNode();
     final addressFocusNode = useFocusNode();
     final universityFocusNode = useFocusNode();
-    final file = useState<FileSelectorResult?>(null);
     final genderOptions = ['Male', 'Female'];
     final cityOptions = (ref.read(citiesControllerProvider) as CitiesLoaded).cities;
     final selectedGender = useState(currentState.user.userInfo.gender ? 'Male' : 'Female');
@@ -84,7 +85,21 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                         shape: BoxShape.circle,
                         border: Border.all(color: Theme.of(context).primaryColor, width: 2.0),
                       ),
-                      child: const Icon(IconlyLight.profile, size: 48.0, color: Colors.grey),
+                      child:
+                          image.value != null
+                              ? ClipOval(
+                                child: Image.memory(image.value!.data, fit: BoxFit.cover, width: 86.0, height: 86.0),
+                              )
+                              : currentState.user.userInfo.avatar != null
+                              ? ClipOval(
+                                child: CachedNetworkImage(
+                                  imageUrl: queryImage(currentState.user.userInfo.avatar!),
+                                  fit: BoxFit.cover,
+                                  width: 86.0,
+                                  height: 86.0,
+                                ),
+                              )
+                              : const Icon(IconlyLight.profile, size: 48.0, color: Colors.grey),
                     ),
                     Positioned(
                       bottom: 0,
@@ -95,7 +110,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                           icon: Icon(IconlyLight.edit, color: Theme.of(context).colorScheme.onPrimary, size: 16.0),
                           onPressed: () async {
                             final result = await ref.read(fileServiceProvider).uploadImage();
-                            result.fold(ifLeft: (value) => null, ifRight: (value) => image.value = value);
+                            result.fold(ifLeft: (_) => null, ifRight: (value) => image.value = value);
                           },
                         ),
                       ),
@@ -426,9 +441,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                         lastName: lastNameController.text,
                         phone: phoneController.text,
                         birthDay: DateFormat('yyyy-MM-dd').format(selectedDate.value!),
-                        gender: 1,
-                        location: '',
-                        avatar: file.value,
+                        gender: genderOptions.indexOf(selectedGender.value),
+                        location:
+                            '${selectedCity.value?.name}, ${selectedDistrict.value?.name}, ${addressController.text}',
+                        avatar: image.value,
                       );
                   if (context.mounted) {
                     ElegantNotification.success(

@@ -30,9 +30,10 @@ class MainActivity : FlutterActivity() {
 
     private val continuation: Channel<Any?> = Channel()
 
-    private suspend fun requestStoragePermission(
-
-    ): Boolean {
+    private suspend fun requestStoragePermission(): Boolean {
+        if (checkStoragePermission()) {
+            return true
+        }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             activity.requestPermissions(
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE),
