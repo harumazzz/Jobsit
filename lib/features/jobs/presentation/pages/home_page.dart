@@ -300,9 +300,12 @@ class _FilterModal extends HookWidget {
                 CitiesInitial() => const Center(child: Text('No location found')),
                 CitiesLoading() => const Center(child: CircularProgressIndicator()),
                 CitiesError() => Center(child: Text(state.message, style: Theme.of(context).textTheme.bodyLarge)),
-                CitiesLoaded(cities: final cities) => DropdownButtonField<City>(
+                CitiesLoaded(cities: final cities) => DropdownButtonField<City?>(
                   value: citySelection.value,
-                  items: [...cities.map((City value) => DropdownMenuItem<City>(value: value, child: Text(value.name)))],
+                  items: [
+                    const DropdownMenuItem<City?>(child: Text('-Choose a location-')),
+                    ...cities.map((City value) => DropdownMenuItem<City?>(value: value, child: Text(value.name))),
+                  ],
                   label: '-Choose a location-',
                   textBuilder: () {
                     if (citySelection.value != null) {

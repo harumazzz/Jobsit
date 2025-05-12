@@ -22,6 +22,8 @@ class ProfilePage extends HookConsumerWidget {
     final state = ref.read(authControllerProvider) as AuthAuthorized;
     final allowSearch = useState(state.user.jobInfo.searchable);
     final emailNotification = useState(state.user.userInfo.mailReceive);
+    final isSearchableLoading = useState(false);
+    final isMailReceiveLoading = useState(false);
     return CustomScrollView(
       slivers: [
         const SliverAppBar(
@@ -112,11 +114,19 @@ class ProfilePage extends HookConsumerWidget {
               ),
               value: allowSearch.value,
               onChanged: (bool? value) async {
+                if (isSearchableLoading.value) {
+                  return;
+                }
                 if (value == null) {
                   return;
                 }
                 allowSearch.value = value;
-                await ref.read(authControllerProvider.notifier).updateSearchable(searchable: value);
+                isSearchableLoading.value = true;
+                try {
+                  await ref.read(authControllerProvider.notifier).updateSearchable(searchable: value);
+                } finally {
+                  isSearchableLoading.value = false;
+                }
               },
             ),
           ),
@@ -142,11 +152,19 @@ class ProfilePage extends HookConsumerWidget {
               ),
               value: emailNotification.value,
               onChanged: (bool? value) async {
+                if (isMailReceiveLoading.value) {
+                  return;
+                }
                 if (value == null) {
                   return;
                 }
+                isMailReceiveLoading.value = true;
                 emailNotification.value = value;
-                await ref.read(authControllerProvider.notifier).updateMailReceive(mailReceive: value);
+                try {
+                  await ref.read(authControllerProvider.notifier).updateMailReceive(mailReceive: value);
+                } finally {
+                  isMailReceiveLoading.value = false;
+                }
               },
             ),
           ),

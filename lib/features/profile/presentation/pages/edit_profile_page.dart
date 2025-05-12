@@ -476,7 +476,6 @@ class JobInfoEditPage extends HookWidget {
     final positionFocusNode = useFocusNode();
     final majorFocusNode = useFocusNode();
     final jobTypeFocusNode = useFocusNode();
-    final locationFocusNode = useFocusNode();
     final cvFocusNode = useFocusNode();
     final coverLetterFocusNode = useFocusNode();
     final selectedMajor = useState<Major?>(null);

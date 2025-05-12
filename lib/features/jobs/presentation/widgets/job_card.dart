@@ -2,15 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/network/api_constant.dart';
 import '../../domain/entities/job.dart';
 import '../providers/job_provider.dart';
 
-class JobCard extends ConsumerWidget {
+class JobCard extends HookConsumerWidget {
   const JobCard({super.key, required this.job, required this.onPressed});
 
   final Job job;
@@ -21,6 +22,7 @@ class JobCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final savedJobState = ref.watch(savedJobControllerProvider);
     final isHighlighted = savedJobState is SavedJobLoaded && savedJobState.jobs.containsKey(job.id);
+    final isBookmarkProcessing = useState(false);
 
     return Card(
       child: InkWell(
@@ -66,23 +68,38 @@ class JobCard extends ConsumerWidget {
                   IconButton(
                     tooltip: 'Bookmark',
                     onPressed: () async {
+                      if (isBookmarkProcessing.value) {
+                        return;
+                      }
+                      isBookmarkProcessing.value = true;
                       await Future.delayed(const Duration(milliseconds: 100));
-                      if (ref.read(savedJobControllerProvider.notifier).contains(job.id)) {
-                        await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: job.id);
+                      try {
+                        if (ref.read(savedJobControllerProvider.notifier).contains(job.id)) {
+                          await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: job.id);
+                          if (context.mounted) {
+                            ElegantNotification.success(
+                              background: const Color(0xFFDEF2ED),
+                              description: const Text('Job has been removed successfully!'),
+                            ).show(context);
+                          }
+                        } else {
+                          await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
+                          if (context.mounted) {
+                            ElegantNotification.success(
+                              background: const Color(0xFFDEF2ED),
+                              description: const Text('Job has been saved successfully!'),
+                            ).show(context);
+                          }
+                        }
+                      } catch (e) {
                         if (context.mounted) {
-                          ElegantNotification.success(
-                            background: const Color(0xFFDEF2ED),
-                            description: const Text('Job has been removed successfully!'),
+                          ElegantNotification.error(
+                            background: const Color(0xFFFEF3F2),
+                            description: const Text('Error occurred while saving the job!'),
                           ).show(context);
                         }
-                      } else {
-                        await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
-                        if (context.mounted) {
-                          ElegantNotification.success(
-                            background: const Color(0xFFDEF2ED),
-                            description: const Text('Job has been saved successfully!'),
-                          ).show(context);
-                        }
+                      } finally {
+                        isBookmarkProcessing.value = false;
                       }
                     },
                     icon: Icon(

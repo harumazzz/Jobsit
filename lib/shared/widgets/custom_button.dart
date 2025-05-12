@@ -65,7 +65,7 @@ class DropdownButtonField<T> extends StatefulWidget {
 
 class _DropdownButtonFieldState<T> extends State<DropdownButtonField<T>> {
   late final FocusNode _focusNode;
-  late T _selectedValue;
+  late T? _selectedValue;
   late TextEditingController _controller;
 
   @override
@@ -104,12 +104,10 @@ class _DropdownButtonFieldState<T> extends State<DropdownButtonField<T>> {
             ...widget.items.map((item) {
               return MenuItemButton(
                 onPressed: () async {
-                  if (item.value != null) {
-                    setState(() => _selectedValue = item.value as T);
-                    widget.onChanged(item.value);
-                    _controller.text =
-                        widget.textBuilder != null ? widget.textBuilder!.call() : _selectedValue.toString();
-                  }
+                  setState(() => _selectedValue = item.value);
+                  widget.onChanged(item.value);
+                  _controller.text =
+                      widget.textBuilder != null ? widget.textBuilder!.call() : _selectedValue.toString();
                   _focusNode.unfocus();
                 },
                 child: ListTile(contentPadding: const EdgeInsets.symmetric(horizontal: 16.0), title: item.child),

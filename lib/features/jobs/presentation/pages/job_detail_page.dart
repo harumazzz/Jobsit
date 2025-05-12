@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:pdfx/pdfx.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:intl/intl.dart';
 
@@ -21,12 +22,12 @@ class JobDetailPage extends HookConsumerWidget {
   const JobDetailPage({super.key, required this.jobId});
 
   final int jobId;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pageController = usePageController();
     final isSelected = useState(ref.read(savedJobControllerProvider.notifier).contains(jobId));
     final selectedTabIndex = useState(0);
+    final isBookmarkProcessing = useState(false);
 
     return Scaffold(
       backgroundColor: const Color(0xFff5fafd),
@@ -51,24 +52,32 @@ class JobDetailPage extends HookConsumerWidget {
                       iconSize: 30.0,
                       color: Theme.of(context).colorScheme.primary,
                       onPressed: () async {
-                        await Future.delayed(const Duration(milliseconds: 100));
-                        isSelected.value = !isSelected.value;
-                        if (ref.read(savedJobControllerProvider.notifier).contains(state.job.id)) {
-                          await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: jobId);
-                          if (context.mounted) {
-                            ElegantNotification.success(
-                              background: const Color(0xFFDEF2ED),
-                              description: const Text('Job has been removed successfully!'),
-                            ).show(context);
+                        if (isBookmarkProcessing.value) {
+                          return;
+                        }
+                        isBookmarkProcessing.value = true;
+                        try {
+                          await Future.delayed(const Duration(milliseconds: 100));
+                          isSelected.value = !isSelected.value;
+                          if (ref.read(savedJobControllerProvider.notifier).contains(state.job.id)) {
+                            await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: jobId);
+                            if (context.mounted) {
+                              ElegantNotification.success(
+                                background: const Color(0xFFDEF2ED),
+                                description: const Text('Job has been removed successfully!'),
+                              ).show(context);
+                            }
+                          } else {
+                            await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
+                            if (context.mounted) {
+                              ElegantNotification.success(
+                                background: const Color(0xFFDEF2ED),
+                                description: const Text('Job has been saved successfully!'),
+                              ).show(context);
+                            }
                           }
-                        } else {
-                          await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
-                          if (context.mounted) {
-                            ElegantNotification.success(
-                              background: const Color(0xFFDEF2ED),
-                              description: const Text('Job has been saved successfully!'),
-                            ).show(context);
-                          }
+                        } finally {
+                          isBookmarkProcessing.value = false;
                         }
                       },
                     ),
@@ -346,13 +355,13 @@ class JobDetailPage extends HookConsumerWidget {
                                   ),
                                   const SizedBox(height: 16.0),
                                   Row(
-                                    spacing: 8.0,
                                     children: [
                                       Icon(
                                         IconlyLight.location,
                                         size: 24.0,
                                         color: Theme.of(context).colorScheme.primary,
                                       ),
+                                      const SizedBox(width: 8.0),
                                       Text(
                                         job.company.location ?? 'Location',
                                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -372,7 +381,7 @@ class JobDetailPage extends HookConsumerWidget {
                                   const SizedBox(height: 16.0),
                                   relatedJobs.isEmpty
                                       ? SizedBox(
-                                        height: 250.0,
+                                        height: 200.0,
                                         child: Center(
                                           child: Text(
                                             'No other jobs available.',
@@ -384,10 +393,10 @@ class JobDetailPage extends HookConsumerWidget {
                                         ),
                                       )
                                       : CarouselSlider(
-                                        options: CarouselOptions(height: 250.0, autoPlay: true),
+                                        options: CarouselOptions(height: 200.0, autoPlay: true),
                                         items: [
-                                          ...relatedJobs.map(
-                                            (e) => JobCard(
+                                          ...relatedJobs.map((e) {
+                                            return JobCard(
                                               job: e,
                                               onPressed: () async {
                                                 final jobDetailState = ref.read(jobDetailControllerProvider.notifier);
@@ -396,8 +405,8 @@ class JobDetailPage extends HookConsumerWidget {
                                                   JobDetailRoute(id: e.id).pushReplacement(context);
                                                 }
                                               },
-                                            ),
-                                          ),
+                                            );
+                                          }),
                                         ],
                                       ),
                                 ],
@@ -436,7 +445,7 @@ class _ApplyNavBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 5.0, offset: const Offset(0, -1))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 13), blurRadius: 5.0, offset: const Offset(0, -1))],
       ),
       child: Consumer(
         builder: (context, ref, child) {
@@ -495,7 +504,7 @@ class _ApplyModal extends HookWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 20.0,
+        spacing: 16.0,
         children: [
           Text(
             'Attached CV',
@@ -550,7 +559,15 @@ class _ApplyModal extends HookWidget {
               opacity: 0.84,
               child: CustomButton(
                 onPressed: () async {
-                  // TODO(self): Implement PDF preview functionality
+                  await showDialog(
+                    context: context,
+                    builder:
+                        (context) => AlertDialog(
+                          title: Text(file.value!.name),
+                          content: SizedBox(height: 600.0, width: 400.0, child: PdfViewerPage(data: file.value!.data)),
+                          actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close'))],
+                        ),
+                  );
                 },
                 child: Text(
                   'Preview',
@@ -598,6 +615,13 @@ class _ApplyModal extends HookWidget {
                   if (file.value == null) {
                     return;
                   }
+                  if (controller.text.trim().isEmpty) {
+                    ElegantNotification.error(
+                      background: const Color(0xFFFCE8DB),
+                      description: const Text('Please write a reference letter'),
+                    ).show(context);
+                    return;
+                  }
                   await ref
                       .read(applyJobControllerProvider.notifier)
                       .applyJob(jobId: jobId, referenceLetter: controller.text, cv: file.value!);
@@ -640,5 +664,41 @@ class _ApplyModal extends HookWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('jobId', jobId));
+  }
+}
+
+class PdfViewerPage extends StatefulWidget {
+  const PdfViewerPage({super.key, required this.data});
+
+  final Uint8List data;
+
+  @override
+  State<PdfViewerPage> createState() => _PdfViewerPageState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IterableProperty<Uint8List>('data', [data]));
+  }
+}
+
+class _PdfViewerPageState extends State<PdfViewerPage> {
+  late PdfController _pdfController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pdfController = PdfController(document: PdfDocument.openData(widget.data));
+  }
+
+  @override
+  void dispose() {
+    _pdfController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(children: [PdfView(controller: _pdfController, scrollDirection: Axis.vertical)]);
   }
 }
