@@ -152,7 +152,26 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                             icon: Icon(IconlyLight.edit, color: Theme.of(context).colorScheme.onPrimary, size: 16.0),
                             onPressed: () async {
                               final result = await ref.read(fileServiceProvider).uploadImage();
-                              result.fold(ifLeft: (_) => null, ifRight: (value) => image.value = value);
+                              result.fold(
+                                ifLeft: (_) => null,
+                                ifRight: (value) {
+                                  if (value.data.length > 512 * 1024) {
+                                    ElegantNotification.error(
+                                      background: const Color(0xFFDEF2ED),
+                                      description: const Text('Image size exceeds 512KB'),
+                                    ).show(context);
+                                    return;
+                                  }
+                                  if (RegExp(r'\.(jpg|png)$', caseSensitive: false).hasMatch(value.name)) {
+                                    ElegantNotification.error(
+                                      background: const Color(0xFFDEF2ED),
+                                      description: const Text('Image format is not supported'),
+                                    ).show(context);
+                                    return;
+                                  }
+                                  image.value = value;
+                                },
+                              );
                             },
                           ),
                         ),
