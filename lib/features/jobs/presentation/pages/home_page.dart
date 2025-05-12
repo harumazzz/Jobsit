@@ -152,9 +152,9 @@ class _JobPage extends HookConsumerWidget {
                             isScrollControlled: true,
                             builder: (context) {
                               return _FilterModal(
-                                jobTypeIndex: jobFilterState.scheduleIndex,
-                                jobPositionIndex: jobFilterState.positionscheduleIndex,
-                                jobMajorIndex: jobFilterState.majorIndex,
+                                jobTypes: jobFilterState.schedules,
+                                jobPositions: jobFilterState.positions,
+                                jobMajors: jobFilterState.majors,
                                 jobCity: jobFilterState.city,
                                 searchController: controller,
                                 searchNode: node,
@@ -211,10 +211,10 @@ class _JobPage extends HookConsumerWidget {
                             page: page.value,
                             limit: 10,
                             city: jobFilterState.city,
-                            schedule: jobFilterState.schedule,
-                            position: jobFilterState.position,
-                            major: jobFilterState.major,
                             title: jobFilterState.title,
+                            schedules: jobFilterState.schedulesList,
+                            positions: jobFilterState.positionsList,
+                            majors: jobFilterState.majorsList,
                           );
                         }
                         page.value++;
@@ -248,9 +248,9 @@ class _FilterModal extends HookWidget {
   const _FilterModal({
     required this.searchController,
     required this.searchNode,
-    required this.jobTypeIndex,
-    required this.jobPositionIndex,
-    required this.jobMajorIndex,
+    required this.jobTypes,
+    required this.jobPositions,
+    required this.jobMajors,
     this.jobCity,
   });
 
@@ -258,19 +258,19 @@ class _FilterModal extends HookWidget {
 
   final FocusNode searchNode;
 
-  final int jobTypeIndex;
+  final Set<int> jobTypes;
 
-  final int jobPositionIndex;
+  final Set<int> jobPositions;
 
-  final int jobMajorIndex;
+  final Set<int> jobMajors;
 
   final City? jobCity;
 
   @override
   Widget build(BuildContext context) {
-    final jobTypeSelection = useState<int>(jobTypeIndex);
-    final jobPositionSelection = useState<int>(jobPositionIndex);
-    final majorSelection = useState<int>(jobMajorIndex);
+    final jobTypeSelection = useState<Set<int>>(jobTypes);
+    final jobPositionSelection = useState<Set<int>>(jobPositions);
+    final majorSelection = useState<Set<int>>(jobMajors);
     final citySelection = useState<City?>(jobCity);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -422,23 +422,28 @@ class _FilterModal extends HookWidget {
                   final majorState = ref.read(majorControllerProvider);
                   final positionState = ref.read(positionControllerProvider);
                   final scheduleState = ref.read(scheduleControllerProvider);
-                  final Major? major = majorState is MajorLoaded ? majorState.majors[majorSelection.value] : null;
-                  final Position? position =
-                      positionState is PositionLoaded ? positionState.positions[jobPositionSelection.value] : null;
-                  final Schedule? schedule =
-                      scheduleState is ScheduleLoaded ? scheduleState.schedules[jobTypeSelection.value] : null;
+                  final List<Major>? major =
+                      majorState is MajorLoaded ? majorSelection.value.map((e) => majorState.majors[e]).toList() : null;
+                  final List<Position>? position =
+                      positionState is PositionLoaded
+                          ? jobPositionSelection.value.map((e) => positionState.positions[e]).toList()
+                          : null;
+                  final List<Schedule>? schedule =
+                      scheduleState is ScheduleLoaded
+                          ? jobTypeSelection.value.map((e) => scheduleState.schedules[e]).toList()
+                          : null;
                   Navigator.of(context).pop();
                   await ref
                       .read(jobFilterControllerProvider.notifier)
                       .saveFilteredJob(
-                        major: major,
-                        city: citySelection.value,
-                        position: position,
-                        schedule: schedule,
-                        scheduleIndex: jobTypeSelection.value,
-                        positionscheduleIndex: jobPositionSelection.value,
-                        majorIndex: majorSelection.value,
+                        schedules: jobTypeSelection.value,
+                        positions: jobPositionSelection.value,
+                        majors: majorSelection.value,
                         title: searchController.text,
+                        city: citySelection.value,
+                        schedulesList: schedule,
+                        positionsList: position,
+                        majorsList: major,
                       );
                   if (searchNode.hasFocus) {
                     searchNode.unfocus();
@@ -456,12 +461,12 @@ class _FilterModal extends HookWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IntProperty('jobTypeIndex', jobTypeIndex));
-    properties.add(IntProperty('jobPositionIndex', jobPositionIndex));
-    properties.add(IntProperty('jobMajorIndex', jobMajorIndex));
     properties.add(DiagnosticsProperty<City?>('jobCity', jobCity));
     properties.add(DiagnosticsProperty<TextEditingController>('searchController', searchController));
     properties.add(DiagnosticsProperty<FocusNode>('searchNode', searchNode));
+    properties.add(IterableProperty<int>('jobTypes', jobTypes));
+    properties.add(IterableProperty<int>('jobPositions', jobPositions));
+    properties.add(IterableProperty<int>('jobMajors', jobMajors));
   }
 }
 
@@ -472,14 +477,18 @@ class _SelectedOption extends StatelessWidget {
 
   final int index;
 
-  final ValueNotifier<int> selection;
+  final ValueNotifier<Set<int>> selection;
 
   @override
   Widget build(BuildContext context) {
-    final isSelected = selection.value == index;
+    final isSelected = selection.value.contains(index);
     return FilledButton(
       onPressed: () async {
-        selection.value = index;
+        if (isSelected) {
+          selection.value = selection.value.where((e) => e != index).toSet();
+        } else {
+          selection.value = {...selection.value, index};
+        }
       },
       style: FilledButton.styleFrom(
         side: BorderSide(color: Theme.of(context).colorScheme.primary),
@@ -495,7 +504,7 @@ class _SelectedOption extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(StringProperty('label', label));
     properties.add(IntProperty('index', index));
-    properties.add(DiagnosticsProperty<ValueNotifier<int>>('selection', selection));
+    properties.add(DiagnosticsProperty<ValueNotifier<Set<int>>>('selection', selection));
   }
 }
 

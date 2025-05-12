@@ -19,10 +19,10 @@ abstract class JobRepository {
   Future<Either<Failure, List<Job>>> getFilteredJobs({
     int page = 1,
     int limit = 10,
-    Position? position,
-    Schedule? schedule,
+    List<Position>? positions,
+    List<Schedule>? schedules,
     City? city,
-    Major? major,
+    List<Major>? majors,
     String? title,
   });
 

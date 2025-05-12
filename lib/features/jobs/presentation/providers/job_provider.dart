@@ -69,10 +69,10 @@ class SearchJobsController extends _$SearchJobsController {
     required int page,
     required int limit,
     required String title,
-    Position? position,
-    Schedule? schedule,
+    List<Position>? positions,
+    List<Schedule>? schedules,
     City? city,
-    Major? major,
+    List<Major>? majors,
   }) async {
     state = const SearchJobsState.loading();
     try {
@@ -81,10 +81,10 @@ class SearchJobsController extends _$SearchJobsController {
         FilterJobUseCaseParams(
           page: page,
           limit: limit,
-          position: position,
-          schedule: schedule,
+          positions: positions,
+          schedules: schedules,
           city: city,
-          major: major,
+          majors: majors,
           title: title,
         ),
       );
@@ -400,22 +400,22 @@ class ScheduleController extends _$ScheduleController {
 @freezed
 sealed class JobFilterState with _$JobFilterState {
   const factory JobFilterState.initial({
-    required int scheduleIndex,
-    required int positionscheduleIndex,
-    required int majorIndex,
+    required Set<int> schedules,
+    required Set<int> positions,
+    required Set<int> majors,
     required String title,
     City? city,
   }) = JobFilterInitial;
 
   const factory JobFilterState.onSearch({
-    required int scheduleIndex,
-    required int positionscheduleIndex,
-    required int majorIndex,
+    required Set<int> schedules,
+    required Set<int> positions,
+    required Set<int> majors,
     required String title,
-    Schedule? schedule,
-    Position? position,
-    City? city,
-    Major? major,
+    required City? city,
+    required List<Schedule>? schedulesList,
+    required List<Position>? positionsList,
+    required List<Major>? majorsList,
   }) = JobFilterOnSearch;
 }
 
@@ -423,7 +423,7 @@ sealed class JobFilterState with _$JobFilterState {
 class JobFilterController extends _$JobFilterController {
   @override
   JobFilterState build() {
-    return const JobFilterState.initial(scheduleIndex: 0, positionscheduleIndex: 0, majorIndex: 0, title: '');
+    return JobFilterState.initial(schedules: HashSet(), positions: HashSet(), majors: HashSet(), title: '');
   }
 
   bool get isEmpty {
@@ -431,32 +431,40 @@ class JobFilterController extends _$JobFilterController {
   }
 
   Future<void> resetFilter() async {
-    state = const JobFilterState.initial(scheduleIndex: 0, positionscheduleIndex: 0, majorIndex: 0, title: '');
+    state = JobFilterState.initial(schedules: HashSet(), positions: HashSet(), majors: HashSet(), title: '');
   }
 
   Future<void> saveFilteredJob({
-    required int scheduleIndex,
-    required int positionscheduleIndex,
-    required int majorIndex,
+    required Set<int> schedules,
+    required Set<int> positions,
+    required Set<int> majors,
+    required List<Schedule>? schedulesList,
+    required List<Position>? positionsList,
+    required List<Major>? majorsList,
+    required City? city,
     required String title,
-    Schedule? schedule,
-    Position? position,
-    City? city,
-    Major? major,
   }) async {
     state = JobFilterState.onSearch(
-      scheduleIndex: scheduleIndex,
-      positionscheduleIndex: positionscheduleIndex,
-      majorIndex: majorIndex,
-      schedule: schedule,
-      position: position,
-      city: city,
-      major: major,
+      schedules: schedules,
+      positions: positions,
+      majors: majors,
       title: title,
+      city: city,
+      schedulesList: schedulesList,
+      positionsList: positionsList,
+      majorsList: majorsList,
     );
     await ref
         .read(searchJobsControllerProvider.notifier)
-        .filterJobs(page: 0, limit: 10, schedule: schedule, position: position, city: city, major: major, title: title);
+        .filterJobs(
+          page: 0,
+          limit: 10,
+          schedules: schedulesList,
+          positions: positionsList,
+          majors: majorsList,
+          city: city,
+          title: title,
+        );
   }
 }
 

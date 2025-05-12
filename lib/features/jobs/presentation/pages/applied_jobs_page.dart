@@ -66,9 +66,9 @@ class AppliedJobsPage extends HookConsumerWidget {
                             page: page.value,
                             limit: 10,
                             city: jobFilterState.city,
-                            schedule: jobFilterState.schedule,
-                            position: jobFilterState.position,
-                            major: jobFilterState.major,
+                            schedules: jobFilterState.schedulesList,
+                            positions: jobFilterState.positionsList,
+                            majors: jobFilterState.majorsList,
                             title: jobFilterState.title,
                           );
                         }

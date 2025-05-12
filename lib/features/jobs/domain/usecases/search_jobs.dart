@@ -120,10 +120,10 @@ sealed class FilterJobUseCaseParams with _$FilterJobUseCaseParams {
     required int page,
     required int limit,
     String? title,
-    Schedule? schedule,
-    Position? position,
+    List<Schedule>? schedules,
+    List<Position>? positions,
     City? city,
-    Major? major,
+    List<Major>? majors,
   }) = _FilterJobUseCaseParams;
 }
 
@@ -137,10 +137,10 @@ final class FilterJobUseCase implements UseCase<List<Job>, FilterJobUseCaseParam
     return await _jobRepository.getFilteredJobs(
       page: params.page,
       limit: params.limit,
-      schedule: params.schedule,
-      position: params.position,
+      schedules: params.schedules,
+      positions: params.positions,
       city: params.city,
-      major: params.major,
+      majors: params.majors,
       title: params.title,
     );
   }

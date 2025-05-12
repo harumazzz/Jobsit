@@ -91,22 +91,22 @@ final class JobRepositoryImpl implements JobRepository {
   Future<Either<Failure, List<Job>>> getFilteredJobs({
     int page = 1,
     int limit = 10,
-    Position? position,
-    Schedule? schedule,
+    List<Position>? positions,
+    List<Schedule>? schedules,
     City? city,
-    Major? major,
+    List<Major>? majors,
     String? title,
   }) async {
     try {
       final formData = FormData();
-      if (position != null) {
-        formData.fields.add(MapEntry('jobPositionIds', position.id.toString()));
+      if (positions != null) {
+        formData.fields.add(MapEntry('jobPositionIds', positions.map((e) => e.id.toString()).join(',')));
       }
-      if (schedule != null) {
-        formData.fields.add(MapEntry('jobScheduleIds', schedule.id.toString()));
+      if (schedules != null) {
+        formData.fields.add(MapEntry('jobScheduleIds', schedules.map((e) => e.id.toString()).join(',')));
       }
-      if (major != null) {
-        formData.fields.add(MapEntry('jobMajorIds', major.id.toString()));
+      if (majors != null) {
+        formData.fields.add(MapEntry('jobMajorIds', majors.map((e) => e.id.toString()).join(',')));
       }
       if (city != null) {
         final name = city.name.replaceFirst('Thành phố', '').replaceFirst('Tỉnh', '').trim();
