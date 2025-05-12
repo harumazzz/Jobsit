@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -64,6 +65,57 @@ class _JobPage extends HookConsumerWidget {
     final node = useFocusNode();
     final isLoading = useState(false);
     final page = useState(0);
+    final debounceTimer = useRef<Timer?>(null);
+    final performSearch = useCallback((String searchText) {
+      page.value = 0;
+      debounceTimer.value?.cancel();
+      debounceTimer.value = Timer(const Duration(milliseconds: 800), () async {
+        final jobFilterState = ref.read(jobFilterControllerProvider);
+        if (jobFilterState is! JobFilterOnSearch) {
+          return;
+        }
+        await ref
+            .read(jobFilterControllerProvider.notifier)
+            .saveFilteredJob(
+              title: searchText,
+              schedules: jobFilterState.schedules,
+              positions: jobFilterState.positions,
+              majors: jobFilterState.majors,
+              city: jobFilterState.city,
+              schedulesList: jobFilterState.schedulesList,
+              positionsList: jobFilterState.positionsList,
+              majorsList: jobFilterState.majorsList,
+            );
+        final searchController = ref.read(searchJobsControllerProvider.notifier);
+        if (searchText.isEmpty && ref.read(jobFilterControllerProvider.notifier).isEmpty) {
+          await searchController.searchJobs(page: 0, limit: 10);
+        } else {
+          final currentFilterState = ref.read(jobFilterControllerProvider) as JobFilterOnSearch;
+          await searchController.filterJobs(
+            page: 0,
+            limit: 10,
+            city: currentFilterState.city,
+            title: currentFilterState.title,
+            schedules: currentFilterState.schedulesList,
+            positions: currentFilterState.positionsList,
+            majors: currentFilterState.majorsList,
+          );
+        }
+      });
+    }, [ref, page]);
+
+    // Add listener to text controller
+    useEffect(() {
+      controller.addListener(() {
+        performSearch(controller.text);
+      });
+
+      return () {
+        debounceTimer.value?.cancel();
+        controller.removeListener(() {});
+      };
+    }, [controller, performSearch]);
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final state = ref.read(searchJobsControllerProvider);
       if (state is SearchJobsInitial) {
@@ -71,6 +123,7 @@ class _JobPage extends HookConsumerWidget {
         page.value++;
       }
     });
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
