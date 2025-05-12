@@ -39,6 +39,8 @@ sealed class UserInformation with _$UserInformation {
     required String phone,
     required bool gender,
     required bool mailReceive,
+    String? city,
+    String? district,
     String? birthDate,
     String? address,
     String? avatar,

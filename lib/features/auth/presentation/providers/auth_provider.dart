@@ -232,6 +232,9 @@ class AuthController extends _$AuthController {
     required String phone,
     required int gender,
     required String location,
+    required String city,
+    required String district,
+    required University university,
     FileSelectorResult? avatar,
   }) async {
     if (state is AuthAuthorized) {
@@ -244,6 +247,9 @@ class AuthController extends _$AuthController {
           phone: phone,
           gender: gender,
           location: location,
+          city: city,
+          district: district,
+          university: university,
           avatar: avatar != null ? FileRequest(name: avatar.name, data: avatar.data) : null,
         ),
       );

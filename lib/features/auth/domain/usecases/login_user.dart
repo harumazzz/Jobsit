@@ -212,6 +212,9 @@ sealed class UpdateUserInfoParams with _$UpdateUserInfoParams {
     required String phone,
     required int gender,
     required String location,
+    required String city,
+    required String district,
+    required University university,
     FileRequest? avatar,
   }) = _UpdateUserInfoParams;
 }
@@ -231,6 +234,9 @@ final class UpdateUserInfoUseCase implements UseCase<User, UpdateUserInfoParams>
       gender: params.gender,
       location: params.location,
       avatar: params.avatar,
+      city: params.city,
+      district: params.district,
+      university: params.university,
     );
   }
 }

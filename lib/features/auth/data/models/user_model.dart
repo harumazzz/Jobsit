@@ -83,6 +83,8 @@ abstract class UserCreationResponse with _$UserCreationResponse {
     @JsonKey(name: 'birthDay') String? birthDate,
     @JsonKey(name: 'avatar') String? avatar,
     @JsonKey(name: 'location') String? address,
+    @JsonKey(name: 'city') String? city,
+    @JsonKey(name: 'district') String? district,
     @JsonKey(name: 'mailReceive') required bool mailReceive,
     @JsonKey(name: 'roleDTO') required RoleResponse role,
     @JsonKey(name: 'statusDTO') required StatusResponse status,
@@ -293,6 +295,8 @@ extension GetUserResponseMapper on GetUserResponse {
         birthDate: user.birthDate,
         address: user.address,
         mailReceive: user.mailReceive,
+        city: user.city,
+        district: user.district,
       ),
       jobInfo: JobInformation(
         university: jobInfo.university?.toEntity(),

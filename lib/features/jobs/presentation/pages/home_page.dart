@@ -66,43 +66,48 @@ class _JobPage extends HookConsumerWidget {
     final isLoading = useState(false);
     final page = useState(0);
     final debounceTimer = useRef<Timer?>(null);
-    final performSearch = useCallback((String searchText) {
-      page.value = 0;
-      debounceTimer.value?.cancel();
-      debounceTimer.value = Timer(const Duration(milliseconds: 800), () async {
-        final jobFilterState = ref.read(jobFilterControllerProvider);
-        if (jobFilterState is! JobFilterOnSearch) {
-          return;
-        }
-        await ref
-            .read(jobFilterControllerProvider.notifier)
-            .saveFilteredJob(
-              title: searchText,
-              schedules: jobFilterState.schedules,
-              positions: jobFilterState.positions,
-              majors: jobFilterState.majors,
-              city: jobFilterState.city,
-              schedulesList: jobFilterState.schedulesList,
-              positionsList: jobFilterState.positionsList,
-              majorsList: jobFilterState.majorsList,
+    final performSearch = useCallback(
+      (String searchText) {
+        page.value = 0;
+        debounceTimer.value?.cancel();
+        debounceTimer.value = Timer(const Duration(milliseconds: 800), () async {
+          final jobFilterState = ref.read(jobFilterControllerProvider);
+          if (jobFilterState is! JobFilterOnSearch) {
+            return;
+          }
+          await ref
+              .read(jobFilterControllerProvider.notifier)
+              .saveFilteredJob(
+                title: searchText,
+                schedules: jobFilterState.schedules,
+                positions: jobFilterState.positions,
+                majors: jobFilterState.majors,
+                city: jobFilterState.city,
+                schedulesList: jobFilterState.schedulesList,
+                positionsList: jobFilterState.positionsList,
+                majorsList: jobFilterState.majorsList,
+              );
+          final searchController = ref.read(searchJobsControllerProvider.notifier);
+          if (searchText.isEmpty && ref.read(jobFilterControllerProvider.notifier).isEmpty) {
+            await searchController.searchJobs(page: 0, limit: 10);
+          } else {
+            final currentFilterState = ref.read(jobFilterControllerProvider) as JobFilterOnSearch;
+            await searchController.filterJobs(
+              page: 0,
+              limit: 10,
+              city: currentFilterState.city,
+              title: currentFilterState.title,
+              schedules: currentFilterState.schedulesList,
+              positions: currentFilterState.positionsList,
+              majors: currentFilterState.majorsList,
             );
-        final searchController = ref.read(searchJobsControllerProvider.notifier);
-        if (searchText.isEmpty && ref.read(jobFilterControllerProvider.notifier).isEmpty) {
-          await searchController.searchJobs(page: 0, limit: 10);
-        } else {
-          final currentFilterState = ref.read(jobFilterControllerProvider) as JobFilterOnSearch;
-          await searchController.filterJobs(
-            page: 0,
-            limit: 10,
-            city: currentFilterState.city,
-            title: currentFilterState.title,
-            schedules: currentFilterState.schedulesList,
-            positions: currentFilterState.positionsList,
-            majors: currentFilterState.majorsList,
-          );
-        }
-      });
-    }, [ref, page]);
+          }
+        });
+      },
+      () {
+        return [ref, page];
+      }(),
+    );
 
     // Add listener to text controller
     useEffect(() {

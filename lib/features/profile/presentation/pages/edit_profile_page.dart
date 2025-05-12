@@ -55,8 +55,29 @@ class PersonalInfoEditPage extends HookConsumerWidget {
     final genderOptions = ['Male', 'Female'];
     final cityOptions = (ref.read(citiesControllerProvider) as CitiesLoaded).cities;
     final selectedGender = useState(currentState.user.userInfo.gender ? 'Male' : 'Female');
-    final selectedCity = useState<City?>(null);
-    final selectedDistrict = useState<District?>(null);
+    final selectedCity = useState<City?>(
+      currentState.user.userInfo.city != null
+          ? (ref.read(citiesControllerProvider) as CitiesLoaded).cities.firstWhere(
+            (city) => city.name.contains(currentState.user.userInfo.city!),
+          )
+          : null,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final state = ref.read(districtsControllerProvider);
+      if (state is DistrictsInitial) {
+        await ref.read(districtsControllerProvider.notifier).getDistricts(code: selectedCity.value!.code);
+      }
+    });
+    if (ref.watch(districtsControllerProvider) is! DistrictsLoaded) {
+      return Center(child: LinearProgressIndicator(color: Theme.of(context).primaryColor));
+    }
+    final selectedDistrict = useState<District?>(
+      currentState.user.userInfo.district != null
+          ? (ref.read(districtsControllerProvider) as DistrictsLoaded).districts.firstWhere(
+            (district) => district.name.contains(currentState.user.userInfo.district!),
+          )
+          : null,
+    );
     final selectedDate = useState<DateTime?>(
       currentState.user.userInfo.birthDate != null
           ? DateFormat('dd-MM-yyyy').parse(currentState.user.userInfo.birthDate!)
@@ -444,11 +465,14 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                         firstName: firstNameController.text,
                         lastName: lastNameController.text,
                         phone: phoneController.text,
-                        birthDay: DateFormat('yyyy-MM-dd').format(selectedDate.value!),
+                        birthDay: DateFormat('dd-MM-yyyy').format(selectedDate.value!),
                         gender: genderOptions.indexOf(selectedGender.value),
                         location:
                             '${selectedCity.value?.name}, ${selectedDistrict.value?.name}, ${addressController.text}',
                         avatar: image.value,
+                        city: selectedCity.value!.name,
+                        district: selectedDistrict.value!.name,
+                        university: selectedUniversity.value!,
                       );
                   if (context.mounted) {
                     ElegantNotification.success(

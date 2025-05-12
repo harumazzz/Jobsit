@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dart_either/dart_either.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -266,17 +267,27 @@ final class AuthRepositoryImpl implements AuthRepository {
     required String phone,
     required int gender,
     required String location,
+    required String city,
+    required String district,
+    required University university,
     FileRequest? avatar,
   }) async {
     try {
       final Map<String, dynamic> value = {
         'candidateProfileDTO': jsonEncode({
-          'firstName': firstName,
-          'lastName': lastName,
-          'birthDay': birthDay,
-          'phone': phone,
-          'gender': gender,
-          'location': location,
+          'userProfileDTO': {
+            'firstName': firstName,
+            'lastName': lastName,
+            'birthDay': birthDay,
+            'phone': phone,
+            'gender': gender,
+            'location': location,
+            'city': city,
+            'district': district,
+          },
+          'candidateOtherInfoDTO': {
+            'universityDTO': {'id': university.id},
+          },
         }),
       };
       if (avatar != null) {

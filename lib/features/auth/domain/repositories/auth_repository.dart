@@ -52,6 +52,9 @@ abstract class AuthRepository {
     required String phone,
     required int gender,
     required String location,
+    required String city,
+    required String district,
+    required University university,
     FileRequest? avatar,
   });
 
