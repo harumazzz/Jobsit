@@ -108,19 +108,21 @@ class _JobPage extends HookConsumerWidget {
         return [ref, page];
       }(),
     );
+    useEffect(
+      () {
+        controller.addListener(() {
+          performSearch(controller.text);
+        });
 
-    // Add listener to text controller
-    useEffect(() {
-      controller.addListener(() {
-        performSearch(controller.text);
-      });
-
-      return () {
-        debounceTimer.value?.cancel();
-        controller.removeListener(() {});
-      };
-    }, [controller, performSearch]);
-
+        return () {
+          debounceTimer.value?.cancel();
+          controller.removeListener(() {});
+        };
+      },
+      () {
+        return [controller, performSearch];
+      }(),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final state = ref.read(searchJobsControllerProvider);
       if (state is SearchJobsInitial) {

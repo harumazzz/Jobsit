@@ -37,6 +37,7 @@ class JobDetailPage extends HookConsumerWidget {
             expandedHeight: 38.0,
             floating: true,
             backgroundColor: const Color(0xFff5fafd),
+            surfaceTintColor: const Color(0xFff5fafd),
             flexibleSpace: const FlexibleSpaceBar(title: Text('Job Detail'), centerTitle: true),
             actions: [
               Consumer(
@@ -381,7 +382,7 @@ class JobDetailPage extends HookConsumerWidget {
                                   const SizedBox(height: 16.0),
                                   relatedJobs.isEmpty
                                       ? SizedBox(
-                                        height: 200.0,
+                                        height: 220.0,
                                         child: Center(
                                           child: Text(
                                             'No other jobs available.',
@@ -393,7 +394,7 @@ class JobDetailPage extends HookConsumerWidget {
                                         ),
                                       )
                                       : CarouselSlider(
-                                        options: CarouselOptions(height: 200.0, autoPlay: true),
+                                        options: CarouselOptions(height: 220.0, autoPlay: true),
                                         items: [
                                           ...relatedJobs.map((e) {
                                             return JobCard(
@@ -441,37 +442,41 @@ class _ApplyNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 13), blurRadius: 5.0, offset: const Offset(0, -1))],
-      ),
-      child: Consumer(
-        builder: (context, ref, child) {
-          final state = ref.watch(jobDetailControllerProvider);
-          return switch (state) {
-            JobDetailLoading() => const Center(child: CircularProgressIndicator()),
-            JobDetailError() => const SizedBox.shrink(),
-            JobDetailInitial() => const SizedBox.shrink(),
-            JobDetailLoaded() => ElevatedButton(
-              onPressed: () async {
-                await showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => _ApplyModal(jobId: jobId),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 32.0),
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+        child: Consumer(
+          builder: (context, ref, child) {
+            final state = ref.watch(jobDetailControllerProvider);
+            return switch (state) {
+              JobDetailLoading() => const Center(child: CircularProgressIndicator()),
+              JobDetailError() => const SizedBox.shrink(),
+              JobDetailInitial() => const SizedBox.shrink(),
+              JobDetailLoaded() => ElevatedButton(
+                onPressed: () async {
+                  await showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    useSafeArea: true,
+                    builder:
+                        (context) => Padding(
+                          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                          child: _ApplyModal(jobId: jobId),
+                        ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 32.0),
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                ),
+                child: const Text('Apply', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
-              child: const Text('Apply', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            ),
-          };
-        },
+            };
+          },
+        ),
       ),
     );
   }
@@ -493,169 +498,180 @@ class _ApplyModal extends HookWidget {
     final file = useState<FileSelectorResult?>(null);
     final controller = useTextEditingController();
     final text = useState<String>('Upload new CV');
-    return Container(
-      height: 560.0,
-      width: double.infinity,
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 24.0, bottom: 8.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(32.0), topRight: Radius.circular(32.0)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 16.0,
-        children: [
-          Text(
-            'Attached CV',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          Consumer(
-            builder: (context, ref, child) {
-              return TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 32.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-                    side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
-                  ),
+    return SafeArea(
+      child: Container(
+        height: 560.0,
+        width: double.infinity,
+        padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 24.0, bottom: 8.0),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: const BorderRadius.only(topLeft: Radius.circular(32.0), topRight: Radius.circular(32.0)),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 16.0,
+            children: [
+              Text(
+                'Attached CV',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-                child: Center(
-                  child: Text(
-                    text.value,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSecondary,
-                      fontWeight: FontWeight.bold,
+              ),
+              Consumer(
+                builder: (context, ref, child) {
+                  return TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 32.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                        side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                      ),
                     ),
-                  ),
-                ),
-                onPressed: () async {
-                  final result = await ref.read(fileServiceProvider).uploadFile([
-                    const FileSelector(label: 'CV', extensions: ['pdf']),
-                  ]);
-                  result.fold(
-                    ifLeft: (error) {
-                      ElegantNotification.error(
-                        background: const Color(0xFFFCE8DB),
-                        description: Text(error.message),
-                      ).show(context);
-                    },
-                    ifRight: (e) {
-                      text.value = e.name;
-                      file.value = e;
-                    },
-                  );
-                },
-              );
-            },
-          ),
-          if (file.value != null)
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 300),
-              opacity: 0.84,
-              child: CustomButton(
-                onPressed: () async {
-                  await showDialog(
-                    context: context,
-                    builder:
-                        (context) => AlertDialog(
-                          title: Text(file.value!.name),
-                          content: SizedBox(height: 600.0, width: 400.0, child: PdfViewerPage(data: file.value!.data)),
-                          actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close'))],
+                    child: Center(
+                      child: Text(
+                        text.value,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSecondary,
+                          fontWeight: FontWeight.bold,
                         ),
+                      ),
+                    ),
+                    onPressed: () async {
+                      final result = await ref.read(fileServiceProvider).uploadFile([
+                        const FileSelector(label: 'CV', extensions: ['pdf']),
+                      ]);
+                      result.fold(
+                        ifLeft: (error) {
+                          ElegantNotification.error(
+                            background: const Color(0xFFFCE8DB),
+                            description: Text(error.message),
+                          ).show(context);
+                        },
+                        ifRight: (e) {
+                          text.value = e.name;
+                          file.value = e;
+                        },
+                      );
+                    },
                   );
                 },
-                child: Text(
-                  'Preview',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                ),
               ),
-            ),
-          Text(
-            'Resume letter',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          TextField(
-            controller: controller,
-            minLines: 5,
-            maxLines: 5,
-            decoration: InputDecoration(
-              fillColor: Colors.white,
-              filled: true,
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
-                borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
-                borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-              ),
-              hintText: 'Write a brief introduce about yourself',
-              hintStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.5),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          const SizedBox.shrink(),
-          Consumer(
-            builder: (context, ref, child) {
-              return CustomButton(
-                onPressed: () async {
-                  if (file.value == null) {
-                    return;
-                  }
-                  if (controller.text.trim().isEmpty) {
-                    ElegantNotification.error(
-                      background: const Color(0xFFFCE8DB),
-                      description: const Text('Please write a reference letter'),
-                    ).show(context);
-                    return;
-                  }
-                  await ref
-                      .read(applyJobControllerProvider.notifier)
-                      .applyJob(jobId: jobId, referenceLetter: controller.text, cv: file.value!);
-                  final state = ref.read(applyJobControllerProvider);
-                  if (state is ApplyJobError) {
-                    if (context.mounted) {
-                      ElegantNotification.error(
-                        background: const Color(0xFFFCE8DB),
-                        description: Text(state.message),
-                      ).show(context);
-                    }
-                  } else if (state is ApplyJobLoaded) {
-                    if (context.mounted) {
-                      ElegantNotification.success(
-                        background: const Color(0xFFDEF2ED),
-                        description: const Text('Job has been applied successfully!'),
-                      ).show(context);
-                      Navigator.pop(context);
-                    }
-                  }
-                },
-                child: Center(
-                  child: Text(
-                    'Submit',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onPrimary,
+              if (file.value != null)
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: 0.84,
+                  child: CustomButton(
+                    onPressed: () async {
+                      await showDialog(
+                        context: context,
+                        builder:
+                            (context) => AlertDialog(
+                              title: Text(file.value!.name),
+                              content: SizedBox(
+                                height: 600.0,
+                                width: 400.0,
+                                child: PdfViewerPage(data: file.value!.data),
+                              ),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+                              ],
+                            ),
+                      );
+                    },
+                    child: Text(
+                      'Preview',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     ),
                   ),
                 ),
-              );
-            },
+              Text(
+                'Resume letter',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 12.0),
+              TextField(
+                controller: controller,
+                minLines: 5,
+                maxLines: 5,
+                decoration: InputDecoration(
+                  fillColor: Colors.white,
+                  filled: true,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  ),
+                  hintText: 'Write a brief introduce about yourself',
+                  hintStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.5),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const SizedBox.shrink(),
+              Consumer(
+                builder: (context, ref, child) {
+                  return CustomButton(
+                    onPressed: () async {
+                      if (file.value == null) {
+                        return;
+                      }
+                      if (controller.text.trim().isEmpty) {
+                        ElegantNotification.error(
+                          background: const Color(0xFFFCE8DB),
+                          description: const Text('Please write a reference letter'),
+                        ).show(context);
+                        return;
+                      }
+                      await ref
+                          .read(applyJobControllerProvider.notifier)
+                          .applyJob(jobId: jobId, referenceLetter: controller.text, cv: file.value!);
+                      final state = ref.read(applyJobControllerProvider);
+                      if (state is ApplyJobError) {
+                        if (context.mounted) {
+                          ElegantNotification.error(
+                            background: const Color(0xFFFCE8DB),
+                            description: Text(state.message),
+                          ).show(context);
+                        }
+                      } else if (state is ApplyJobLoaded) {
+                        if (context.mounted) {
+                          ElegantNotification.success(
+                            background: const Color(0xFFDEF2ED),
+                            description: const Text('Job has been applied successfully!'),
+                          ).show(context);
+                          Navigator.pop(context);
+                        }
+                      }
+                    },
+                    child: Center(
+                      child: Text(
+                        'Submit',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

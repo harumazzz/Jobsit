@@ -21,6 +21,7 @@ class SavedJobsPage extends HookWidget {
             expandedHeight: 38.0,
             floating: true,
             backgroundColor: Color(0xFFefeff0),
+            surfaceTintColor: const Color(0xFff5fafd),
             flexibleSpace: FlexibleSpaceBar(title: Text('Saved Jobs'), centerTitle: true),
           ),
           SliverPadding(
