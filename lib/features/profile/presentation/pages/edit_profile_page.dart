@@ -62,22 +62,41 @@ class PersonalInfoEditPage extends HookConsumerWidget {
           )
           : null,
     );
+    final selectedDistrict = useState<District?>(null);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final state = ref.read(districtsControllerProvider);
-      if (state is DistrictsInitial) {
+      if (state is DistrictsInitial && selectedCity.value != null) {
         await ref.read(districtsControllerProvider.notifier).getDistricts(code: selectedCity.value!.code);
+        if (currentState.user.userInfo.district != null) {
+          final districtsState = ref.read(districtsControllerProvider);
+          if (districtsState is DistrictsLoaded) {
+            try {
+              final district = districtsState.districts.firstWhere(
+                (district) => district.name.contains(currentState.user.userInfo.district!),
+              );
+              selectedDistrict.value = district;
+            } catch (e) {
+              debugPrint('District not found: $e');
+            }
+          }
+        }
+      }
+      if (state is DistrictsLoaded && selectedCity.value != null) {
+        if (currentState.user.userInfo.district != null) {
+          try {
+            final district = state.districts.firstWhere(
+              (district) => district.name.contains(currentState.user.userInfo.district!),
+            );
+            selectedDistrict.value = district;
+          } catch (e) {
+            debugPrint('District not found: $e');
+          }
+        }
       }
     });
-    if (ref.watch(districtsControllerProvider) is! DistrictsLoaded) {
-      return Center(child: LinearProgressIndicator(color: Theme.of(context).primaryColor));
+    if (selectedCity.value != null && ref.watch(districtsControllerProvider) is! DistrictsLoaded) {
+      return Scaffold(body: Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)));
     }
-    final selectedDistrict = useState<District?>(
-      currentState.user.userInfo.district != null
-          ? (ref.read(districtsControllerProvider) as DistrictsLoaded).districts.firstWhere(
-            (district) => district.name.contains(currentState.user.userInfo.district!),
-          )
-          : null,
-    );
     final selectedDate = useState<DateTime?>(
       currentState.user.userInfo.birthDate != null
           ? DateFormat('dd-MM-yyyy').parse(currentState.user.userInfo.birthDate!)
@@ -85,6 +104,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
     );
     return Scaffold(
       appBar: AppBar(
+        surfaceTintColor: const Color(0xFff5fafd),
         title: const Text('Personal Information', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
@@ -311,10 +331,18 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                         ...cityOptions.map((city) {
                           return MenuItemButton(
                             onPressed: () async {
+                              // Reset district selection when city changes
+                              selectedDistrict.value = null;
+
+                              // Reset districts controller and set new city
+                              await ref.read(districtsControllerProvider.notifier).reset();
                               selectedCity.value = city;
+
+                              // Get districts for the selected city
                               await ref
                                   .read(districtsControllerProvider.notifier)
                                   .getDistricts(code: selectedCity.value!.code);
+
                               cityFocusNode.unfocus();
                               if (context.mounted) {
                                 FocusScope.of(context).requestFocus(districtFocusNode);
@@ -345,19 +373,33 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                           focusNode: districtFocusNode,
                           validator: (value) => null,
                           builder: (FormFieldState<dynamic> field) {
+                            final String displayText;
+                            var isEnabled = true;
+                            if (selectedCity.value == null) {
+                              displayText = 'Select a city first';
+                              isEnabled = false;
+                            } else if (state is! DistrictsLoaded) {
+                              displayText = 'Loading districts...';
+                              isEnabled = false;
+                            } else if (selectedDistrict.value != null) {
+                              displayText = selectedDistrict.value!.name;
+                            } else {
+                              displayText = 'Select District';
+                            }
                             return InputDecorator(
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'District',
-                                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                                contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                                border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                                enabled: isEnabled,
                               ),
                               child: GestureDetector(
                                 onTap: () async {
-                                  controller.open();
+                                  if (isEnabled) {
+                                    controller.open();
+                                  }
                                 },
-                                child: Text(
-                                  selectedDistrict.value != null ? selectedDistrict.value!.name : 'Select District',
-                                ),
+                                child: Text(displayText, style: isEnabled ? null : const TextStyle(color: Colors.grey)),
                               ),
                             );
                           },
@@ -510,6 +552,7 @@ class JobInfoEditPage extends HookWidget {
     final cv = useState<FileSelectorResult?>(null);
     return Scaffold(
       appBar: AppBar(
+        surfaceTintColor: const Color(0xFff5fafd),
         title: const Text('Job Information', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
@@ -786,14 +829,11 @@ class _CustomNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 5.0, offset: const Offset(0, -1))],
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest),
       child: CustomButton(
         onPressed: onPressed,
-        child: const Padding(padding: EdgeInsets.symmetric(vertical: 8.0), child: Text('Save')),
+        child: const Padding(padding: EdgeInsets.symmetric(vertical: 4.0), child: Text('Save')),
       ),
     );
   }

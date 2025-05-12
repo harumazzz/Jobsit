@@ -273,6 +273,10 @@ class DistrictsController extends _$DistrictsController {
     return const DistrictsState.initial();
   }
 
+  Future<void> reset() async {
+    state = const DistrictsState.loading();
+  }
+
   Future<void> getDistricts({required int code}) async {
     state = const DistrictsState.loading();
     try {
