@@ -73,12 +73,18 @@ class ProfilePage extends HookConsumerWidget {
               children: [
                 _CustomIcon(
                   title: 'Applied',
-                  subtitle: '0',
+                  subtitle: switch (ref.watch(applyJobControllerProvider)) {
+                    ApplyJobLoaded(jobs: final jobs) => jobs.length.toString(),
+                    _ => '0',
+                  },
                   icon: Icon(IconlyLight.profile, size: 24.0, color: Theme.of(context).colorScheme.onPrimary),
                 ),
                 _CustomIcon(
                   title: 'Saved',
-                  subtitle: '0',
+                  subtitle: switch (ref.watch(savedJobControllerProvider)) {
+                    SavedJobLoaded(jobs: final jobs) => jobs.length.toString(),
+                    _ => '0',
+                  },
                   icon: Icon(IconlyLight.work, size: 24.0, color: Theme.of(context).colorScheme.onPrimary),
                 ),
               ],

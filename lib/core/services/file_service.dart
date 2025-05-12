@@ -82,7 +82,13 @@ final class FileService implements IFileService {
     var result =
         (await file_selector.openFile(
           acceptedTypeGroups: [
-            ...allowance.map((e) => file_selector.XTypeGroup(label: e.label, extensions: e.extensions)),
+            ...allowance.map((e) {
+              return file_selector.XTypeGroup(
+                label: e.label,
+                extensions: e.extensions,
+                uniformTypeIdentifiers: e.extensions,
+              );
+            }),
           ],
         ))?.path;
     if (result == null) {

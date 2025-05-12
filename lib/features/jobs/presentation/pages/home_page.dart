@@ -62,6 +62,7 @@ class _JobPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useTextEditingController(text: ref.read(jobFilterControllerProvider).title);
     final node = useFocusNode();
+    final isLoading = useState(false);
     final page = useState(0);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final state = ref.read(searchJobsControllerProvider);
@@ -129,30 +130,40 @@ class _JobPage extends HookConsumerWidget {
                     ),
                     elevation: 2.0,
                     onPressed: () async {
-                      final citiesController = ref.read(citiesControllerProvider.notifier);
-                      final scheduleController = ref.read(scheduleControllerProvider.notifier);
-                      final positionController = ref.read(positionControllerProvider.notifier);
-                      final majorController = ref.read(majorControllerProvider.notifier);
-                      await citiesController.fetchCities();
-                      await scheduleController.getSchedules();
-                      await positionController.getPositions();
-                      await majorController.getMajors();
-                      final jobFilterState = ref.read(jobFilterControllerProvider);
-                      if (context.mounted) {
-                        await showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          builder: (context) {
-                            return _FilterModal(
-                              jobTypeIndex: jobFilterState.scheduleIndex,
-                              jobPositionIndex: jobFilterState.positionscheduleIndex,
-                              jobMajorIndex: jobFilterState.majorIndex,
-                              jobCity: jobFilterState.city,
-                              searchController: controller,
-                              searchNode: node,
-                            );
-                          },
-                        );
+                      if (isLoading.value) {
+                        return;
+                      }
+                      isLoading.value = true;
+                      try {
+                        final citiesController = ref.read(citiesControllerProvider.notifier);
+                        final scheduleController = ref.read(scheduleControllerProvider.notifier);
+                        final positionController = ref.read(positionControllerProvider.notifier);
+                        final majorController = ref.read(majorControllerProvider.notifier);
+                        await Future.wait([
+                          citiesController.fetchCities(),
+                          scheduleController.getSchedules(),
+                          positionController.getPositions(),
+                          majorController.getMajors(),
+                        ]);
+                        final jobFilterState = ref.read(jobFilterControllerProvider);
+                        if (context.mounted) {
+                          await showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (context) {
+                              return _FilterModal(
+                                jobTypeIndex: jobFilterState.scheduleIndex,
+                                jobPositionIndex: jobFilterState.positionscheduleIndex,
+                                jobMajorIndex: jobFilterState.majorIndex,
+                                jobCity: jobFilterState.city,
+                                searchController: controller,
+                                searchNode: node,
+                              );
+                            },
+                          );
+                        }
+                      } finally {
+                        isLoading.value = false;
                       }
                     },
                     child: Icon(IconlyLight.filter, color: Theme.of(context).colorScheme.primaryContainer),
@@ -413,6 +424,7 @@ class _FilterModal extends HookWidget {
                       positionState is PositionLoaded ? positionState.positions[jobPositionSelection.value] : null;
                   final Schedule? schedule =
                       scheduleState is ScheduleLoaded ? scheduleState.schedules[jobTypeSelection.value] : null;
+                  Navigator.of(context).pop();
                   await ref
                       .read(jobFilterControllerProvider.notifier)
                       .saveFilteredJob(
@@ -427,9 +439,6 @@ class _FilterModal extends HookWidget {
                       );
                   if (searchNode.hasFocus) {
                     searchNode.unfocus();
-                  }
-                  if (context.mounted) {
-                    Navigator.of(context).pop();
                   }
                 },
                 child: const Center(child: Text('Apply filter')),

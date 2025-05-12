@@ -70,13 +70,21 @@ sealed class Position with _$Position {
 }
 
 extension JobExtension on Job {
-  int get minInUSD {
-    return (minAllowance / 24.500).round();
+  String get minInUSD {
+    return _formatCurrency(minAllowance);
   }
 
-  int get maxInUSD {
-    return (maxAllowance / 24.500).round();
+  String get maxInUSD {
+    return _formatCurrency(maxAllowance);
   }
+}
+
+String _formatCurrency(double value) {
+  final formattedValue = (value / 24.500).round();
+  if (formattedValue > 1000) {
+    return '${formattedValue / 1000}k';
+  }
+  return formattedValue.toString();
 }
 
 @freezed

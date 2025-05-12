@@ -35,7 +35,6 @@ class AppliedJobsPage extends HookConsumerWidget {
               builder: (context, ref, child) {
                 final jobState = ref.watch(applyJobControllerProvider);
                 switch (jobState) {
-                  case ApplyJobInitial():
                   case ApplyJobLoading():
                     return SliverToBoxAdapter(
                       child: ListView.builder(
@@ -90,6 +89,8 @@ class AppliedJobsPage extends HookConsumerWidget {
                         },
                       ),
                     );
+                  default:
+                    return const SliverToBoxAdapter(child: SizedBox.shrink());
                 }
               },
             ),

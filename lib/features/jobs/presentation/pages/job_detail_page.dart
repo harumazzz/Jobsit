@@ -55,8 +55,20 @@ class JobDetailPage extends HookConsumerWidget {
                         isSelected.value = !isSelected.value;
                         if (ref.read(savedJobControllerProvider.notifier).contains(state.job.id)) {
                           await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: jobId);
+                          if (context.mounted) {
+                            ElegantNotification.success(
+                              background: const Color(0xFFDEF2ED),
+                              description: const Text('Job has been removed successfully!'),
+                            ).show(context);
+                          }
                         } else {
                           await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
+                          if (context.mounted) {
+                            ElegantNotification.success(
+                              background: const Color(0xFFDEF2ED),
+                              description: const Text('Job has been saved successfully!'),
+                            ).show(context);
+                          }
                         }
                       },
                     ),
@@ -127,18 +139,20 @@ class JobDetailPage extends HookConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 12.0),
+                        Text(
+                          job.company.name ?? 'Company Name',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSecondary,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                        ),
+                        const SizedBox(height: 12.0),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(
-                              job.company.name ?? 'Company Name',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSecondary,
-                              ),
-                            ),
-                            const SizedBox(width: 12.0),
                             Icon(IconlyLight.location, size: 24.0, color: Theme.of(context).colorScheme.primary),
                             const SizedBox(width: 4.0),
                             Text(
@@ -146,6 +160,8 @@ class JobDetailPage extends HookConsumerWidget {
                               style: Theme.of(
                                 context,
                               ).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSecondary),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
                             ),
                           ],
                         ),
@@ -154,8 +170,8 @@ class JobDetailPage extends HookConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            ...job.positions.map(
-                              (position) => Container(
+                            ...job.majors.map(
+                              (major) => Container(
                                 margin: const EdgeInsets.symmetric(horizontal: 5),
                                 padding: const EdgeInsets.all(5),
                                 decoration: const BoxDecoration(
@@ -163,7 +179,7 @@ class JobDetailPage extends HookConsumerWidget {
                                   borderRadius: BorderRadius.all(Radius.circular(8)),
                                 ),
                                 child: Text(
-                                  position.name,
+                                  major.name,
                                   style: Theme.of(
                                     context,
                                   ).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
@@ -192,12 +208,12 @@ class JobDetailPage extends HookConsumerWidget {
                             ),
                             JobIntroduce(
                               title: 'Salary',
-                              content: '\$${job.minInUSD}k - \$${job.maxInUSD}k',
+                              content: '\$${job.minInUSD} - \$${job.maxInUSD}',
                               child: Icon(IconlyLight.wallet, size: 24.0, color: Theme.of(context).colorScheme.primary),
                             ),
                             JobIntroduce(
                               title: 'Deadline',
-                              content: DateFormat('dd/MM/yyyy').format(job.applicationDeadline.toLocal()),
+                              content: DateFormat('dd/MM/yy').format(job.applicationDeadline.toLocal()),
                               child: Icon(
                                 IconlyLight.calendar,
                                 size: 24.0,
@@ -278,7 +294,7 @@ class JobDetailPage extends HookConsumerWidget {
                         const SizedBox(height: 24.0),
                         Container(
                           padding: const EdgeInsets.all(16.0),
-                          height: 600,
+                          height: 700,
                           child: PageView(
                             controller: pageController,
                             onPageChanged: (index) async {
@@ -356,7 +372,7 @@ class JobDetailPage extends HookConsumerWidget {
                                   const SizedBox(height: 16.0),
                                   relatedJobs.isEmpty
                                       ? SizedBox(
-                                        height: 200.0,
+                                        height: 250.0,
                                         child: Center(
                                           child: Text(
                                             'No other jobs available.',
@@ -368,7 +384,7 @@ class JobDetailPage extends HookConsumerWidget {
                                         ),
                                       )
                                       : CarouselSlider(
-                                        options: CarouselOptions(height: 200.0, autoPlay: true),
+                                        options: CarouselOptions(height: 250.0, autoPlay: true),
                                         items: [
                                           ...relatedJobs.map(
                                             (e) => JobCard(
@@ -443,7 +459,7 @@ class _ApplyNavBar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 32.0),
                 shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
               ),
-              child: const Text('Apply Now', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: const Text('Apply', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           };
         },
@@ -469,7 +485,7 @@ class _ApplyModal extends HookWidget {
     final controller = useTextEditingController();
     final text = useState<String>('Upload new CV');
     return Container(
-      height: 500.0,
+      height: 560.0,
       width: double.infinity,
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 24.0, bottom: 8.0),
       decoration: BoxDecoration(
@@ -528,6 +544,23 @@ class _ApplyModal extends HookWidget {
               );
             },
           ),
+          if (file.value != null)
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: 0.84,
+              child: CustomButton(
+                onPressed: () async {
+                  // TODO(self): Implement PDF preview functionality
+                },
+                child: Text(
+                  'Preview',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+            ),
           Text(
             'Resume letter',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -568,12 +601,22 @@ class _ApplyModal extends HookWidget {
                   await ref
                       .read(applyJobControllerProvider.notifier)
                       .applyJob(jobId: jobId, referenceLetter: controller.text, cv: file.value!);
-                  if (context.mounted) {
-                    ElegantNotification.success(
-                      background: const Color(0xFFDEF2ED),
-                      description: const Text('Your application has been submitted successfully!'),
-                    ).show(context);
-                    Navigator.pop(context);
+                  final state = ref.read(applyJobControllerProvider);
+                  if (state is ApplyJobError) {
+                    if (context.mounted) {
+                      ElegantNotification.error(
+                        background: const Color(0xFFFCE8DB),
+                        description: Text(state.message),
+                      ).show(context);
+                    }
+                  } else if (state is ApplyJobLoaded) {
+                    if (context.mounted) {
+                      ElegantNotification.success(
+                        background: const Color(0xFFDEF2ED),
+                        description: const Text('Job has been applied successfully!'),
+                      ).show(context);
+                      Navigator.pop(context);
+                    }
                   }
                 },
                 child: Center(

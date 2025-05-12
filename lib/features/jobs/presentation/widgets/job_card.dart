@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
@@ -68,8 +69,20 @@ class JobCard extends ConsumerWidget {
                       await Future.delayed(const Duration(milliseconds: 100));
                       if (ref.read(savedJobControllerProvider.notifier).contains(job.id)) {
                         await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: job.id);
+                        if (context.mounted) {
+                          ElegantNotification.success(
+                            background: const Color(0xFFDEF2ED),
+                            description: const Text('Job has been removed successfully!'),
+                          ).show(context);
+                        }
                       } else {
                         await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
+                        if (context.mounted) {
+                          ElegantNotification.success(
+                            background: const Color(0xFFDEF2ED),
+                            description: const Text('Job has been saved successfully!'),
+                          ).show(context);
+                        }
                       }
                     },
                     icon: Icon(
@@ -80,25 +93,31 @@ class JobCard extends ConsumerWidget {
                   ),
                 ],
               ),
-              Row(
-                spacing: 8.0,
-                children: [
-                  ...job.positions.map(
-                    (position) => Chip(
-                      label: Text(
-                        position.name,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          fontWeight: FontWeight.w600,
+              if (job.positions.isNotEmpty)
+                SizedBox(
+                  height: 32.0,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      return Chip(
+                        label: Text(
+                          job.positions[index].name,
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
-                      side: BorderSide.none,
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    ),
+                        backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
+                        side: BorderSide.none,
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return const SizedBox(width: 8.0);
+                    },
+                    itemCount: job.positions.length,
                   ),
-                ],
-              ),
+                ),
               Row(
                 spacing: 8.0,
                 children: [
@@ -368,25 +387,31 @@ class AppliedJobCard extends StatelessWidget {
                   ),
                 ],
               ),
-              Row(
-                spacing: 8.0,
-                children: [
-                  ...job.positions.map(
-                    (position) => Chip(
-                      label: Text(
-                        position.name,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          fontWeight: FontWeight.w600,
+              if (job.positions.isNotEmpty)
+                SizedBox(
+                  height: 32.0,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      return Chip(
+                        label: Text(
+                          job.positions[index].name,
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
-                      side: BorderSide.none,
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    ),
+                        backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
+                        side: BorderSide.none,
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return const SizedBox(width: 8.0);
+                    },
+                    itemCount: job.positions.length,
                   ),
-                ],
-              ),
+                ),
               Row(
                 spacing: 8.0,
                 children: [

@@ -29,7 +29,6 @@ class SavedJobsPage extends HookWidget {
               builder: (context, ref, child) {
                 final jobState = ref.watch(savedJobControllerProvider);
                 switch (jobState) {
-                  case SavedJobInitial():
                   case SavedJobLoading():
                     return SliverToBoxAdapter(
                       child: ListView.builder(
@@ -84,6 +83,8 @@ class SavedJobsPage extends HookWidget {
                         },
                       ),
                     );
+                  default:
+                    return const SliverToBoxAdapter(child: SizedBox.shrink());
                 }
               },
             ),
