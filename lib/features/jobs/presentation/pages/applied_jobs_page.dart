@@ -27,6 +27,7 @@ class AppliedJobsPage extends HookConsumerWidget {
             expandedHeight: 38.0,
             floating: true,
             backgroundColor: Color(0xFFefeff0),
+            surfaceTintColor: Color(0xFff5fafd),
             flexibleSpace: FlexibleSpaceBar(title: Text('Applied Jobs'), centerTitle: true),
           ),
           SliverPadding(
