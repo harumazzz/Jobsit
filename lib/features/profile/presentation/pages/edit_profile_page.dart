@@ -162,7 +162,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                                     ).show(context);
                                     return;
                                   }
-                                  if (RegExp(r'\.(jpg|png)$', caseSensitive: false).hasMatch(value.name)) {
+                                  if (!RegExp(r'\.(jpg|png)$', caseSensitive: false).hasMatch(value.path)) {
                                     ElegantNotification.error(
                                       background: const Color(0xFFDEF2ED),
                                       description: const Text('Image format is not supported'),
