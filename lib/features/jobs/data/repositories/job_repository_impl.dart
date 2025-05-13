@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dart_either/dart_either.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -194,7 +196,10 @@ final class JobRepositoryImpl implements JobRepository {
   }) async {
     try {
       final formData = FormData.fromMap({
-        'candidateApplication': {'id': jobId, 'coverLetter': coverLetter},
+        'candidateApplication': jsonEncode({
+          'jobDTO': {'id': jobId},
+          'referenceLetter': coverLetter,
+        }),
         'fileCV': MultipartFile.fromBytes(cv.data, filename: cv.name),
       });
       final result = await _jobRemoteDataSource.applyJob(formData: formData);
