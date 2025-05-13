@@ -40,9 +40,7 @@ class SavedJobsPage extends HookWidget {
                       ),
                     );
                   case SavedJobError():
-                    return SliverToBoxAdapter(
-                      child: Center(child: Text(jobState.message, style: Theme.of(context).textTheme.bodyLarge)),
-                    );
+                    return const SliverToBoxAdapter(child: SizedBox.shrink());
                   case SavedJobLoaded():
                     final state = PagingState<int, Job>(
                       pages: [jobState.jobs.values.toList()],

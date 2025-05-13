@@ -72,7 +72,20 @@ class _JobPage extends HookConsumerWidget {
         debounceTimer.value?.cancel();
         debounceTimer.value = Timer(const Duration(milliseconds: 800), () async {
           final jobFilterState = ref.read(jobFilterControllerProvider);
+          await ref.read(searchJobsControllerProvider.notifier).reset();
           if (jobFilterState is! JobFilterOnSearch) {
+            await ref
+                .read(jobFilterControllerProvider.notifier)
+                .saveFilteredJob(
+                  title: searchText,
+                  schedules: jobFilterState.schedules,
+                  positions: jobFilterState.positions,
+                  majors: jobFilterState.majors,
+                  city: null,
+                  schedulesList: [],
+                  positionsList: [],
+                  majorsList: [],
+                );
             return;
           }
           await ref

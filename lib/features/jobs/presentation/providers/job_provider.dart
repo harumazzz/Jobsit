@@ -30,6 +30,10 @@ class SearchJobsController extends _$SearchJobsController {
     return const SearchJobsState.initial();
   }
 
+  Future<void> reset() async {
+    state = const SearchJobsState.loaded(jobs: [], finished: false);
+  }
+
   Future<void> searchJobs({required int page, required int limit}) async {
     final (currentJobs, finished) = switch (state) {
       SearchJobsLoaded(jobs: final jobs, finished: final finished) => (jobs, finished),

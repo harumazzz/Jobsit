@@ -440,12 +440,17 @@ class AppliedJobCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    spacing: 8.0,
-                    children: [
-                      Icon(IconlyLight.profile, size: 24.0, color: Theme.of(context).colorScheme.primary),
-                      Text('${job.amount}'),
-                    ],
+                  Chip(
+                    label: Text(
+                      'Applied',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
+                    side: BorderSide.none,
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   ),
                   Row(
                     spacing: 8.0,
