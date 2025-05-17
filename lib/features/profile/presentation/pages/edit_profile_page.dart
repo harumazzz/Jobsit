@@ -552,23 +552,126 @@ class PersonalInfoEditPage extends HookConsumerWidget {
   }
 }
 
-class JobInfoEditPage extends HookWidget {
+class JobInfoEditPage extends HookConsumerWidget {
   const JobInfoEditPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.read(authControllerProvider) is! AuthAuthorized) {
+      return const Center(child: Text('You are not authorized to view this page.'));
+    }
+
     final formKey = useMemoized(GlobalKey<FormBuilderState>.new);
+
     final jobWantedController = useTextEditingController();
-    final cvPlaceholderController = useTextEditingController(text: 'CV Placeholder');
     final coverLetterController = useTextEditingController();
+    final cvPlaceholderController = useTextEditingController(text: 'CV Placeholder');
+
     final jobWantedFocusNode = useFocusNode();
     final positionFocusNode = useFocusNode();
     final majorFocusNode = useFocusNode();
     final jobTypeFocusNode = useFocusNode();
+    final locationFocusNode = useFocusNode();
     final cvFocusNode = useFocusNode();
     final coverLetterFocusNode = useFocusNode();
-    final selectedMajor = useState<Major?>(null);
+
     final cv = useState<FileSelectorResult?>(null);
+    final selectedPositions = useState<Set<Position>>({});
+    final selectedMajors = useState<Set<Major>>({});
+    final selectedJobTypes = useState<Set<Schedule>>({});
+    final selectedCity = useState<City?>(null);
+
+    final positionOverlayEntry = useState<OverlayEntry?>(null);
+    final majorOverlayEntry = useState<OverlayEntry?>(null);
+    final jobTypeOverlayEntry = useState<OverlayEntry?>(null);
+    final locationOverlayEntry = useState<OverlayEntry?>(null);
+
+    final positionKey = useMemoized(GlobalKey<FormFieldState>.new);
+    final majorKey = useMemoized(GlobalKey<FormFieldState>.new);
+    final jobTypeKey = useMemoized(GlobalKey<FormFieldState>.new);
+    final locationKey = useMemoized(GlobalKey<FormFieldState>.new);
+
+    Future<void> hideAllDropdowns() async {
+      if (positionOverlayEntry.value != null) {
+        positionOverlayEntry.value!.remove();
+        positionOverlayEntry.value = null;
+      }
+      if (majorOverlayEntry.value != null) {
+        majorOverlayEntry.value!.remove();
+        majorOverlayEntry.value = null;
+      }
+      if (jobTypeOverlayEntry.value != null) {
+        jobTypeOverlayEntry.value!.remove();
+        jobTypeOverlayEntry.value = null;
+      }
+      if (locationOverlayEntry.value != null) {
+        locationOverlayEntry.value!.remove();
+        locationOverlayEntry.value = null;
+      }
+    }
+
+    useEffect(
+      () {
+        return hideAllDropdowns;
+      },
+      () {
+        return const [];
+      }(),
+    );
+
+    useEffect(
+      () {
+        Future.microtask(() async {
+          await ref.read(positionControllerProvider.notifier).getPositions();
+          await ref.read(majorControllerProvider.notifier).getMajors();
+          await ref.read(scheduleControllerProvider.notifier).getSchedules();
+          await ref.read(citiesControllerProvider.notifier).fetchCities();
+        });
+        return null;
+      },
+      () {
+        return const [];
+      }(),
+    );
+
+    final positionState = ref.watch(positionControllerProvider);
+    final positions = switch (positionState) {
+      PositionLoaded(positions: final positions) => positions,
+      _ => <Position>[],
+    };
+
+    final majorState = ref.watch(majorControllerProvider);
+    final majors = switch (majorState) {
+      MajorLoaded(majors: final majors) => majors,
+      _ => <Major>[],
+    };
+
+    final jobTypeState = ref.watch(scheduleControllerProvider);
+    final jobTypes = switch (jobTypeState) {
+      ScheduleLoaded(schedules: final schedules) => schedules,
+      _ => <Schedule>[],
+    };
+
+    final citiesState = ref.watch(citiesControllerProvider);
+    final cities = switch (citiesState) {
+      CitiesLoaded(cities: final citiesList) => citiesList,
+      _ => <City>[],
+    };
+
+    if (positionState is! PositionLoaded ||
+        majorState is! MajorLoaded ||
+        jobTypeState is! ScheduleLoaded ||
+        citiesState is! CitiesLoaded) {
+      return Scaffold(
+        appBar: AppBar(
+          surfaceTintColor: const Color(0xFff5fafd),
+          title: const Text('Job Information', style: TextStyle(fontWeight: FontWeight.bold)),
+          centerTitle: true,
+        ),
+        body: Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: const Color(0xFff5fafd),
@@ -599,163 +702,379 @@ class JobInfoEditPage extends HookWidget {
                     },
                   ),
                   const SizedBox(height: 16.0),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Consumer(
-                        builder: (context, ref, child) {
-                          final state = ref.watch(majorControllerProvider);
-                          return switch (state) {
-                            MajorInitial() => const SizedBox.shrink(),
-                            MajorLoading() => const SizedBox.shrink(),
-                            MajorError() => const SizedBox.shrink(),
-                            MajorLoaded(majors: final majors) => MenuAnchor(
-                              style: MenuStyle(
-                                minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8.0, 0.0)),
-                                maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8.0, double.infinity)),
-                                elevation: WidgetStateProperty.all(4.0),
-                              ),
-                              crossAxisUnconstrained: false,
-                              alignmentOffset: const Offset(0, 8),
-                              builder: (context, controller, child) {
-                                return FormBuilderField(
-                                  name: 'major',
-                                  focusNode: majorFocusNode,
-                                  validator: (value) => null,
-                                  builder: (FormFieldState<dynamic> field) {
-                                    return InputDecorator(
-                                      decoration: const InputDecoration(
-                                        labelText: 'Major',
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                  FormBuilderField(
+                    key: positionKey,
+                    name: 'position',
+                    focusNode: positionFocusNode,
+                    validator: (value) => null,
+                    builder: (FormFieldState<dynamic> field) {
+                      return InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: selectedPositions.value.isEmpty ? 'Position' : null,
+                          border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GestureDetector(
+                              onTap: () async {
+                                if (positionOverlayEntry.value != null) {
+                                  await hideAllDropdowns();
+                                  return;
+                                }
+                                await hideAllDropdowns();
+                                final RenderBox renderBox = positionKey.currentContext!.findRenderObject() as RenderBox;
+                                final Size size = renderBox.size;
+                                final Offset position = renderBox.localToGlobal(Offset.zero);
+                                positionOverlayEntry.value = OverlayEntry(
+                                  builder:
+                                      (context) => Positioned(
+                                        top: position.dy + size.height,
+                                        left: position.dx,
+                                        width: size.width,
+                                        child: Card(
+                                          elevation: 8,
+                                          margin: EdgeInsets.zero,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                          child: Container(
+                                            constraints: const BoxConstraints(maxHeight: 300),
+                                            child: ListView.builder(
+                                              padding: EdgeInsets.zero,
+                                              shrinkWrap: true,
+                                              itemCount: positions.length,
+                                              itemBuilder: (context, index) {
+                                                final position = positions[index];
+                                                return ListTile(
+                                                  title: Text(position.name),
+                                                  onTap: () async {
+                                                    final newSelection = Set<Position>.from(selectedPositions.value);
+                                                    newSelection.add(position);
+                                                    selectedPositions.value = newSelection;
+                                                    await hideAllDropdowns();
+                                                  },
+                                                  dense: true,
+                                                );
+                                              },
+                                            ),
+                                          ),
                                         ),
-                                        contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                                       ),
-                                      child: GestureDetector(
-                                        onTap: () async {
-                                          controller.open();
-                                        },
-                                        child: Text(
-                                          selectedMajor.value != null ? selectedMajor.value!.name : 'Select Major',
-                                        ),
-                                      ),
-                                    );
-                                  },
                                 );
+                                if (context.mounted) {
+                                  Overlay.of(context).insert(positionOverlayEntry.value!);
+                                }
                               },
-                              menuChildren: [
-                                ...majors.map((major) {
-                                  return MenuItemButton(
-                                    onPressed: () async {
-                                      selectedMajor.value = major;
-                                      majorFocusNode.unfocus();
-                                      FocusScope.of(context).requestFocus(jobTypeFocusNode);
-                                    },
-                                    child: Text(major.name),
-                                  );
-                                }),
-                              ],
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [Text('Position'), Icon(IconlyLight.arrowDown2, size: 16)],
+                              ),
                             ),
-                          };
-                        },
+                            if (selectedPositions.value.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Wrap(
+                                  spacing: 8,
+                                  runSpacing: 4,
+                                  children: [
+                                    ...selectedPositions.value.map(
+                                      (item) => Chip(
+                                        label: Text(item.name, style: const TextStyle(fontSize: 12)),
+                                        deleteIcon: const Icon(Icons.close_outlined, size: 14),
+                                        color: WidgetStateProperty.all(
+                                          Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.64),
+                                        ),
+                                        onDeleted: () {
+                                          final newItems = Set<Position>.from(selectedPositions.value);
+                                          newItems.remove(item);
+                                          selectedPositions.value = newItems;
+                                        },
+                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        visualDensity: VisualDensity.compact,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
                       );
                     },
                   ),
                   const SizedBox(height: 16.0),
-                  // LayoutBuilder(
-                  //   builder: (context, constraints) {
-                  //     return MenuAnchor(
-                  //       style: MenuStyle(
-                  //         minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
-                  //         maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
-                  //         elevation: WidgetStateProperty.all(4.0),
-                  //       ),
-                  //       crossAxisUnconstrained: false,
-                  //       alignmentOffset: const Offset(0, 8),
-                  //       builder: (context, controller, child) {
-                  //         return FormBuilderField(
-                  //           name: 'job_type',
-                  //           focusNode: jobTypeFocusNode,
-                  //           validator: (value) => null,
-                  //           builder: (FormFieldState<dynamic> field) {
-                  //             return InputDecorator(
-                  //               decoration: const InputDecoration(
-                  //                 labelText: 'Job Type',
-                  //                 border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                  //                 contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                  //               ),
-                  //               child: GestureDetector(
-                  //                 onTap: () async {
-                  //                   controller.open();
-                  //                 },
-                  //                 child: Text(selectedJobType.value),
-                  //               ),
-                  //             );
-                  //           },
-                  //         );
-                  //       },
-                  //       menuChildren: [
-                  //         ...jobTypeOptions.map((jobType) {
-                  //           return MenuItemButton(
-                  //             onPressed: () async {
-                  //               selectedJobType.value = jobType;
-                  //               jobTypeFocusNode.unfocus();
-                  //               FocusScope.of(context).requestFocus(locationFocusNode);
-                  //             },
-                  //             child: Text(jobType),
-                  //           );
-                  //         }),
-                  //       ],
-                  //     );
-                  //   },
-                  // ),
+                  FormBuilderField(
+                    key: majorKey,
+                    name: 'major',
+                    focusNode: majorFocusNode,
+                    validator: (value) => null,
+                    builder: (FormFieldState<dynamic> field) {
+                      return InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: selectedMajors.value.isEmpty ? 'Major' : null,
+                          border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GestureDetector(
+                              onTap: () async {
+                                if (majorOverlayEntry.value != null) {
+                                  await hideAllDropdowns();
+                                  return;
+                                }
+                                await hideAllDropdowns();
+                                final RenderBox renderBox = majorKey.currentContext!.findRenderObject() as RenderBox;
+                                final Size size = renderBox.size;
+                                final Offset position = renderBox.localToGlobal(Offset.zero);
+                                majorOverlayEntry.value = OverlayEntry(
+                                  builder:
+                                      (context) => Positioned(
+                                        top: position.dy + size.height,
+                                        left: position.dx,
+                                        width: size.width,
+                                        child: Card(
+                                          elevation: 8,
+                                          margin: EdgeInsets.zero,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                          child: Container(
+                                            constraints: const BoxConstraints(maxHeight: 300),
+                                            child: ListView.builder(
+                                              padding: EdgeInsets.zero,
+                                              shrinkWrap: true,
+                                              itemCount: majors.length,
+                                              itemBuilder: (context, index) {
+                                                final major = majors[index];
+                                                return ListTile(
+                                                  title: Text(major.name),
+                                                  onTap: () async {
+                                                    final newSelection = Set<Major>.from(selectedMajors.value);
+                                                    newSelection.add(major);
+                                                    selectedMajors.value = newSelection;
+                                                    await hideAllDropdowns();
+                                                  },
+                                                  dense: true,
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                );
+                                if (context.mounted) {
+                                  Overlay.of(context).insert(majorOverlayEntry.value!);
+                                }
+                              },
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [Text('Major'), Icon(IconlyLight.arrowDown2, size: 16)],
+                              ),
+                            ),
+                            if (selectedMajors.value.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Wrap(
+                                  spacing: 8,
+                                  runSpacing: 4,
+                                  children: [
+                                    ...selectedMajors.value.map(
+                                      (item) => Chip(
+                                        label: Text(item.name, style: const TextStyle(fontSize: 12)),
+                                        deleteIcon: const Icon(Icons.close_outlined, size: 14),
+                                        color: WidgetStateProperty.all(
+                                          Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.64),
+                                        ),
+                                        onDeleted: () {
+                                          final newItems = Set<Major>.from(selectedMajors.value);
+                                          newItems.remove(item);
+                                          selectedMajors.value = newItems;
+                                        },
+                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        visualDensity: VisualDensity.compact,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 16.0),
-                  // LayoutBuilder(
-                  //   builder: (context, constraints) {
-                  //     return MenuAnchor(
-                  //       style: MenuStyle(
-                  //         minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
-                  //         maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
-                  //         elevation: WidgetStateProperty.all(4.0),
-                  //       ),
-                  //       crossAxisUnconstrained: false,
-                  //       alignmentOffset: const Offset(0, 8),
-                  //       builder: (context, controller, child) {
-                  //         return FormBuilderField(
-                  //           name: 'location',
-                  //           focusNode: locationFocusNode,
-                  //           validator: (value) => null,
-                  //           builder: (FormFieldState<dynamic> field) {
-                  //             return InputDecorator(
-                  //               decoration: const InputDecoration(
-                  //                 labelText: 'Location',
-                  //                 border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                  //                 contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                  //               ),
-                  //               child: GestureDetector(
-                  //                 onTap: () async {
-                  //                   controller.open();
-                  //                 },
-                  //                 child: Text(selectedLocation.value),
-                  //               ),
-                  //             );
-                  //           },
-                  //         );
-                  //       },
-                  //       menuChildren: [
-                  //         ...locationOptions.map((location) {
-                  //           return MenuItemButton(
-                  //             onPressed: () async {
-                  //               selectedLocation.value = location;
-                  //               locationFocusNode.unfocus();
-                  //               FocusScope.of(context).requestFocus(cvFocusNode);
-                  //             },
-                  //             child: Text(location),
-                  //           );
-                  //         }),
-                  //       ],
-                  //     );
-                  //   },
-                  // ),
+                  FormBuilderField(
+                    key: jobTypeKey,
+                    name: 'job_type',
+                    focusNode: jobTypeFocusNode,
+                    validator: (value) => null,
+                    builder: (FormFieldState<dynamic> field) {
+                      return InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: selectedJobTypes.value.isEmpty ? 'Job Type' : null,
+                          border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GestureDetector(
+                              onTap: () async {
+                                if (jobTypeOverlayEntry.value != null) {
+                                  await hideAllDropdowns();
+                                  return;
+                                }
+                                await hideAllDropdowns();
+                                final RenderBox renderBox = jobTypeKey.currentContext!.findRenderObject() as RenderBox;
+                                final Size size = renderBox.size;
+                                final Offset position = renderBox.localToGlobal(Offset.zero);
+                                jobTypeOverlayEntry.value = OverlayEntry(
+                                  builder:
+                                      (context) => Positioned(
+                                        top: position.dy + size.height,
+                                        left: position.dx,
+                                        width: size.width,
+                                        child: Card(
+                                          elevation: 8,
+                                          margin: EdgeInsets.zero,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                          child: Container(
+                                            constraints: const BoxConstraints(maxHeight: 300),
+                                            child: ListView.builder(
+                                              padding: EdgeInsets.zero,
+                                              shrinkWrap: true,
+                                              itemCount: jobTypes.length,
+                                              itemBuilder: (context, index) {
+                                                final jobType = jobTypes[index];
+                                                return ListTile(
+                                                  title: Text(jobType.name),
+                                                  onTap: () async {
+                                                    final newSelection = Set<Schedule>.from(selectedJobTypes.value);
+                                                    newSelection.add(jobType);
+                                                    selectedJobTypes.value = newSelection;
+                                                    await hideAllDropdowns();
+                                                  },
+                                                  dense: true,
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                );
+                                if (context.mounted) {
+                                  Overlay.of(context).insert(jobTypeOverlayEntry.value!);
+                                }
+                              },
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [Text('Job Type'), Icon(IconlyLight.arrowDown2, size: 16)],
+                              ),
+                            ),
+                            if (selectedJobTypes.value.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Wrap(
+                                  spacing: 8,
+                                  runSpacing: 4,
+                                  children: [
+                                    ...selectedJobTypes.value.map(
+                                      (item) => Chip(
+                                        label: Text(item.name, style: const TextStyle(fontSize: 12)),
+                                        deleteIcon: const Icon(Icons.close_outlined, size: 14),
+                                        color: WidgetStateProperty.all(
+                                          Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.64),
+                                        ),
+                                        onDeleted: () async {
+                                          final newItems = Set<Schedule>.from(selectedJobTypes.value);
+                                          newItems.remove(item);
+                                          selectedJobTypes.value = newItems;
+                                        },
+                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        visualDensity: VisualDensity.compact,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                  FormBuilderField(
+                    key: locationKey,
+                    name: 'location',
+                    focusNode: locationFocusNode,
+                    validator: (value) => null,
+                    builder: (FormFieldState<dynamic> field) {
+                      return InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: 'Location',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                          contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                        ),
+                        child: GestureDetector(
+                          onTap: () async {
+                            if (locationOverlayEntry.value != null) {
+                              await hideAllDropdowns();
+                              return;
+                            }
+                            await hideAllDropdowns();
+                            final RenderBox renderBox = locationKey.currentContext!.findRenderObject() as RenderBox;
+                            final Size size = renderBox.size;
+                            final Offset position = renderBox.localToGlobal(Offset.zero);
+                            locationOverlayEntry.value = OverlayEntry(
+                              builder:
+                                  (context) => Positioned(
+                                    top: position.dy + size.height,
+                                    left: position.dx,
+                                    width: size.width,
+                                    child: Card(
+                                      elevation: 8,
+                                      margin: EdgeInsets.zero,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                      child: Container(
+                                        constraints: const BoxConstraints(maxHeight: 300),
+                                        child: ListView.builder(
+                                          padding: EdgeInsets.zero,
+                                          shrinkWrap: true,
+                                          itemCount: cities.length,
+                                          itemBuilder: (context, index) {
+                                            final city = cities[index];
+                                            return ListTile(
+                                              title: Text(city.name),
+                                              onTap: () async {
+                                                selectedCity.value = city;
+                                                await hideAllDropdowns();
+                                                locationFocusNode.unfocus();
+                                                if (context.mounted) {
+                                                  FocusScope.of(context).requestFocus(cvFocusNode);
+                                                }
+                                              },
+                                              dense: true,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                            );
+                            if (context.mounted) {
+                              Overlay.of(context).insert(locationOverlayEntry.value!);
+                            }
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(selectedCity.value != null ? selectedCity.value!.name : 'Location'),
+                              const Icon(IconlyLight.arrowDown2, size: 16),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 16.0),
                   FormBuilderTextField(
                     name: 'cv',
@@ -766,23 +1085,19 @@ class JobInfoEditPage extends HookWidget {
                       labelText: 'CV',
                       border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                       contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                      suffixIcon: Consumer(
-                        builder: (context, ref, child) {
-                          return IconButton(
-                            icon: const Icon(IconlyLight.upload),
-                            onPressed: () async {
-                              final result = await ref.read(fileServiceProvider).uploadFile([
-                                const FileSelector(label: 'CV', extensions: ['pdf', 'docx']),
-                              ]);
-                              result.fold(
-                                ifLeft: (value) => null,
-                                ifRight: (value) {
-                                  cv.value = value;
-                                  cvPlaceholderController.text = value.name;
-                                  cvFocusNode.unfocus();
-                                  FocusScope.of(context).requestFocus(coverLetterFocusNode);
-                                },
-                              );
+                      suffixIcon: IconButton(
+                        icon: const Icon(IconlyLight.upload),
+                        onPressed: () async {
+                          final result = await ref.read(fileServiceProvider).uploadFile([
+                            const FileSelector(label: 'CV', extensions: ['pdf', 'docx']),
+                          ]);
+                          result.fold(
+                            ifLeft: (value) => null,
+                            ifRight: (value) {
+                              cv.value = value;
+                              cvPlaceholderController.text = value.name;
+                              cvFocusNode.unfocus();
+                              FocusScope.of(context).requestFocus(coverLetterFocusNode);
                             },
                           );
                         },
@@ -817,19 +1132,38 @@ class JobInfoEditPage extends HookWidget {
           builder: (context, ref, child) {
             return _CustomNavbar(
               onPressed: () async {
-                FocusScope.of(context).unfocus();
+                await hideAllDropdowns();
+
+                if (context.mounted) {
+                  FocusScope.of(context).unfocus();
+                }
                 if (formKey.currentState!.validate()) {
                   formKey.currentState!.save();
-                  // ref
-                  //     .read(authControllerProvider.notifier)
-                  //     .updateJobInfo(
-
-                  //     );
-                  ElegantNotification.success(
-                    background: const Color(0xFFDEF2ED),
-                    description: const Text('Job information updated successfully!'),
-                  ).show(context);
-                  context.pop();
+                  if (cv.value == null && context.mounted) {
+                    ElegantNotification.error(
+                      background: const Color(0xFFDEF2ED),
+                      description: const Text('Please upload your CV'),
+                    ).show(context);
+                    return;
+                  }
+                  await ref
+                      .read(authControllerProvider.notifier)
+                      .updateJobInfo(
+                        desiredJob: jobWantedController.text,
+                        cv: cv.value,
+                        referenceLetter: coverLetterController.text,
+                        positions: selectedPositions.value.map((e) => e.toAuth()).toList(),
+                        majors: selectedMajors.value.map((e) => e.toAuth()).toList(),
+                        desiredWorkingProvince: selectedCity.value!.name,
+                        schedules: selectedJobTypes.value.map((e) => e.toAuth()).toList(),
+                      );
+                  if (context.mounted) {
+                    ElegantNotification.success(
+                      background: const Color(0xFFDEF2ED),
+                      description: const Text('Job information updated successfully!'),
+                    ).show(context);
+                    context.pop();
+                  }
                 }
               },
             );

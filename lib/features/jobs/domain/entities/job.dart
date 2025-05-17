@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../auth/domain/entities/user.dart' as user;
 
 part 'job.freezed.dart';
 
@@ -67,6 +68,24 @@ sealed class Major with _$Major {
 @freezed
 sealed class Position with _$Position {
   const factory Position({required int id, required String name}) = _Position;
+}
+
+extension PositionExtension on Position {
+  user.Position toAuth() {
+    return user.Position(id: id, name: name);
+  }
+}
+
+extension MajorExtension on Major {
+  user.Major toAuth() {
+    return user.Major(id: id, name: name);
+  }
+}
+
+extension ScheduleExtension on Schedule {
+  user.Schedule toAuth() {
+    return user.Schedule(id: id, name: name);
+  }
 }
 
 extension JobExtension on Job {

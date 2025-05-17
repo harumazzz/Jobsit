@@ -176,7 +176,7 @@ class DisabledButton extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.24),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: Center(
