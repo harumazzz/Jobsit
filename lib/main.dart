@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'i18n/strings.g.dart';
 import 'injection_container.dart';
 import 'shared/routes/app_router.dart';
 import 'shared/theme/app_theme.dart';
@@ -11,8 +12,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   AppTheme.applyOverlay();
+  await LocaleSettings.setLocale(AppLocale.vi);
   InjectionContainer.injectDependencies();
-  runApp(const ProviderScope(child: MainApp()));
+  runApp(TranslationProvider(child: const ProviderScope(child: MainApp())));
 }
 
 class MainApp extends StatelessWidget {
