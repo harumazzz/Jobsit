@@ -180,13 +180,17 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 20.0),
+                Text(
+                  'First Name',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16.0),
                 FormBuilderTextField(
                   name: 'first_name',
                   controller: firstNameController,
                   focusNode: firstNameFocusNode,
                   keyboardType: TextInputType.name,
                   decoration: const InputDecoration(
-                    labelText: 'First Name',
                     border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
@@ -197,13 +201,17 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16.0),
+                Text(
+                  'Last Name',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16.0),
                 FormBuilderTextField(
                   name: 'last_name',
                   controller: lastNameController,
                   focusNode: lastNameFocusNode,
                   keyboardType: TextInputType.name,
                   decoration: const InputDecoration(
-                    labelText: 'Last Name',
                     border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
@@ -214,13 +222,14 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16.0),
+                Text('Email', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16.0),
                 FormBuilderTextField(
                   name: 'email',
                   controller: emailController,
                   focusNode: emailFocusNode,
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
-                    labelText: 'Email',
                     border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
@@ -231,13 +240,17 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16.0),
+                Text(
+                  'Date of Birth',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16.0),
                 FormBuilderDateTimePicker(
                   name: 'date_of_birth',
                   focusNode: dateFocusNode,
                   initialValue: selectedDate.value,
                   inputType: InputType.date,
                   decoration: const InputDecoration(
-                    labelText: 'Date of Birth',
                     border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     suffixIcon: Icon(IconlyLight.calendar),
@@ -249,13 +262,14 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16.0),
+                Text('Phone', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16.0),
                 FormBuilderTextField(
                   name: 'phone',
                   controller: phoneController,
                   focusNode: phoneFocusNode,
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
-                    labelText: 'Phone',
                     border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
@@ -265,6 +279,8 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                     FocusScope.of(context).requestFocus(genderFocusNode);
                   },
                 ),
+                const SizedBox(height: 16.0),
+                Text('Gender', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16.0),
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -284,7 +300,6 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                           builder: (FormFieldState<dynamic> field) {
                             return InputDecorator(
                               decoration: const InputDecoration(
-                                labelText: 'Gender',
                                 border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                                 contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                               ),
@@ -314,6 +329,8 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16.0),
+                Text('City', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16.0),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     return MenuAnchor(
@@ -332,7 +349,6 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                           builder: (FormFieldState<dynamic> field) {
                             return InputDecorator(
                               decoration: const InputDecoration(
-                                labelText: 'City',
                                 border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                                 contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                               ),
@@ -375,6 +391,8 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16.0),
+                Text('District', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16.0),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final state = ref.watch(districtsControllerProvider);
@@ -407,7 +425,6 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                             }
                             return InputDecorator(
                               decoration: InputDecoration(
-                                labelText: 'District',
                                 border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                                 contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                                 enabled: isEnabled,
@@ -440,12 +457,13 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16.0),
+                Text('Address', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16.0),
                 FormBuilderTextField(
                   name: 'address',
                   controller: addressController,
                   focusNode: addressFocusNode,
                   decoration: const InputDecoration(
-                    labelText: 'Address',
                     border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
@@ -454,6 +472,11 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                     addressFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(universityFocusNode);
                   },
+                ),
+                const SizedBox(height: 16.0),
+                Text(
+                  'University',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16.0),
                 LayoutBuilder(
@@ -486,7 +509,6 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                           builder: (FormFieldState<dynamic> field) {
                             return InputDecorator(
                               decoration: const InputDecoration(
-                                labelText: 'University',
                                 border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                                 contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                               ),
@@ -687,12 +709,17 @@ class JobInfoEditPage extends HookConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const SizedBox(height: 20.0),
+                  Text(
+                    'Job Wanted',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16.0),
                   FormBuilderTextField(
                     name: 'job_wanted',
                     controller: jobWantedController,
                     focusNode: jobWantedFocusNode,
                     decoration: const InputDecoration(
-                      labelText: 'Job Wanted',
                       border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                       contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     ),
@@ -702,6 +729,11 @@ class JobInfoEditPage extends HookConsumerWidget {
                     },
                   ),
                   const SizedBox(height: 16.0),
+                  Text(
+                    'Position',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16.0),
                   FormBuilderField(
                     key: positionKey,
                     name: 'position',
@@ -709,10 +741,9 @@ class JobInfoEditPage extends HookConsumerWidget {
                     validator: (value) => null,
                     builder: (FormFieldState<dynamic> field) {
                       return InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: selectedPositions.value.isEmpty ? 'Position' : null,
-                          border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                          contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -766,8 +797,9 @@ class JobInfoEditPage extends HookConsumerWidget {
                                 }
                               },
                               child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [Text('Position'), Icon(IconlyLight.arrowDown2, size: 16)],
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [Icon(IconlyLight.arrowDown2, size: 16)],
                               ),
                             ),
                             if (selectedPositions.value.isNotEmpty)
@@ -802,6 +834,8 @@ class JobInfoEditPage extends HookConsumerWidget {
                     },
                   ),
                   const SizedBox(height: 16.0),
+                  Text('Major', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16.0),
                   FormBuilderField(
                     key: majorKey,
                     name: 'major',
@@ -809,10 +843,9 @@ class JobInfoEditPage extends HookConsumerWidget {
                     validator: (value) => null,
                     builder: (FormFieldState<dynamic> field) {
                       return InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: selectedMajors.value.isEmpty ? 'Major' : null,
-                          border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                          contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -866,8 +899,9 @@ class JobInfoEditPage extends HookConsumerWidget {
                                 }
                               },
                               child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [Text('Major'), Icon(IconlyLight.arrowDown2, size: 16)],
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [Icon(IconlyLight.arrowDown2, size: 16)],
                               ),
                             ),
                             if (selectedMajors.value.isNotEmpty)
@@ -902,6 +936,11 @@ class JobInfoEditPage extends HookConsumerWidget {
                     },
                   ),
                   const SizedBox(height: 16.0),
+                  Text(
+                    'Job Type',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16.0),
                   FormBuilderField(
                     key: jobTypeKey,
                     name: 'job_type',
@@ -909,10 +948,9 @@ class JobInfoEditPage extends HookConsumerWidget {
                     validator: (value) => null,
                     builder: (FormFieldState<dynamic> field) {
                       return InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: selectedJobTypes.value.isEmpty ? 'Job Type' : null,
-                          border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                          contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -966,8 +1004,9 @@ class JobInfoEditPage extends HookConsumerWidget {
                                 }
                               },
                               child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [Text('Job Type'), Icon(IconlyLight.arrowDown2, size: 16)],
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [Icon(IconlyLight.arrowDown2, size: 16)],
                               ),
                             ),
                             if (selectedJobTypes.value.isNotEmpty)
@@ -1002,6 +1041,11 @@ class JobInfoEditPage extends HookConsumerWidget {
                     },
                   ),
                   const SizedBox(height: 16.0),
+                  Text(
+                    'Location',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16.0),
                   FormBuilderField(
                     key: locationKey,
                     name: 'location',
@@ -1010,7 +1054,6 @@ class JobInfoEditPage extends HookConsumerWidget {
                     builder: (FormFieldState<dynamic> field) {
                       return InputDecorator(
                         decoration: const InputDecoration(
-                          labelText: 'Location',
                           border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                           contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                         ),
@@ -1076,33 +1119,37 @@ class JobInfoEditPage extends HookConsumerWidget {
                     },
                   ),
                   const SizedBox(height: 16.0),
+                  Text('CV', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16.0),
                   FormBuilderTextField(
+                    textAlign: TextAlign.center,
                     name: 'cv',
                     controller: cvPlaceholderController,
                     focusNode: cvFocusNode,
                     readOnly: true,
-                    decoration: InputDecoration(
-                      labelText: 'CV',
-                      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                      suffixIcon: IconButton(
-                        icon: const Icon(IconlyLight.upload),
-                        onPressed: () async {
-                          final result = await ref.read(fileServiceProvider).uploadFile([
-                            const FileSelector(label: 'CV', extensions: ['pdf', 'docx']),
-                          ]);
-                          result.fold(
-                            ifLeft: (value) => null,
-                            ifRight: (value) {
-                              cv.value = value;
-                              cvPlaceholderController.text = value.name;
-                              cvFocusNode.unfocus();
-                              FocusScope.of(context).requestFocus(coverLetterFocusNode);
-                            },
-                          );
+                    onTap: () async {
+                      final result = await ref.read(fileServiceProvider).uploadFile([
+                        const FileSelector(label: 'CV', extensions: ['pdf', 'docx']),
+                      ]);
+                      result.fold(
+                        ifLeft: (value) => null,
+                        ifRight: (value) {
+                          cv.value = value;
+                          cvPlaceholderController.text = value.name;
+                          cvFocusNode.unfocus();
+                          FocusScope.of(context).requestFocus(coverLetterFocusNode);
                         },
-                      ),
+                      );
+                    },
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                      contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  Text(
+                    'Cover Letter',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16.0),
                   FormBuilderTextField(
@@ -1112,7 +1159,6 @@ class JobInfoEditPage extends HookConsumerWidget {
                     minLines: 5,
                     maxLines: 5,
                     decoration: const InputDecoration(
-                      labelText: 'Cover Letter',
                       hintText: 'Write a brief introduction about yourself',
                       border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                       contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),

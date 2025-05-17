@@ -8,6 +8,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import '../../../../core/services/location_service.dart';
 import '../../../../core/services/shared_prefs_service.dart';
+import '../../../../i18n/strings.g.dart';
 import '../../../../injection_container.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/bottom_nav_bar.dart';
@@ -581,11 +582,12 @@ class _SelectedOption extends StatelessWidget {
   }
 }
 
-class _LanguageSelector extends StatelessWidget {
+class _LanguageSelector extends HookWidget {
   const _LanguageSelector();
 
   @override
   Widget build(BuildContext context) {
+    final isVietnamese = useState(LocaleSettings.currentLocale == AppLocale.vi);
     return MenuAnchor(
       style: MenuStyle(elevation: WidgetStateProperty.all(4.0)),
       crossAxisUnconstrained: false,
@@ -600,7 +602,12 @@ class _LanguageSelector extends StatelessWidget {
               controller.open();
             }
           },
-          icon: const CircleAvatar(backgroundImage: AssetImage('assets/images/vn.png')),
+          icon: CircleAvatar(
+            backgroundImage:
+                isVietnamese.value
+                    ? const AssetImage('assets/images/vn.png')
+                    : const AssetImage('assets/images/en.png'),
+          ),
         );
       },
       menuChildren: [
@@ -617,7 +624,8 @@ class _LanguageSelector extends StatelessWidget {
             ],
           ),
           onPressed: () async {
-            // TODO(self): Implement language change to Vietnamese
+            await LocaleSettings.setLocale(AppLocale.vi);
+            isVietnamese.value = true;
           },
         ),
         MenuItemButton(
@@ -633,7 +641,8 @@ class _LanguageSelector extends StatelessWidget {
             ],
           ),
           onPressed: () async {
-            // TODO(self): Implement language change to English
+            await LocaleSettings.setLocale(AppLocale.en);
+            isVietnamese.value = false;
           },
         ),
       ],
