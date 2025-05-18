@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/network/api_constant.dart';
+import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -28,12 +29,12 @@ class ProfilePage extends HookConsumerWidget {
     final isMailReceiveLoading = useState(false);
     return CustomScrollView(
       slivers: [
-        const SliverAppBar(
+        SliverAppBar(
           expandedHeight: 38.0,
           floating: true,
-          backgroundColor: Color(0xFFefeff0),
-          surfaceTintColor: Color(0xFff5fafd),
-          flexibleSpace: FlexibleSpaceBar(title: Text('Profile'), centerTitle: true),
+          backgroundColor: const Color(0xFFefeff0),
+          surfaceTintColor: const Color(0xFff5fafd),
+          flexibleSpace: FlexibleSpaceBar(title: Text(context.t.profile.title), centerTitle: true),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 16.0)),
         SliverPadding(
@@ -124,7 +125,7 @@ class ProfilePage extends HookConsumerWidget {
               spacing: 16.0,
               children: [
                 _CustomIcon(
-                  title: 'Applied',
+                  title: context.t.job.applied,
                   subtitle: switch (ref.watch(applyJobControllerProvider)) {
                     ApplyJobLoaded(jobs: final jobs) => jobs.length.toString(),
                     _ => '0',
@@ -132,7 +133,7 @@ class ProfilePage extends HookConsumerWidget {
                   icon: Icon(IconlyLight.profile, size: 24.0, color: Theme.of(context).colorScheme.onPrimary),
                 ),
                 _CustomIcon(
-                  title: 'Saved',
+                  title: context.t.job.saved,
                   subtitle: switch (ref.watch(savedJobControllerProvider)) {
                     SavedJobLoaded(jobs: final jobs) => jobs.length.toString(),
                     _ => '0',
@@ -159,7 +160,7 @@ class ProfilePage extends HookConsumerWidget {
               thumbColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
               trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
               title: Text(
-                'Allow employers to search your profile',
+                context.t.job.allowSearch,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
               ),
               value: allowSearch.value,
@@ -197,7 +198,7 @@ class ProfilePage extends HookConsumerWidget {
               thumbColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
               trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
               title: Text(
-                'Email notification',
+                context.t.job.emailNotification,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
               ),
               value: emailNotification.value,
@@ -228,12 +229,12 @@ class ProfilePage extends HookConsumerWidget {
               children: [
                 Flexible(
                   child: Text(
-                    'Personal Information',
+                    context.t.profile.personalInformation,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Edit',
+                  tooltip: context.t.common.edit,
                   onPressed: () async {
                     await ref.read(citiesControllerProvider.notifier).fetchCities();
                     await ref.read(universityControllerProvider.notifier).getUniversities();
@@ -268,12 +269,15 @@ class ProfilePage extends HookConsumerWidget {
                         SimpleTile(
                           title:
                               state.user.jobInfo.university == null
-                                  ? 'University'
+                                  ? context.t.auth.university
                                   : state.user.jobInfo.university!.name,
                           icon: IconlyLight.home,
                         ),
                         SimpleTile(title: state.user.userInfo.birthDate ?? '01/01/2000', icon: IconlyLight.calendar),
-                        SimpleTile(title: state.user.userInfo.gender ? 'Female' : 'Male', icon: IconlyLight.profile),
+                        SimpleTile(
+                          title: state.user.userInfo.gender ? context.t.profile.female : context.t.profile.male,
+                          icon: IconlyLight.profile,
+                        ),
                         const SizedBox(height: 8.0),
                       ],
                     ),
@@ -292,11 +296,11 @@ class ProfilePage extends HookConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Job Information',
+                  context.t.profile.information,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 IconButton(
-                  tooltip: 'Edit',
+                  tooltip: context.t.common.edit,
                   onPressed: () async {
                     await const EditJobRoute().push(context);
                   },
@@ -323,55 +327,55 @@ class ProfilePage extends HookConsumerWidget {
                       children: [
                         const SizedBox(height: 8.0),
                         JobTile(
-                          title: 'Job wanted',
+                          title: context.t.job.wanted,
                           child: Text(
-                            state.user.jobInfo.desiredJob ?? 'Something',
+                            state.user.jobInfo.desiredJob ?? '',
                             style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w400),
                           ),
                         ),
                         CarouselJobTile(
-                          title: 'Position',
+                          title: context.t.job.position,
                           count: state.user.jobInfo.positions.length,
-                          emptyBuilder: (_) => const Text('No positions available'),
+                          emptyBuilder: (_) => Text(context.t.profile.noPosition),
                           builder: (context, index) {
                             return DisabledButton(title: state.user.jobInfo.positions[index].name);
                           },
                         ),
                         CarouselJobTile(
-                          title: 'Major',
+                          title: context.t.job.major,
                           count: state.user.jobInfo.majors.length,
-                          emptyBuilder: (_) => const Text('No majors available'),
+                          emptyBuilder: (_) => Text(context.t.profile.noMajor),
                           builder: (context, index) {
-                            return DisabledButton(title: state.user.jobInfo.positions[index].name);
+                            return DisabledButton(title: state.user.jobInfo.majors[index].name);
                           },
                         ),
                         CarouselJobTile(
-                          title: 'Job type',
+                          title: context.t.job.type,
                           count: state.user.jobInfo.schedules.length,
-                          emptyBuilder: (_) => const Text('No job type available'),
+                          emptyBuilder: (_) => Text(context.t.profile.noType),
                           builder: (context, index) {
                             return DisabledButton(title: state.user.jobInfo.schedules[index].name);
                           },
                         ),
                         JobTile(
-                          title: 'Job location',
+                          title: context.t.auth.location,
                           child: SimpleTile(
                             icon: IconlyLight.location,
-                            title: state.user.jobInfo.desiredWorkingProvince ?? 'City',
+                            title: state.user.jobInfo.desiredWorkingProvince ?? context.t.auth.city,
                             spacing: 8.0,
                             padding: EdgeInsets.zero,
                           ),
                         ),
                         JobTile(
-                          title: 'CV',
-                          child: SizedBox(height: 40.0, child: DisabledButton(title: state.user.jobInfo.cv ?? 'No CV')),
-                        ),
-                        JobTile(
-                          title: 'Cover letter',
+                          title: context.t.job.cv,
                           child: SizedBox(
                             height: 40.0,
-                            child: Text(state.user.jobInfo.referenceLetter ?? 'No cover letter'),
+                            child: DisabledButton(title: state.user.jobInfo.cv ?? context.t.profile.noCv),
                           ),
+                        ),
+                        JobTile(
+                          title: context.t.job.coverLetter.title,
+                          child: SizedBox(height: 40.0, child: Text(state.user.jobInfo.referenceLetter ?? '')),
                         ),
                         const SizedBox.shrink(),
                       ],
@@ -392,7 +396,7 @@ class ProfilePage extends HookConsumerWidget {
               onPressed: () async {
                 await const ChangePasswordRoute().push(context);
               },
-              child: const Text('Change Password'),
+              child: Text(context.t.auth.changePassword),
             ),
           ),
         ),
@@ -412,7 +416,7 @@ class ProfilePage extends HookConsumerWidget {
                   const LoginRoute().go(context);
                 }
               },
-              child: const Text('Log Out'),
+              child: Text(context.t.auth.logout),
             ),
           ),
         ),
@@ -531,7 +535,7 @@ class _ProfileShimmer extends StatelessWidget {
                   baseColor: Colors.grey[300]!,
                   highlightColor: Colors.grey[100]!,
                   child: _CustomIcon(
-                    title: 'Applied',
+                    title: context.t.job.applied,
                     subtitle: '0',
                     icon: Icon(IconlyLight.profile, size: 24.0, color: Theme.of(context).colorScheme.onPrimary),
                   ),
@@ -540,7 +544,7 @@ class _ProfileShimmer extends StatelessWidget {
                   baseColor: Colors.grey[300]!,
                   highlightColor: Colors.grey[100]!,
                   child: _CustomIcon(
-                    title: 'Saved',
+                    title: context.t.job.saved,
                     subtitle: '0',
                     icon: Icon(IconlyLight.work, size: 24.0, color: Theme.of(context).colorScheme.onPrimary),
                   ),

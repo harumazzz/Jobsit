@@ -1,4 +1,14 @@
 {
+  "common": {
+    "Edit": "Edit",
+    "Save": "Save",
+    "Cancel": "Cancel",
+    "Delete": "Delete",
+    "Confirm": "Confirm",
+    "Close": "Close",
+    "Search": "Search",
+    "Select": "Select"
+  },
   "auth": {
     "login": "Sign in",
     "register": "Sign up",
@@ -29,6 +39,22 @@
     "returnToSignIn": "Return to sign in",
     "passwordResetSuccess": "Password reset successfully. Please login with your new password.",
     "reset": "Reset",
+    "notAllowedToView": "You are not allowed to view this page",
+    "dateOfBirth": "Date of Birth",
+    "gender": "Gender",
+    "province": "Province",
+    "district": "District",
+    "city": "City",
+    "location": "Location",
+    "address": "Address",
+    "university": "University",
+    "selectUniversity": "Select university",
+    "selectCity": "Select city",
+    "loadingDistrict": "Loading district...",
+    "selectDistrict": "Select district",
+    "desiredJob": "Desired job",
+    "save": "Save",
+    "logout": "Logout",
     "resetPassword": {
       "title": "Reset Password",
       "description": "Please enter new password"
@@ -60,13 +86,36 @@
     "change": "Change"
   },
   "profile": {
-    "updateSuccess": "Information updated successfully"
+    "updateSuccess": "Information updated successfully",
+    "male": "Male",
+    "female": "Female",
+    "personalInformation": "Personal Information",
+    "title": "Profile",
+    "noPosition": "No position available",
+    "noMajor": "No major available",
+    "noType": "No schedules available",
+    "noCv": "No CV available"
   },
   "job": {
     "saveSuccess": "Job saved successfully",
     "unsaveSuccess": "Job unsaved successfully",
     "applicationSuccess": "Application submitted successfully",
-    "unsavedOne": "Unsaved 1 job"
+    "unsavedOne": "Unsaved 1 job",
+    "cvPlaceholder": "CV Placeholder",
+    "information": "Job Information",
+    "wanted": "Job Wanted",
+    "position": "Position",
+    "major": "Major",
+    "type": "Job Type",
+    "cv": "CV",
+    "coverLetter": {
+      "title": "Cover Letter",
+      "description": "Write a brief introduction about yourself"
+    },
+    "applied": "Applied",
+    "saved": "Saved",
+    "allowSearch": "Allow employers to search your profile",
+    "emailNotification": "Email Notification"
   },
   "validation": {
     "required": {
@@ -104,6 +153,7 @@
     "format": {
       "email": "Invalid email address",
       "emailExists": "This email address already exists",
+      "mismatchImage": "Image format does not match",
       "password": {
         "uppercase": "Please include at least 1 uppercase letter",
         "number": "Please include at least 1 number"

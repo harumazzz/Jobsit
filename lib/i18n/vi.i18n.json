@@ -1,4 +1,14 @@
 {
+  "common": {
+    "Edit": "Sửa",
+    "Save": "Lưu",
+    "Cancel": "Hủy",
+    "Delete": "Xóa",
+    "Confirm": "Xác nhận",
+    "Close": "Đóng",
+    "Search": "Tìm kiếm",
+    "Select": "Chọn"
+  },
   "auth": {
     "login": "Đăng nhập",
     "register": "Đăng kí",
@@ -29,6 +39,22 @@
     "returnToSignIn": "Quay lại đăng nhập",
     "passwordResetSuccess": "Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới của bạn.",
     "reset": "Đặt lại",
+    "notAllowedToView": "Bạn không có quyền truy cập trang này",
+    "dateOfBirth": "Ngày sinh",
+    "gender": "Giới tính",
+    "province": "Tỉnh",
+    "district": "Quận",
+    "location": "Địa điểm",
+    "city": "Thành phố",
+    "address": "Địa chỉ",
+    "university": "Trường đại học",
+    "selectUniversity": "Chọn trường đại học",
+    "selectCity": "Chọn thành phố",
+    "loadingDistrict": "Đang tải quận...",
+    "selectDistrict": "Chọn quận",
+    "desiredJob": "Công việc mong muốn",
+    "save": "Lưu",
+    "logout": "Đăng xuất",
     "resetPassword": {
       "title": "Đặt lại mật khẩu",
       "description": "Vui lòng nhập mật khẩu mới"
@@ -60,13 +86,36 @@
     "change": "Đổi"
   },
   "profile": {
-    "updateSuccess": "Cập nhật thông tin thành công!"
+    "updateSuccess": "Cập nhật thông tin thành công!",
+    "male": "Nam",
+    "female": "Nữ",
+    "personalInformation": "Thông tin cá nhân",
+    "title": "Hồ sơ",
+    "noPosition": "Không có vị trí nào",
+    "noMajor": "Không có chuyên ngành nào",
+    "noType": "Không có loại công việc nào",
+    "noCv": "Không có CV nào"
   },
   "job": {
     "saveSuccess": "Lưu việc làm thành công!",
     "unsaveSuccess": "Hủy lưu việc làm thành công!",
     "applicationSuccess": "Ứng tuyển thành công!",
-    "unsavedOne": "Đã hủy lưu 1 việc làm."
+    "unsavedOne": "Đã hủy lưu 1 việc làm.",
+    "cvPlaceholder": "Trưng bày CV",
+    "information": "Thông tin việc làm",
+    "wanted": "Công việc mong muốn",
+    "position": "Vị trí",
+    "major": "Chuyên ngành",
+    "type": "Loại công việc",
+    "cv": "CV",
+    "coverLetter": {
+      "title": "Thư xin việc",
+      "description": "Mô tả về bản thân và lý do bạn muốn ứng tuyển vào vị trí này"
+    },
+    "applied": "Đã ứng tuyển",
+    "saved": "Đã lưu",
+    "allowSearch": "Cho phép nhà tuyển dụng tìm kiếm hồ sơ của bạn",
+    "emailNotification": "Thông báo qua email"
   },
   "validation": {
     "required": {
@@ -104,6 +153,7 @@
     "format": {
       "email": "Địa chỉ email không đúng",
       "emailExists": "Địa chỉ email này đã tồn tại",
+      "mismatchImage": "Định dạng ảnh không đúng",
       "password": {
         "uppercase": "Vui lòng nhập ít nhất 1 chữ in hoa",
         "number": "Vui lòng nhập ít nhất 1 số"

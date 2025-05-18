@@ -13,6 +13,7 @@ import '../../../../core/services/file_service.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
+import '../../../../i18n/strings.g.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../auth/domain/entities/user.dart' show University;
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -25,7 +26,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (ref.read(authControllerProvider) is! AuthAuthorized) {
-      return const Center(child: Text('You are not authorized to view this page.'));
+      return Center(child: Text(context.t.auth.notAllowedToView));
     }
     final currentState = ref.read(authControllerProvider) as AuthAuthorized;
     final formKey = useMemoized(GlobalKey<FormBuilderState>.new);
@@ -52,9 +53,11 @@ class PersonalInfoEditPage extends HookConsumerWidget {
     final districtFocusNode = useFocusNode();
     final addressFocusNode = useFocusNode();
     final universityFocusNode = useFocusNode();
-    final genderOptions = ['Male', 'Female'];
+    final genderOptions = [context.t.profile.male, context.t.profile.female];
     final cityOptions = (ref.read(citiesControllerProvider) as CitiesLoaded).cities;
-    final selectedGender = useState(currentState.user.userInfo.gender ? 'Male' : 'Female');
+    final selectedGender = useState(
+      currentState.user.userInfo.gender ? context.t.profile.male : context.t.profile.female,
+    );
     final selectedCity = useState<City?>(
       currentState.user.userInfo.city != null
           ? (ref.read(citiesControllerProvider) as CitiesLoaded).cities.firstWhere(
@@ -105,7 +108,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: const Color(0xFff5fafd),
-        title: const Text('Personal Information', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(context.t.profile.personalInformation, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: Padding(
@@ -162,7 +165,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                                   if (!RegExp(r'\.(jpg|png)$', caseSensitive: false).hasMatch(value.path)) {
                                     NotificationService.error(
                                       context: context,
-                                      message: 'Image format is not supported',
+                                      message: context.t.validation.format.mismatchImage,
                                     );
                                     return;
                                   }
@@ -178,7 +181,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 20.0),
                 Text(
-                  'First Name',
+                  context.t.auth.firstName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16.0),
@@ -199,7 +202,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 16.0),
                 Text(
-                  'Last Name',
+                  context.t.auth.lastName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16.0),
@@ -219,7 +222,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16.0),
-                Text('Email', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  context.t.auth.email,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 16.0),
                 FormBuilderTextField(
                   name: 'email',
@@ -238,7 +244,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 16.0),
                 Text(
-                  'Date of Birth',
+                  context.t.auth.dateOfBirth,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16.0),
@@ -259,7 +265,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16.0),
-                Text('Phone', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  context.t.auth.phone,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 16.0),
                 FormBuilderTextField(
                   name: 'phone',
@@ -277,7 +286,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16.0),
-                Text('Gender', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  context.t.auth.gender,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 16.0),
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -326,7 +338,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16.0),
-                Text('City', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  context.t.auth.city,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 16.0),
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -353,7 +368,9 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                                 onTap: () async {
                                   controller.open();
                                 },
-                                child: Text(selectedCity.value != null ? selectedCity.value!.name : 'Select City'),
+                                child: Text(
+                                  selectedCity.value != null ? selectedCity.value!.name : context.t.auth.selectCity,
+                                ),
                               ),
                             );
                           },
@@ -363,14 +380,9 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                         ...cityOptions.map((city) {
                           return MenuItemButton(
                             onPressed: () async {
-                              // Reset district selection when city changes
                               selectedDistrict.value = null;
-
-                              // Reset districts controller and set new city
                               await ref.read(districtsControllerProvider.notifier).reset();
                               selectedCity.value = city;
-
-                              // Get districts for the selected city
                               await ref
                                   .read(districtsControllerProvider.notifier)
                                   .getDistricts(code: selectedCity.value!.code);
@@ -388,7 +400,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16.0),
-                Text('District', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  context.t.auth.district,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 16.0),
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -410,15 +425,15 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                             final String displayText;
                             var isEnabled = true;
                             if (selectedCity.value == null) {
-                              displayText = 'Select a city first';
+                              displayText = context.t.auth.selectCity;
                               isEnabled = false;
                             } else if (state is! DistrictsLoaded) {
-                              displayText = 'Loading districts...';
+                              displayText = context.t.auth.loadingDistrict;
                               isEnabled = false;
                             } else if (selectedDistrict.value != null) {
                               displayText = selectedDistrict.value!.name;
                             } else {
-                              displayText = 'Select District';
+                              displayText = context.t.auth.selectDistrict;
                             }
                             return InputDecorator(
                               decoration: InputDecoration(
@@ -454,7 +469,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16.0),
-                Text('Address', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  context.t.auth.address,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 16.0),
                 FormBuilderTextField(
                   name: 'address',
@@ -472,7 +490,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 16.0),
                 Text(
-                  'University',
+                  context.t.auth.university,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16.0),
@@ -516,7 +534,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                                 child: Text(
                                   selectedUniversity.value != null
                                       ? selectedUniversity.value!.name
-                                      : 'Select University',
+                                      : context.t.auth.selectUniversity,
                                 ),
                               ),
                             );
@@ -555,10 +573,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                         university: selectedUniversity.value!,
                       );
                   if (context.mounted) {
-                    NotificationService.success(
-                      context: context,
-                      message: 'Personal information updated successfully!',
-                    );
+                    NotificationService.success(context: context, message: context.t.profile.updateSuccess);
                     context.pop();
                   }
                 }
@@ -577,14 +592,14 @@ class JobInfoEditPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (ref.read(authControllerProvider) is! AuthAuthorized) {
-      return const Center(child: Text('You are not authorized to view this page.'));
+      return Center(child: Text(context.t.auth.notAllowedToView));
     }
 
     final formKey = useMemoized(GlobalKey<FormBuilderState>.new);
 
     final jobWantedController = useTextEditingController();
     final coverLetterController = useTextEditingController();
-    final cvPlaceholderController = useTextEditingController(text: 'CV Placeholder');
+    final cvPlaceholderController = useTextEditingController(text: context.t.job.cvPlaceholder);
 
     final jobWantedFocusNode = useFocusNode();
     final positionFocusNode = useFocusNode();
@@ -684,7 +699,7 @@ class JobInfoEditPage extends HookConsumerWidget {
       return Scaffold(
         appBar: AppBar(
           surfaceTintColor: const Color(0xFff5fafd),
-          title: const Text('Job Information', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: Text(context.t.job.information, style: const TextStyle(fontWeight: FontWeight.bold)),
           centerTitle: true,
         ),
         body: Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
@@ -694,7 +709,7 @@ class JobInfoEditPage extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: const Color(0xFff5fafd),
-        title: const Text('Job Information', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(context.t.job.information, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -708,7 +723,7 @@ class JobInfoEditPage extends HookConsumerWidget {
                 children: [
                   const SizedBox(height: 20.0),
                   Text(
-                    'Job Wanted',
+                    context.t.job.wanted,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16.0),
@@ -727,7 +742,7 @@ class JobInfoEditPage extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 16.0),
                   Text(
-                    'Position',
+                    context.t.job.position,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16.0),
@@ -831,7 +846,10 @@ class JobInfoEditPage extends HookConsumerWidget {
                     },
                   ),
                   const SizedBox(height: 16.0),
-                  Text('Major', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    context.t.job.major,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 16.0),
                   FormBuilderField(
                     key: majorKey,
@@ -934,7 +952,7 @@ class JobInfoEditPage extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 16.0),
                   Text(
-                    'Job Type',
+                    context.t.job.type,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16.0),
@@ -1039,7 +1057,7 @@ class JobInfoEditPage extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 16.0),
                   Text(
-                    'Location',
+                    context.t.auth.location,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16.0),
@@ -1116,7 +1134,10 @@ class JobInfoEditPage extends HookConsumerWidget {
                     },
                   ),
                   const SizedBox(height: 16.0),
-                  Text('CV', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    context.t.job.cv,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 16.0),
                   FormBuilderTextField(
                     textAlign: TextAlign.center,
@@ -1126,7 +1147,7 @@ class JobInfoEditPage extends HookConsumerWidget {
                     readOnly: true,
                     onTap: () async {
                       final result = await ref.read(fileServiceProvider).uploadFile([
-                        const FileSelector(label: 'CV', extensions: ['pdf', 'docx']),
+                        FileSelector(label: context.t.job.cv, extensions: ['pdf', 'docx']),
                       ]);
                       result.fold(
                         ifLeft: (value) => null,
@@ -1145,7 +1166,7 @@ class JobInfoEditPage extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 16.0),
                   Text(
-                    'Cover Letter',
+                    context.t.job.coverLetter.title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16.0),
@@ -1155,10 +1176,10 @@ class JobInfoEditPage extends HookConsumerWidget {
                     focusNode: coverLetterFocusNode,
                     minLines: 5,
                     maxLines: 5,
-                    decoration: const InputDecoration(
-                      hintText: 'Write a brief introduction about yourself',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                      contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                    decoration: InputDecoration(
+                      hintText: context.t.job.coverLetter.description,
+                      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     ),
                     onSubmitted: (_) async {
                       coverLetterFocusNode.unfocus();
@@ -1198,7 +1219,7 @@ class JobInfoEditPage extends HookConsumerWidget {
                         schedules: selectedJobTypes.value.map((e) => e.toAuth()).toList(),
                       );
                   if (context.mounted) {
-                    NotificationService.success(context: context, message: 'Job information updated successfully!');
+                    NotificationService.success(context: context, message: context.t.profile.updateSuccess);
                     context.pop();
                   }
                 }
@@ -1223,7 +1244,7 @@ class _CustomNavbar extends StatelessWidget {
       decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest),
       child: CustomButton(
         onPressed: onPressed,
-        child: const Padding(padding: EdgeInsets.symmetric(vertical: 4.0), child: Text('Save')),
+        child: Padding(padding: const EdgeInsets.symmetric(vertical: 4.0), child: Text(context.t.auth.save)),
       ),
     );
   }
