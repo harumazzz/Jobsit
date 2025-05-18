@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -8,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/network/api_constant.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../domain/entities/job.dart';
 import '../providers/job_provider.dart';
 
@@ -77,26 +77,17 @@ class JobCard extends HookConsumerWidget {
                         if (ref.read(savedJobControllerProvider.notifier).contains(job.id)) {
                           await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: job.id);
                           if (context.mounted) {
-                            ElegantNotification.success(
-                              background: const Color(0xFFDEF2ED),
-                              description: const Text('Job has been removed successfully!'),
-                            ).show(context);
+                            NotificationService.error(context: context, message: 'Job has been removed successfully!');
                           }
                         } else {
                           await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
                           if (context.mounted) {
-                            ElegantNotification.success(
-                              background: const Color(0xFFDEF2ED),
-                              description: const Text('Job has been saved successfully!'),
-                            ).show(context);
+                            NotificationService.success(context: context, message: 'Job has been saved successfully!');
                           }
                         }
                       } catch (e) {
                         if (context.mounted) {
-                          ElegantNotification.error(
-                            background: const Color(0xFFFEF3F2),
-                            description: const Text('Error occurred while saving the job!'),
-                          ).show(context);
+                          NotificationService.error(context: context, message: 'Error occurred while saving the job!');
                         }
                       } finally {
                         isBookmarkProcessing.value = false;

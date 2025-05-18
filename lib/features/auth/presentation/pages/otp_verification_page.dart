@@ -1,10 +1,10 @@
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
@@ -59,13 +59,10 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
         const OtpVerifiedRoute().go(context);
       }
       if (next is AuthSendedMail && context.mounted) {
-        ElegantNotification.success(
-          background: const Color(0xFFDEF2ED),
-          description: const Text('Verification code sent to your email. Please check your inbox.'),
-        ).show(context);
+        NotificationService.success(context: context, message: 'OTP code has been sent to your email');
       }
       if (next is AuthError && context.mounted) {
-        ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
+        NotificationService.error(context: context, message: next.message);
       }
     });
     return Scaffold(
@@ -199,10 +196,7 @@ class OtpVerifiedPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ElegantNotification.success(
-      background: const Color(0xFFDEF2ED),
-      description: const Text('Registered successfully! Please login to your account.'),
-    ).show(context);
+    NotificationService.success(context: context, message: 'Account verified successfully');
     useDebounced(() async => const HomeRoute().go(context), const Duration(seconds: 5));
     return Scaffold(
       body: Center(
@@ -271,7 +265,7 @@ class _ForgotPasswordOTPState extends ConsumerState<ForgotPasswordOTP> {
         const OtpVerifiedRoute().go(context);
       }
       if (next is AuthError && context.mounted) {
-        ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
+        NotificationService.error(context: context, message: next.message);
       }
     });
     return Scaffold(

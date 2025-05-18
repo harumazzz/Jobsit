@@ -1,4 +1,3 @@
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -6,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -141,10 +141,7 @@ class ChangePasswordPage extends HookWidget {
                                 confirmPassword: confirmPasswordController.text,
                               );
                           if (context.mounted) {
-                            ElegantNotification.success(
-                              background: const Color(0xFFDEF2ED),
-                              description: const Text('Password changed successfully!'),
-                            ).show(context);
+                            NotificationService.success(context: context, message: 'Password changed successfully!');
                             context.pop();
                           }
                         }

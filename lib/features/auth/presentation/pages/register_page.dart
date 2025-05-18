@@ -1,9 +1,9 @@
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
@@ -75,13 +75,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       switch (next) {
         case AuthError _:
-          ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
+          NotificationService.error(context: context, message: next.message);
           break;
         case AuthRegistered _:
-          ElegantNotification.success(
-            background: const Color(0xFFDEF2ED),
-            description: const Text('Register an account successfully!'),
-          ).show(context);
+          NotificationService.success(context: context, message: 'Register an account successfully!');
           OtpVerificationRoute(email: _emailController.text).go(context);
           break;
         default:

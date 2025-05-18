@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -12,6 +11,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/network/api_constant.dart';
 import '../../../../core/services/file_service.dart';
 import '../../../../core/services/location_service.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../auth/domain/entities/user.dart' show University;
@@ -156,17 +156,14 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                                 ifLeft: (_) => null,
                                 ifRight: (value) {
                                   if (value.data.length > 512 * 1024) {
-                                    ElegantNotification.error(
-                                      background: const Color(0xFFDEF2ED),
-                                      description: const Text('Image size exceeds 512KB'),
-                                    ).show(context);
+                                    NotificationService.error(context: context, message: 'Image size exceeds 512KB');
                                     return;
                                   }
                                   if (!RegExp(r'\.(jpg|png)$', caseSensitive: false).hasMatch(value.path)) {
-                                    ElegantNotification.error(
-                                      background: const Color(0xFFDEF2ED),
-                                      description: const Text('Image format is not supported'),
-                                    ).show(context);
+                                    NotificationService.error(
+                                      context: context,
+                                      message: 'Image format is not supported',
+                                    );
                                     return;
                                   }
                                   image.value = value;
@@ -558,10 +555,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                         university: selectedUniversity.value!,
                       );
                   if (context.mounted) {
-                    ElegantNotification.success(
-                      background: const Color(0xFFDEF2ED),
-                      description: const Text('Personal information updated successfully!'),
-                    ).show(context);
+                    NotificationService.success(
+                      context: context,
+                      message: 'Personal information updated successfully!',
+                    );
                     context.pop();
                   }
                 }
@@ -1186,10 +1183,7 @@ class JobInfoEditPage extends HookConsumerWidget {
                 if (formKey.currentState!.validate()) {
                   formKey.currentState!.save();
                   if (cv.value == null && context.mounted) {
-                    ElegantNotification.error(
-                      background: const Color(0xFFDEF2ED),
-                      description: const Text('Please upload your CV'),
-                    ).show(context);
+                    NotificationService.error(context: context, message: 'Please upload your CV');
                     return;
                   }
                   await ref
@@ -1204,10 +1198,7 @@ class JobInfoEditPage extends HookConsumerWidget {
                         schedules: selectedJobTypes.value.map((e) => e.toAuth()).toList(),
                       );
                   if (context.mounted) {
-                    ElegantNotification.success(
-                      background: const Color(0xFFDEF2ED),
-                      description: const Text('Job information updated successfully!'),
-                    ).show(context);
+                    NotificationService.success(context: context, message: 'Job information updated successfully!');
                     context.pop();
                   }
                 }

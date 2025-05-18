@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -12,6 +11,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/network/api_constant.dart';
 import '../../../../core/services/file_service.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../domain/entities/job.dart';
@@ -63,18 +63,18 @@ class JobDetailPage extends HookConsumerWidget {
                           if (ref.read(savedJobControllerProvider.notifier).contains(state.job.id)) {
                             await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: jobId);
                             if (context.mounted) {
-                              ElegantNotification.success(
-                                background: const Color(0xFFDEF2ED),
-                                description: const Text('Job has been removed successfully!'),
-                              ).show(context);
+                              NotificationService.error(
+                                context: context,
+                                message: 'Job has been removed from your saved list',
+                              );
                             }
                           } else {
                             await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
                             if (context.mounted) {
-                              ElegantNotification.success(
-                                background: const Color(0xFFDEF2ED),
-                                description: const Text('Job has been saved successfully!'),
-                              ).show(context);
+                              NotificationService.success(
+                                context: context,
+                                message: 'Job has been saved successfully!',
+                              );
                             }
                           }
                         } finally {
@@ -546,10 +546,7 @@ class _ApplyModal extends HookWidget {
                       ]);
                       result.fold(
                         ifLeft: (error) {
-                          ElegantNotification.error(
-                            background: const Color(0xFFFCE8DB),
-                            description: Text(error.message),
-                          ).show(context);
+                          NotificationService.error(context: context, message: error.message);
                         },
                         ifRight: (e) {
                           text.value = e.name;
@@ -630,10 +627,7 @@ class _ApplyModal extends HookWidget {
                         return;
                       }
                       if (controller.text.trim().isEmpty) {
-                        ElegantNotification.error(
-                          background: const Color(0xFFFCE8DB),
-                          description: const Text('Please write a reference letter'),
-                        ).show(context);
+                        NotificationService.error(context: context, message: 'Please write a reference letter');
                         return;
                       }
                       await ref
@@ -642,17 +636,11 @@ class _ApplyModal extends HookWidget {
                       final state = ref.read(applyJobControllerProvider);
                       if (state is ApplyJobError) {
                         if (context.mounted) {
-                          ElegantNotification.error(
-                            background: const Color(0xFFFCE8DB),
-                            description: Text(state.message),
-                          ).show(context);
+                          NotificationService.error(context: context, message: state.message);
                         }
                       } else if (state is ApplyJobLoaded) {
                         if (context.mounted) {
-                          ElegantNotification.success(
-                            background: const Color(0xFFDEF2ED),
-                            description: const Text('Job has been applied successfully!'),
-                          ).show(context);
+                          NotificationService.success(context: context, message: 'Job has been applied successfully!');
                           Navigator.pop(context);
                         }
                       }

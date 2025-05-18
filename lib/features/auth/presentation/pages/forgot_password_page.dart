@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:elegant_notification/elegant_notification.dart';
 
+import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
@@ -47,14 +47,14 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     final state = ref.watch(authControllerProvider);
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       if (next is AuthForgotPassword) {
-        ElegantNotification.success(
-          background: const Color(0xFFDEF2ED),
-          description: const Text('Verification code sent to your email. Please check your inbox.'),
-        ).show(context);
+        NotificationService.success(
+          context: context,
+          message: 'Verification code sent to your email. Please check your inbox.',
+        );
         VerifyForgotPasswordOTPRoute(email: _emailController.text).go(context);
       }
       if (next is AuthError) {
-        ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
+        NotificationService.error(context: context, message: next.message);
       }
     });
     return Scaffold(
@@ -187,14 +187,14 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
     final state = ref.watch(authControllerProvider);
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       if (next is AuthResetPassword) {
-        ElegantNotification.success(
-          background: const Color(0xFFDEF2ED),
-          description: const Text('Password reset successfully. Please login with your new password.'),
-        ).show(context);
+        NotificationService.success(
+          context: context,
+          message: 'Password reset successfully. Please login with your new password.',
+        );
         const LoginRoute().go(context);
       }
       if (next is AuthError && context.mounted) {
-        ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
+        NotificationService.error(context: context, message: next.message);
       }
     });
     return Scaffold(
