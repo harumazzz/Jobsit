@@ -27,7 +27,11 @@
     "chooseALocation": "Chọn một địa điểm",
     "applyFilter": "Lọc công việc",
     "vietnamese": "Tiếng Việt",
-    "english": "Tiếng Anh"
+    "english": "Tiếng Anh",
+    "home": "Trang chủ",
+    "applied": "Ứng tuyển",
+    "saved": "Đã lưu",
+    "profile": "Hồ sơ"
   },
   "auth": {
     "login": "Đăng nhập",

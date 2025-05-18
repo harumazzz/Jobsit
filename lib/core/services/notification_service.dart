@@ -23,14 +23,16 @@ class NotificationService {
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
-      icon: _CustomIcon(iconData: iconData, iconColor: accentColor, lineColor: accentColor),
+      icon: _CustomIcon(iconData: iconData, iconColor: Colors.white, lineColor: accentColor),
       background: backgroundColor,
-      showProgressIndicator: false,
-      borderRadius: BorderRadius.circular(12.0),
-      toastDuration: const Duration(seconds: 4),
+      progressIndicatorColor: accentColor,
+      progressIndicatorBackground: backgroundColor,
+      borderRadius: BorderRadius.circular(16.0),
+      toastDuration: const Duration(seconds: 5),
+      border: Border.all(color: accentColor),
       closeButton:
           (onDismiss) => IconButton(
-            padding: EdgeInsets.zero,
+            padding: const EdgeInsets.only(right: 8.0),
             constraints: const BoxConstraints(),
             icon: Icon(Icons.close_outlined, color: accentColor, size: 20),
             onPressed: onDismiss,
@@ -47,7 +49,7 @@ class NotificationService {
       notificationType: NotificationType.success,
       backgroundColor: const Color(0xFFDEF2ED),
       accentColor: const Color(0xFF00B074),
-      iconData: Icons.check_circle,
+      iconData: IconlyLight.infoSquare,
     );
   }
 
@@ -69,7 +71,7 @@ class NotificationService {
       notificationType: NotificationType.info,
       backgroundColor: const Color(0xFFD7F1FD),
       accentColor: const Color(0xFF509AF8),
-      iconData: Icons.check_circle,
+      iconData: IconlyLight.infoSquare,
     );
   }
 }
@@ -85,11 +87,7 @@ class _CustomIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 4.0,
-      children: [Icon(iconData, color: iconColor, size: 22.0), Container(width: 28.0, height: 3.5, color: lineColor)],
-    );
+    return CircleAvatar(backgroundColor: lineColor, radius: 20.0, child: Icon(iconData, color: iconColor, size: 20.0));
   }
 
   @override

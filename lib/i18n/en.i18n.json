@@ -27,7 +27,11 @@
     "chooseALocation": "Choose a location",
     "applyFilter": "Apply filter",
     "vietnamese": "Vietnamese",
-    "english": "English"
+    "english": "English",
+    "home": "Home",
+    "applied": "Applied",
+    "saved": "Saved",
+    "profile": "Profile"
   },
   "auth": {
     "login": "Sign in",
