@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
+import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
@@ -57,10 +58,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       switch (next) {
         case AuthError _:
-          NotificationService.error(context: context, message: next.message);
+          NotificationService.error(context: context, message: context.t.login.fail);
           break;
         case AuthAuthorized _:
-          NotificationService.success(context: context, message: 'Login successfully!');
+          NotificationService.success(context: context, message: context.t.login.success);
           const HomeRoute().go(context);
           break;
         default:
@@ -86,10 +87,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   focusNode: _emailFocusNode,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                    labelText: 'Email',
-                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    labelText: context.t.auth.email,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
                   controller: _emailController,
                   validator: (value) => InputConverter.validateEmail(value, context),
@@ -103,7 +104,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: 20.0),
                 AuthTextField(
                   name: 'password',
-                  label: 'Password',
+                  label: context.t.auth.password,
                   controller: _passwordController,
                   focusNode: _passwordFocusNode,
                   keyboardType: TextInputType.visiblePassword,
@@ -140,7 +141,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             );
                           },
                         ),
-                        const Text('Save password'),
+                        Text(context.t.auth.savePassword),
                       ],
                     ),
                     InkWell(
@@ -150,7 +151,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       onTap: () async {
                         const ForgotPasswordRoute().go(context);
                       },
-                      child: const Text('Forgot password?'),
+                      child: Text(context.t.auth.forgotPassword),
                     ),
                   ],
                 ),
@@ -167,12 +168,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               .login(email: _emailController.text, password: _passwordController.text);
                         }
                       },
-                      child: const Text('Login'),
+                      child: Text(context.t.auth.login),
                     ),
                   ),
                 },
                 const SizedBox(height: 20.0),
-                const Text('Or Sign in with'),
+                Text(context.t.auth.orSignInWith),
                 const SizedBox(height: 12.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -219,9 +220,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 4.0,
             children: [
-              const Text(
-                'Don\'t have an Account?',
-                style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w400, color: Colors.black),
+              Text(
+                context.t.auth.notHaveAccount,
+                style: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.w400, color: Colors.black),
               ),
               InkWell(
                 splashColor: Colors.transparent,
@@ -230,7 +231,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 onTap: () async {
                   const RegisterRoute().go(context);
                 },
-                child: const Text('Sign Up', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w700)),
+                child: Text(
+                  context.t.auth.register,
+                  style: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.w700),
+                ),
               ),
             ],
           ),

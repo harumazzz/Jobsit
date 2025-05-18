@@ -1,4 +1,49 @@
 {
+  "auth": {
+    "login": "Đăng nhập",
+    "register": "Đăng kí",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "forgotPassword": "Quên mật khẩu",
+    "orSignInWith": "Hoặc đăng nhập bằng",
+    "notHaveAccount": "Bạn chưa có tài khoản?",
+    "savePassword": "Lưu mật khẩu",
+    "firstName": "Họ",
+    "lastName": "Tên",
+    "resend": "Gửi lại",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "phone": "Số điện thoại",
+    "orContinueWith": "Hoặc tiếp tục với",
+    "alreadyHaveAccount": "Bạn đã có tài khoản?",
+    "otpSent": "OTP đã được gửi đến email của bạn",
+    "verification": "XÁC THỰC",
+    "verify": "Xác thực",
+    "notHaveTheCode": "Chưa nhận được mã?",
+    "enterOtp": "Nhập mã OTP mà chúng tôi đã gửi cho bạn qua SMS",
+    "enterOtpCode": "Nhập mã OTP",
+    "accountVerifiedSuccess": "Tài khoản đã được xác thực thành công",
+    "forgotPasswordSuccess": "Mã OTP để đặt lại mật khẩu đã được gửi đến email của bạn",
+    "pleaseEnterEmail": "Vui lòng nhập email đã đăng ký của bạn",
+    "sendCodeThroughMail": "Chúng tôi sẽ gửi một liên kết để đặt lại mật khẩu của bạn",
+    "send": "Gửi",
+    "returnToSignIn": "Quay lại đăng nhập",
+    "passwordResetSuccess": "Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới của bạn.",
+    "reset": "Đặt lại",
+    "resetPassword": {
+      "title": "Đặt lại mật khẩu",
+      "description": "Vui lòng nhập mật khẩu mới"
+    },
+    "termsAndConditions": {
+      "prefix": "Bằng cách nhấp vào nút 'Đăng kí', tôi đồng ý với\n",
+      "termsOfUse": "Điều khoản sử dụng",
+      "and": " và ",
+      "privacyPolicy": "Chính sách bảo mật",
+      "suffix": " của Jobsit.vn"
+    },
+    "changePassword": "Đổi mật khẩu",
+    "newPassword": "Mật khẩu mới",
+    "confirmNewPassword": "Xác nhận mật khẩu mới"
+  },
   "login": {
     "success": "Đăng nhập thành công!",
     "fail": "Tài khoản hoặc mật khẩu không đúng!",
@@ -11,7 +56,8 @@
   },
   "password": {
     "changeSuccess": "Đổi mật khẩu thành công!",
-    "currentIncorrect": "Mật khẩu hiện tại không đúng"
+    "currentIncorrect": "Mật khẩu hiện tại không đúng",
+    "change": "Đổi"
   },
   "profile": {
     "updateSuccess": "Cập nhật thông tin thành công!"

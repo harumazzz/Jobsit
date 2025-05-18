@@ -1,4 +1,49 @@
 {
+  "auth": {
+    "login": "Sign in",
+    "register": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "resend": "Resend",
+    "forgotPassword": "Forgot password?",
+    "orSignInWith": "or sign in with",
+    "notHaveAccount": "Don't have an account?",
+    "savePassword": "Save password",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "confirmPassword": "Confirm password",
+    "phone": "Phone number",
+    "orContinueWith": "or continue with",
+    "alreadyHaveAccount": "Already have an account?",
+    "otpSent": "OTP has been sent to your email",
+    "verification": "VERIFICATION",
+    "notHaveTheCode": "Didn't receive the code?",
+    "verify": "Verify",
+    "enterOtp": "Enter the OTP code that we send you via SMS",
+    "enterOtpCode": "Enter OTP code",
+    "accountVerifiedSuccess": "Account verified successfully",
+    "forgotPasswordSuccess": "Password reset OTP has been sent to your email",
+    "pleaseEnterEmail": "Please enter your Registered Email",
+    "sendCodeThroughMail": "We will send a link to reset your password",
+    "send": "Send",
+    "returnToSignIn": "Return to sign in",
+    "passwordResetSuccess": "Password reset successfully. Please login with your new password.",
+    "reset": "Reset",
+    "resetPassword": {
+      "title": "Reset Password",
+      "description": "Please enter new password"
+    },
+    "termsAndConditions": {
+      "prefix": "By clicking the 'Register' button, I agree to the\n",
+      "termsOfUse": "Terms of Use",
+      "and": " and ",
+      "privacyPolicy": "Privacy Policy",
+      "suffix": " of Jobsit.vn"
+    },
+    "changePassword": "Change Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password"
+  },
   "login": {
     "success": "Logged in successfully",
     "fail": "Username or password incorrect",
@@ -11,7 +56,8 @@
   },
   "password": {
     "changeSuccess": "Password changed successfully",
-    "currentIncorrect": "Current password is incorrect"
+    "currentIncorrect": "Current password is incorrect",
+    "change": "Change"
   },
   "profile": {
     "updateSuccess": "Information updated successfully"

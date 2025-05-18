@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
+import '../../../../i18n/strings.g.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
@@ -25,7 +26,7 @@ class ChangePasswordPage extends HookWidget {
     final validateConfirmPassword = useCallback(
       (String? value) {
         if (value != newPasswordController.text) {
-          return 'Passwords do not match';
+          return context.t.validation.format.passwordMismatch;
         }
         return null;
       },
@@ -46,7 +47,7 @@ class ChangePasswordPage extends HookWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Change Password',
+                  context.t.auth.changePassword,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontFamily: GoogleFonts.workSans(fontWeight: FontWeight.bold).fontFamily,
                     fontWeight: FontWeight.bold,
@@ -60,10 +61,10 @@ class ChangePasswordPage extends HookWidget {
                   focusNode: currentPasswordFocusNode,
                   keyboardType: TextInputType.visiblePassword,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                    labelText: 'Password',
-                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    labelText: context.t.auth.password,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
                   validator: (value) => InputConverter.validatePassword(value, context),
                   onSubmitted: (_) async {
@@ -80,10 +81,10 @@ class ChangePasswordPage extends HookWidget {
                   focusNode: newPasswordFocusNode,
                   keyboardType: TextInputType.visiblePassword,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                    labelText: 'New Password',
-                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    labelText: context.t.auth.newPassword,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
                   validator: (value) => InputConverter.validatePassword(value, context),
                   onSubmitted: (_) async {
@@ -100,10 +101,10 @@ class ChangePasswordPage extends HookWidget {
                   focusNode: confirmPasswordFocusNode,
                   keyboardType: TextInputType.visiblePassword,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                    labelText: 'Confirm New Password',
-                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    labelText: context.t.auth.confirmNewPassword,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
                   validator: (value) {
                     final passwordValidation = InputConverter.validatePassword(value, context);
@@ -141,12 +142,15 @@ class ChangePasswordPage extends HookWidget {
                                 confirmPassword: confirmPasswordController.text,
                               );
                           if (context.mounted) {
-                            NotificationService.success(context: context, message: 'Password changed successfully!');
+                            NotificationService.success(context: context, message: context.t.password.changeSuccess);
                             context.pop();
                           }
                         }
                       },
-                      child: const Padding(padding: EdgeInsets.symmetric(vertical: 8.0), child: Text('Change')),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(context.t.password.change),
+                      ),
                     );
                   },
                 ),

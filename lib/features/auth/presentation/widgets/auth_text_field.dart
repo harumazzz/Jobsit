@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../core/utils/input_converter.dart';
+import '../../../../i18n/strings.g.dart';
 import '../providers/auth_provider.dart';
 
 class AuthTextField extends StatelessWidget {
@@ -127,7 +128,7 @@ class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField>
       setState(() {
         _isCheckingEmail = false;
         _isEmailAvailable = !result.toLowerCase().contains('đã sử dụng');
-        _emailErrorText = _isEmailAvailable ? null : 'Email already exists';
+        _emailErrorText = _isEmailAvailable ? null : context.t.registration.emailExists;
       });
     } catch (e) {
       setState(() {
@@ -152,7 +153,7 @@ class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField>
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
         border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-        labelText: 'Email',
+        labelText: context.t.auth.email,
         contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
         errorText: _emailErrorText,
         suffixIcon:
@@ -174,7 +175,7 @@ class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField>
           return basicValidation;
         }
         if (!_isEmailAvailable) {
-          return 'Email already exists';
+          return context.t.registration.emailExists;
         }
         return null;
       },

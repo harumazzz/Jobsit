@@ -63,7 +63,5 @@ flutter:
   uses-material-design: true
   assets:
     - test/
-    - test/core/
-    - test/core/util/
     - assets/
     - assets/images/

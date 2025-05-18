@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
+import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
@@ -59,7 +60,7 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
         const OtpVerifiedRoute().go(context);
       }
       if (next is AuthSendedMail && context.mounted) {
-        NotificationService.success(context: context, message: 'OTP code has been sent to your email');
+        NotificationService.success(context: context, message: context.t.auth.otpSent);
       }
       if (next is AuthError && context.mounted) {
         NotificationService.error(context: context, message: next.message);
@@ -77,9 +78,9 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
                 children: [
                   const _Stepper(),
                   const SizedBox(height: 30.0),
-                  const Text('VERIFICATION'),
+                  Text(context.t.auth.verification),
                   const SizedBox(height: 20.0),
-                  const Text('Enter the OTP code that we send you via SMS'),
+                  Text(context.t.auth.enterOtp),
                   const SizedBox(height: 30.0),
                   _OtpField(controller: _otpController, focusNode: _otpFocusNode),
                   const SizedBox(height: 20.0),
@@ -87,7 +88,7 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
                     spacing: 4.0,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Didn\'t receive the code?'),
+                      Text(context.t.auth.notHaveTheCode),
                       InkWell(
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
@@ -96,7 +97,7 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
                           _otpFocusNode.unfocus();
                           await ref.read(authControllerProvider.notifier).resendMail(email: widget.email);
                         },
-                        child: const Text('Resend', style: TextStyle(color: Colors.red)),
+                        child: Text(context.t.auth.resend, style: const TextStyle(color: Colors.red)),
                       ),
                     ],
                   ),
@@ -110,7 +111,7 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
                           await ref.read(authControllerProvider.notifier).verifyEmail(otp: _otpController.text);
                         }
                       },
-                      child: const Text('Verify'),
+                      child: Text(context.t.auth.verify),
                     ),
                   ),
                 ],
@@ -138,12 +139,12 @@ class _OtpField extends StatelessWidget {
       keyboardType: TextInputType.number,
       maxLength: 6,
       textInputAction: TextInputAction.next,
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-        labelText: 'Enter OTP code',
-        contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+      decoration: InputDecoration(
+        border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+        labelText: context.t.auth.enterOtpCode,
+        contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
         counterText: '',
-        errorStyle: TextStyle(color: Colors.red),
+        errorStyle: const TextStyle(color: Colors.red),
       ),
       controller: controller,
       validator: InputConverter.validateOtp,
@@ -205,9 +206,9 @@ class OtpVerifiedPage extends StatelessWidget {
           spacing: 12.0,
           children: [
             Image.asset('assets/images/checked.png', width: 85, height: 85),
-            const Text(
-              'Account verified successfully',
-              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400, color: Colors.green),
+            Text(
+              context.t.auth.accountVerifiedSuccess,
+              style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400, color: Colors.green),
             ),
           ],
         ),
@@ -280,9 +281,9 @@ class _ForgotPasswordOTPState extends ConsumerState<ForgotPasswordOTP> {
                 children: [
                   const _Stepper(),
                   const SizedBox(height: 30.0),
-                  const Text('VERIFICATION'),
+                  Text(context.t.auth.verification),
                   const SizedBox(height: 20.0),
-                  const Text('Enter the OTP code that we send you via Email'),
+                  Text(context.t.auth.enterOtp),
                   const SizedBox(height: 30.0),
                   _OtpField(controller: _otpController, focusNode: _otpFocusNode),
                   const SizedBox(height: 20.0),
@@ -290,7 +291,7 @@ class _ForgotPasswordOTPState extends ConsumerState<ForgotPasswordOTP> {
                     spacing: 4.0,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Didn\'t receive the code?'),
+                      Text(context.t.auth.notHaveTheCode),
                       InkWell(
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
@@ -299,7 +300,7 @@ class _ForgotPasswordOTPState extends ConsumerState<ForgotPasswordOTP> {
                           _otpFocusNode.unfocus();
                           await ref.read(authControllerProvider.notifier).forgotPassword(email: widget.email);
                         },
-                        child: const Text('Resend', style: TextStyle(color: Colors.red)),
+                        child: Text(context.t.auth.resend, style: const TextStyle(color: Colors.red)),
                       ),
                     ],
                   ),
@@ -313,7 +314,7 @@ class _ForgotPasswordOTPState extends ConsumerState<ForgotPasswordOTP> {
                           await ref.read(authControllerProvider.notifier).verifyOtp(otp: _otpController.text);
                         }
                       },
-                      child: const Text('Verify'),
+                      child: Text(context.t.auth.verify),
                     ),
                   ),
                 ],

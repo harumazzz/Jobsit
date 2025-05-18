@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
+import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
@@ -75,10 +76,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     ref.listen<AuthState>(authControllerProvider, (previous, next) async {
       switch (next) {
         case AuthError _:
-          NotificationService.error(context: context, message: next.message);
+          NotificationService.error(context: context, message: context.t.registration.emailExists);
           break;
         case AuthRegistered _:
-          NotificationService.success(context: context, message: 'Register an account successfully!');
+          NotificationService.success(context: context, message: context.t.registration.success);
           OtpVerificationRoute(email: _emailController.text).go(context);
           break;
         default:
@@ -89,7 +90,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFefeff0),
       appBar: AppBar(
-        title: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(context.t.auth.register, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: const Color(0xFFefeff0),
       ),
@@ -106,10 +107,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   name: 'first_name',
                   keyboardType: TextInputType.name,
                   controller: _firstNameController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                    labelText: 'First Name',
-                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    labelText: context.t.auth.firstName,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
                   validator: (value) => InputConverter.validateFirstName(value, context),
                   focusNode: _firstNameFocusNode,
@@ -125,10 +126,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   name: 'last_name',
                   keyboardType: TextInputType.name,
                   controller: _lastNameController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                    labelText: 'Last Name',
-                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    labelText: context.t.auth.lastName,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
                   validator: (value) => InputConverter.validateLastName(value, context),
                   focusNode: _lastNameFocusNode,
@@ -156,7 +157,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   keyboardType: TextInputType.visiblePassword,
                   focusNode: _passwordFocusNode,
                   controller: _passwordController,
-                  label: 'Password',
+                  label: context.t.auth.password,
                   validator: (value) => InputConverter.validatePassword(value, context),
                   onFieldSubmitted: (value) {
                     if (_passwordFocusNode.hasFocus) {
@@ -172,7 +173,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   validator: (value) {
                     return InputConverter.validateConfirmPassword(value, context, _passwordController.text);
                   },
-                  label: 'Confirm Password',
+                  label: context.t.auth.confirmPassword,
                   focusNode: _confirmPasswordFocusNode,
                   keyboardType: TextInputType.visiblePassword,
                   onFieldSubmitted: (value) {
@@ -188,10 +189,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   controller: _phoneController,
                   focusNode: _phoneFocusNode,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                    labelText: 'Phone',
-                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    labelText: context.t.auth.phone,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
                   validator: (value) => InputConverter.validatePhone(value, context),
                   onSubmitted: (_) async {
@@ -201,15 +202,21 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   },
                 ),
                 const SizedBox(height: 20.0),
-                const Text.rich(
+                Text.rich(
                   textAlign: TextAlign.center,
                   TextSpan(
                     children: [
-                      TextSpan(text: 'By clicking the \'Register\' button, I agree to the\n'),
-                      TextSpan(text: 'Terms of Use', style: TextStyle(fontWeight: FontWeight.bold)),
-                      TextSpan(text: ' and '),
-                      TextSpan(text: 'Privacy Policy', style: TextStyle(fontWeight: FontWeight.bold)),
-                      TextSpan(text: ' of Jobsit.vn'),
+                      TextSpan(text: context.t.auth.termsAndConditions.prefix),
+                      TextSpan(
+                        text: context.t.auth.termsAndConditions.termsOfUse,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(text: context.t.auth.termsAndConditions.and),
+                      TextSpan(
+                        text: context.t.auth.termsAndConditions.privacyPolicy,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(text: context.t.auth.termsAndConditions.suffix),
                     ],
                   ),
                 ),
@@ -232,12 +239,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                               );
                         }
                       },
-                      child: const Text('Register'),
+                      child: Text(context.t.auth.register),
                     ),
                   ),
                 },
                 const SizedBox(height: 20.0),
-                const Text('Or Continue With'),
+                Text(context.t.auth.orContinueWith),
                 const SizedBox(height: 12.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -282,13 +289,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('Already have an Account?'),
+              Text(context.t.auth.alreadyHaveAccount),
               InkWell(
                 splashColor: Colors.transparent,
                 highlightColor: Colors.transparent,
                 hoverColor: Colors.transparent,
                 onTap: () async => const LoginRoute().go(context),
-                child: const Text(' Sign In', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(' ${context.t.auth.login}', style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
             ],
           ),
