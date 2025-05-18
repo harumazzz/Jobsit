@@ -194,7 +194,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                     border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
-                  validator: InputConverter.validateName,
+                  validator: (value) => InputConverter.validateFirstName(value, context),
                   onSubmitted: (_) async {
                     firstNameFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(lastNameFocusNode);
@@ -215,7 +215,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                     border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
-                  validator: InputConverter.validateName,
+                  validator: (value) => InputConverter.validateLastName(value, context),
                   onSubmitted: (_) async {
                     lastNameFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(emailFocusNode);
@@ -233,7 +233,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                     border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
-                  validator: InputConverter.validateEmail,
+                  validator: (value) => InputConverter.validateEmail(value, context),
                   onSubmitted: (_) async {
                     emailFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(dateFocusNode);
@@ -273,7 +273,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                     border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
-                  validator: InputConverter.validatePhone,
+                  validator: (value) => InputConverter.validatePhone(value, context),
                   onSubmitted: (_) async {
                     phoneFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(genderFocusNode);
@@ -467,7 +467,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                     border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
-                  validator: InputConverter.validateAddress,
+                  validator: (value) => InputConverter.validateAddress(value, context),
                   onSubmitted: (_) async {
                     addressFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(universityFocusNode);

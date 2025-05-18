@@ -65,7 +65,7 @@ class ChangePasswordPage extends HookWidget {
                     labelText: 'Password',
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
-                  validator: InputConverter.validatePassword,
+                  validator: (value) => InputConverter.validatePassword(value, context),
                   onSubmitted: (_) async {
                     if (currentPasswordFocusNode.hasFocus) {
                       currentPasswordFocusNode.unfocus();
@@ -85,7 +85,7 @@ class ChangePasswordPage extends HookWidget {
                     labelText: 'New Password',
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
-                  validator: InputConverter.validatePassword,
+                  validator: (value) => InputConverter.validatePassword(value, context),
                   onSubmitted: (_) async {
                     if (newPasswordFocusNode.hasFocus) {
                       newPasswordFocusNode.unfocus();
@@ -106,7 +106,7 @@ class ChangePasswordPage extends HookWidget {
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
                   validator: (value) {
-                    final passwordValidation = InputConverter.validatePassword(value);
+                    final passwordValidation = InputConverter.validatePassword(value, context);
                     if (passwordValidation != null) {
                       return passwordValidation;
                     }

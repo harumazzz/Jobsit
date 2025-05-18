@@ -94,7 +94,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                   labelText: 'Email',
                   contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                 ),
-                validator: InputConverter.validateEmail,
+                validator: (value) => InputConverter.validateEmail(value, context),
                 onSubmitted: (value) {
                   if (_emailFocusNode.hasFocus) {
                     _emailFocusNode.unfocus();
@@ -217,7 +217,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                 focusNode: _passwordFocusNode,
                 keyboardType: TextInputType.visiblePassword,
                 label: 'Password',
-                validator: InputConverter.validatePassword,
+                validator: (value) => InputConverter.validatePassword(value, context),
                 onFieldSubmitted: (value) async {
                   if (_passwordFocusNode.hasFocus) {
                     _passwordFocusNode.unfocus();

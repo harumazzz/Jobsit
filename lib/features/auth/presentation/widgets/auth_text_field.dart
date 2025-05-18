@@ -106,7 +106,7 @@ class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField>
 
   void _onEmailChanged() async {
     final email = widget.controller.text;
-    if (email.isEmpty || InputConverter.validateEmail(email) != null) {
+    if (email.isEmpty || InputConverter.validateEmail(email, context) != null) {
       setState(() {
         _isCheckingEmail = false;
         _isEmailAvailable = true;
@@ -164,12 +164,12 @@ class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField>
                 )
                 : _isEmailAvailable &&
                     widget.controller.text.isNotEmpty &&
-                    InputConverter.validateEmail(widget.controller.text) == null
+                    InputConverter.validateEmail(widget.controller.text, context) == null
                 ? const Icon(Icons.check_circle_outline, color: Colors.green)
                 : null,
       ),
       validator: (value) {
-        final basicValidation = InputConverter.validateEmail(value);
+        final basicValidation = InputConverter.validateEmail(value, context);
         if (basicValidation != null) {
           return basicValidation;
         }

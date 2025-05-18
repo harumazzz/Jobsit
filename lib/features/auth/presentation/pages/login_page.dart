@@ -95,7 +95,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
                   controller: _emailController,
-                  validator: InputConverter.validateEmail,
+                  validator: (value) => InputConverter.validateEmail(value, context),
                   onSubmitted: (_) async {
                     if (_emailFocusNode.hasFocus) {
                       _emailFocusNode.unfocus();
@@ -110,7 +110,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   controller: _passwordController,
                   focusNode: _passwordFocusNode,
                   keyboardType: TextInputType.visiblePassword,
-                  validator: InputConverter.validatePassword,
+                  validator: (value) => InputConverter.validatePassword(value, context),
                   onFieldSubmitted: (value) async {
                     if (_passwordFocusNode.hasFocus) {
                       _passwordFocusNode.unfocus();

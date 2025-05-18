@@ -114,7 +114,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     labelText: 'First Name',
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
-                  validator: InputConverter.validateName,
+                  validator: (value) => InputConverter.validateFirstName(value, context),
                   focusNode: _firstNameFocusNode,
                   onSubmitted: (_) async {
                     if (_firstNameFocusNode.hasFocus) {
@@ -133,7 +133,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     labelText: 'Last Name',
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
-                  validator: InputConverter.validateName,
+                  validator: (value) => InputConverter.validateLastName(value, context),
                   focusNode: _lastNameFocusNode,
                   onSubmitted: (_) async {
                     if (_lastNameFocusNode.hasFocus) {
@@ -160,7 +160,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   focusNode: _passwordFocusNode,
                   controller: _passwordController,
                   label: 'Password',
-                  validator: InputConverter.validatePassword,
+                  validator: (value) => InputConverter.validatePassword(value, context),
                   onFieldSubmitted: (value) {
                     if (_passwordFocusNode.hasFocus) {
                       _passwordFocusNode.unfocus();
@@ -172,7 +172,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 AuthTextField(
                   name: 'confirm_password',
                   controller: _confirmPasswordController,
-                  validator: InputConverter.validateConfirmPassword,
+                  validator: (value) {
+                    return InputConverter.validateConfirmPassword(value, context, _passwordController.text);
+                  },
                   label: 'Confirm Password',
                   focusNode: _confirmPasswordFocusNode,
                   keyboardType: TextInputType.visiblePassword,
@@ -194,7 +196,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     labelText: 'Phone',
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                   ),
-                  validator: InputConverter.validatePhone,
+                  validator: (value) => InputConverter.validatePhone(value, context),
                   onSubmitted: (_) async {
                     if (_phoneFocusNode.hasFocus) {
                       _phoneFocusNode.unfocus();
