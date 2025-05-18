@@ -159,7 +159,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                                 ifLeft: (_) => null,
                                 ifRight: (value) {
                                   if (value.data.length > 512 * 1024) {
-                                    NotificationService.error(context: context, message: 'Image size exceeds 512KB');
+                                    NotificationService.error(
+                                      context: context,
+                                      message: context.t.validation.file.avatarSize,
+                                    );
                                     return;
                                   }
                                   if (!RegExp(r'\.(jpg|png)$', caseSensitive: false).hasMatch(value.path)) {
@@ -1125,7 +1128,7 @@ class JobInfoEditPage extends HookConsumerWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(selectedCity.value != null ? selectedCity.value!.name : 'Location'),
+                              Text(selectedCity.value != null ? selectedCity.value!.name : context.t.auth.location),
                               const Icon(IconlyLight.arrowDown2, size: 16),
                             ],
                           ),
@@ -1204,7 +1207,7 @@ class JobInfoEditPage extends HookConsumerWidget {
                 if (formKey.currentState!.validate()) {
                   formKey.currentState!.save();
                   if (cv.value == null && context.mounted) {
-                    NotificationService.error(context: context, message: 'Please upload your CV');
+                    NotificationService.error(context: context, message: context.t.job.uploadCV);
                     return;
                   }
                   await ref

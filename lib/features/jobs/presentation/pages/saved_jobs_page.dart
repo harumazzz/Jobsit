@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
+import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../domain/entities/job.dart';
 import '../providers/job_provider.dart';
@@ -17,12 +18,12 @@ class SavedJobsPage extends HookWidget {
     return SafeArea(
       child: CustomScrollView(
         slivers: [
-          const SliverAppBar(
+          SliverAppBar(
             expandedHeight: 38.0,
             floating: true,
-            backgroundColor: Color(0xFFefeff0),
-            surfaceTintColor: Color(0xFff5fafd),
-            flexibleSpace: FlexibleSpaceBar(title: Text('Saved Jobs'), centerTitle: true),
+            backgroundColor: const Color(0xFFefeff0),
+            surfaceTintColor: const Color(0xFff5fafd),
+            flexibleSpace: FlexibleSpaceBar(title: Text(context.t.job.savedJob), centerTitle: true),
           ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

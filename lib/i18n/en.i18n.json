@@ -1,13 +1,33 @@
 {
   "common": {
-    "Edit": "Edit",
-    "Save": "Save",
-    "Cancel": "Cancel",
-    "Delete": "Delete",
-    "Confirm": "Confirm",
-    "Close": "Close",
-    "Search": "Search",
-    "Select": "Select"
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close",
+    "search": "Search",
+    "select": "Select",
+    "days": "Days",
+    "description": "Description",
+    "company": "Company",
+    "jobDescription": "Job Description",
+    "companyOverview": "Company Overview",
+    "companyAddress": "Company Address",  
+    "otherJobs": "Other Jobs",
+    "noOtherJobs": "No other jobs available",
+    "apply": "Apply",
+    "preview": "Preview",
+    "resumeLetter": {
+      "title": "Resume Letter",
+      "description": "Write a brief introduction about yourself"
+    },
+    "searchJob": "Search job",
+    "filter": "Filter",
+    "chooseALocation": "Choose a location",
+    "applyFilter": "Apply filter",
+    "vietnamese": "Vietnamese",
+    "english": "English"
   },
   "auth": {
     "login": "Sign in",
@@ -108,6 +128,7 @@
     "major": "Major",
     "type": "Job Type",
     "cv": "CV",
+    "uploadCV": "Please upload your CV",
     "coverLetter": {
       "title": "Cover Letter",
       "description": "Write a brief introduction about yourself"
@@ -115,7 +136,18 @@
     "applied": "Applied",
     "saved": "Saved",
     "allowSearch": "Allow employers to search your profile",
-    "emailNotification": "Email Notification"
+    "emailNotification": "Email Notification",
+    "saveError": "Error occurred while saving the job!",
+    "appliedJob": "Applied Job",
+    "savedJob": "Saved Job",
+    "appliedJobError": "Error occurred while fetching for the applied job!",
+    "savedJobError": "Error occurred while fetching for the saved job!",
+    "detailError": "Error occurred while fetching job details!",
+    "salary": "Salary",
+    "deadline": "Deadline",
+    "uploadNewCV": "Upload New CV",
+    "attachCV": "Attached CV",
+    "jobPosition": "Job Position"
   },
   "validation": {
     "required": {

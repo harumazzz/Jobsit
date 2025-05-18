@@ -1,13 +1,33 @@
 {
   "common": {
-    "Edit": "Sửa",
-    "Save": "Lưu",
-    "Cancel": "Hủy",
-    "Delete": "Xóa",
-    "Confirm": "Xác nhận",
-    "Close": "Đóng",
-    "Search": "Tìm kiếm",
-    "Select": "Chọn"
+    "edit": "Sửa",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "confirm": "Xác nhận",
+    "close": "Đóng",
+    "search": "Tìm kiếm",
+    "select": "Chọn",
+    "days": "Ngày",
+    "description": "Mô tả",
+    "company": "Công ty",
+    "jobDescription": "Mô tả công việc",
+    "companyOverview": "Giới thiệu",
+    "companyAddress": "Địa chỉ công ty",
+    "otherJobs": "Công việc khác",
+    "noOtherJobs": "Không có công việc nào khác",
+    "apply": "Ứng tuyển",
+    "preview": "Xem trước",
+    "resumeLetter": {
+      "title": "Thư xin việc",
+      "description": "Viết một đoạn giới thiệu ngắn về bản thân"
+    },
+    "searchJob": "Tìm kiếm công việc",
+    "filter": "Lọc",
+    "chooseALocation": "Chọn một địa điểm",
+    "applyFilter": "Lọc công việc",
+    "vietnamese": "Tiếng Việt",
+    "english": "Tiếng Anh"
   },
   "auth": {
     "login": "Đăng nhập",
@@ -108,6 +128,7 @@
     "major": "Chuyên ngành",
     "type": "Loại công việc",
     "cv": "CV",
+    "uploadCV": "Vui lòng tải lên CV của bạn",
     "coverLetter": {
       "title": "Thư xin việc",
       "description": "Mô tả về bản thân và lý do bạn muốn ứng tuyển vào vị trí này"
@@ -115,7 +136,18 @@
     "applied": "Đã ứng tuyển",
     "saved": "Đã lưu",
     "allowSearch": "Cho phép nhà tuyển dụng tìm kiếm hồ sơ của bạn",
-    "emailNotification": "Thông báo qua email"
+    "emailNotification": "Thông báo qua email",
+    "saveError": "Đã xảy ra lỗi khi lưu việc làm!",
+    "appliedJob": "Công việc đã ứng tuyển",
+    "savedJob": "Công việc đã lưu",
+    "appliedJobError": "Đã xảy ra lỗi khi lấy danh sách công việc đã ứng tuyển!",
+    "savedJobError": "Đã xảy ra lỗi khi lấy danh sách công việc đã lưu!",
+    "detailError": "Đã xảy ra lỗi khi lấy thông tin chi tiết công việc!",
+    "salary": "Mức lương",
+    "deadline": "Hạn nộp",
+    "uploadNewCV": "Tải lên CV mới",
+    "attachCV": "Đính kèm CV",
+    "jobPosition": "Vị trí công việc"
   },
   "validation": {
     "required": {

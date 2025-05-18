@@ -173,7 +173,7 @@ class _JobPage extends HookConsumerWidget {
                       padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0)),
                       keyboardType: TextInputType.text,
                       textInputAction: TextInputAction.search,
-                      hintText: 'Search Job',
+                      hintText: context.t.common.searchJob,
                       focusNode: node,
                       controller: controller,
                       hintStyle: WidgetStatePropertyAll(
@@ -197,7 +197,7 @@ class _JobPage extends HookConsumerWidget {
                   ),
                   FloatingActionButton(
                     backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                    tooltip: 'Filter',
+                    tooltip: context.t.common.filter,
                     shape: RoundedRectangleBorder(
                       borderRadius: const BorderRadius.all(Radius.circular(12.0)),
                       side: BorderSide(color: Theme.of(context).colorScheme.primaryContainer),
@@ -358,7 +358,7 @@ class _FilterModal extends HookWidget {
               Icon(IconlyLight.location, color: Theme.of(context).colorScheme.primaryContainer),
               const SizedBox(width: 8.0),
               Text(
-                'Location',
+                context.t.auth.location,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Theme.of(context).colorScheme.primaryContainer,
                   fontWeight: FontWeight.bold,
@@ -371,21 +371,21 @@ class _FilterModal extends HookWidget {
             builder: (context, ref, child) {
               final state = ref.watch(citiesControllerProvider);
               return switch (state) {
-                CitiesInitial() => const Center(child: Text('No location found')),
+                CitiesInitial() => const Center(child: SizedBox.shrink()),
                 CitiesLoading() => const Center(child: CircularProgressIndicator()),
                 CitiesError() => Center(child: Text(state.message, style: Theme.of(context).textTheme.bodyLarge)),
                 CitiesLoaded(cities: final cities) => DropdownButtonField<City?>(
                   value: citySelection.value,
                   items: [
-                    const DropdownMenuItem<City?>(child: Text('-Choose a location-')),
+                    DropdownMenuItem<City?>(child: Text('-${context.t.common.chooseALocation}-')),
                     ...cities.map((City value) => DropdownMenuItem<City?>(value: value, child: Text(value.name))),
                   ],
-                  label: '-Choose a location-',
+                  label: '-${context.t.common.chooseALocation}-',
                   textBuilder: () {
                     if (citySelection.value != null) {
                       return citySelection.value!.name;
                     }
-                    return '-Choose a location-';
+                    return '-${context.t.common.chooseALocation}-';
                   },
                   onChanged: (City? value) async {
                     citySelection.value = value;
@@ -396,7 +396,7 @@ class _FilterModal extends HookWidget {
           ),
           const SizedBox(height: 24.0),
           Text(
-            'Job Type',
+            context.t.job.type,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Theme.of(context).colorScheme.primaryContainer,
               fontWeight: FontWeight.bold,
@@ -407,7 +407,7 @@ class _FilterModal extends HookWidget {
             builder: (context, ref, child) {
               final state = ref.watch(scheduleControllerProvider);
               return switch (state) {
-                ScheduleInitial() => const Center(child: Text('No schedule found')),
+                ScheduleInitial() => const Center(child: SizedBox.shrink()),
                 ScheduleLoading() => const Center(child: CircularProgressIndicator()),
                 ScheduleError() => Center(child: Text(state.message, style: Theme.of(context).textTheme.bodyLarge)),
                 ScheduleLoaded(schedules: final schedules) => SizedBox(
@@ -426,7 +426,7 @@ class _FilterModal extends HookWidget {
           ),
           const SizedBox(height: 24.0),
           Text(
-            'Job Position',
+            context.t.job.jobPosition,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Theme.of(context).colorScheme.primaryContainer,
               fontWeight: FontWeight.bold,
@@ -437,7 +437,7 @@ class _FilterModal extends HookWidget {
             builder: (context, ref, child) {
               final state = ref.watch(positionControllerProvider);
               return switch (state) {
-                PositionInitial() => const Center(child: Text('No position found')),
+                PositionInitial() => const Center(child: SizedBox.shrink()),
                 PositionLoading() => const Center(child: CircularProgressIndicator()),
                 PositionError() => Center(child: Text(state.message, style: Theme.of(context).textTheme.bodyLarge)),
                 PositionLoaded(positions: final positions) => SizedBox(
@@ -460,7 +460,7 @@ class _FilterModal extends HookWidget {
           ),
           const SizedBox(height: 24.0),
           Text(
-            'Major',
+            context.t.job.major,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Theme.of(context).colorScheme.primaryContainer,
               fontWeight: FontWeight.bold,
@@ -471,7 +471,7 @@ class _FilterModal extends HookWidget {
             builder: (context, ref, child) {
               final state = ref.watch(majorControllerProvider);
               return switch (state) {
-                MajorInitial() => const Center(child: Text('No major found')),
+                MajorInitial() => const Center(child: SizedBox.shrink()),
                 MajorLoading() => const Center(child: CircularProgressIndicator()),
                 MajorError() => Center(child: Text(state.message, style: Theme.of(context).textTheme.bodyLarge)),
                 MajorLoaded(majors: final majors) => SizedBox(
@@ -523,7 +523,7 @@ class _FilterModal extends HookWidget {
                     searchNode.unfocus();
                   }
                 },
-                child: const Center(child: Text('Apply filter')),
+                child: Center(child: Text(context.t.common.applyFilter)),
               );
             },
           ),

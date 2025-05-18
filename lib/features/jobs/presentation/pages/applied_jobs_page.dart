@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
+import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../domain/entities/job.dart';
 import '../providers/job_provider.dart';
@@ -23,12 +24,12 @@ class AppliedJobsPage extends HookConsumerWidget {
     return SafeArea(
       child: CustomScrollView(
         slivers: [
-          const SliverAppBar(
+          SliverAppBar(
             expandedHeight: 38.0,
             floating: true,
-            backgroundColor: Color(0xFFefeff0),
-            surfaceTintColor: Color(0xFff5fafd),
-            flexibleSpace: FlexibleSpaceBar(title: Text('Applied Jobs'), centerTitle: true),
+            backgroundColor: const Color(0xFFefeff0),
+            surfaceTintColor: const Color(0xFff5fafd),
+            flexibleSpace: FlexibleSpaceBar(title: Text(context.t.job.appliedJob), centerTitle: true),
           ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -47,7 +48,9 @@ class AppliedJobsPage extends HookConsumerWidget {
                     );
                   case ApplyJobError():
                     return SliverToBoxAdapter(
-                      child: Center(child: Text(jobState.message, style: Theme.of(context).textTheme.bodyLarge)),
+                      child: Center(
+                        child: Text(context.t.job.appliedJobError, style: Theme.of(context).textTheme.bodyLarge),
+                      ),
                     );
                   case ApplyJobLoaded():
                     final state = PagingState<int, Job>(

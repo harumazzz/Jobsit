@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/network/api_constant.dart';
 import '../../../../core/services/file_service.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../domain/entities/job.dart';
@@ -49,7 +50,7 @@ class JobDetailPage extends HookConsumerWidget {
                     JobDetailInitial() => const SizedBox.shrink(),
                     JobDetailLoaded(job: final job) => IconButton(
                       icon: Icon(isSelected.value ? IconlyBold.bookmark : IconlyLight.bookmark),
-                      tooltip: 'Bookmark',
+                      tooltip: context.t.common.save,
                       iconSize: 30.0,
                       color: Theme.of(context).colorScheme.primary,
                       onPressed: () async {
@@ -63,18 +64,12 @@ class JobDetailPage extends HookConsumerWidget {
                           if (ref.read(savedJobControllerProvider.notifier).contains(state.job.id)) {
                             await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: jobId);
                             if (context.mounted) {
-                              NotificationService.error(
-                                context: context,
-                                message: 'Job has been removed from your saved list',
-                              );
+                              NotificationService.error(context: context, message: context.t.job.unsaveSuccess);
                             }
                           } else {
                             await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
                             if (context.mounted) {
-                              NotificationService.success(
-                                context: context,
-                                message: 'Job has been saved successfully!',
-                              );
+                              NotificationService.success(context: context, message: context.t.job.saveSuccess);
                             }
                           }
                         } finally {
@@ -92,10 +87,8 @@ class JobDetailPage extends HookConsumerWidget {
               final state = ref.watch(jobDetailControllerProvider);
               return switch (state) {
                 JobDetailLoading() => const SliverFillRemaining(child: Center(child: CircularProgressIndicator())),
-                JobDetailError(message: final message) => SliverFillRemaining(
-                  child: Center(child: Text('Error: $message')),
-                ),
-                JobDetailInitial() => const SliverFillRemaining(child: Center(child: Text('No data available'))),
+                JobDetailError() => SliverFillRemaining(child: Center(child: Text(context.t.job.detailError))),
+                JobDetailInitial() => SliverFillRemaining(child: Center(child: Text(context.t.job.detailError))),
                 JobDetailLoaded(job: final job, relatedJobs: final relatedJobs) => SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   sliver: SliverToBoxAdapter(
@@ -150,7 +143,7 @@ class JobDetailPage extends HookConsumerWidget {
                         ),
                         const SizedBox(height: 12.0),
                         Text(
-                          job.company.name ?? 'Company Name',
+                          job.company.name ?? '',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.onSecondary,
@@ -166,7 +159,7 @@ class JobDetailPage extends HookConsumerWidget {
                             Icon(IconlyLight.location, size: 24.0, color: Theme.of(context).colorScheme.primary),
                             const SizedBox(width: 4.0),
                             Text(
-                              job.company.location ?? 'Location',
+                              job.company.location ?? '',
                               style: Theme.of(
                                 context,
                               ).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSecondary),
@@ -203,8 +196,8 @@ class JobDetailPage extends HookConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             JobIntroduce(
-                              title: 'Position',
-                              content: job.positions.isNotEmpty ? job.positions[0].name : 'Not specified',
+                              title: context.t.job.position,
+                              content: job.positions.isNotEmpty ? job.positions[0].name : '',
                               child: Icon(
                                 IconlyLight.profile,
                                 size: 24.0,
@@ -212,17 +205,17 @@ class JobDetailPage extends HookConsumerWidget {
                               ),
                             ),
                             JobIntroduce(
-                              title: 'Type',
-                              content: job.schedules.isNotEmpty ? job.schedules[0].name : ' Not specified',
+                              title: context.t.job.type,
+                              content: job.schedules.isNotEmpty ? job.schedules[0].name : ' ',
                               child: Icon(IconlyLight.work, size: 24.0, color: Theme.of(context).colorScheme.primary),
                             ),
                             JobIntroduce(
-                              title: 'Salary',
+                              title: context.t.job.salary,
                               content: '\$${job.minInUSD} - \$${job.maxInUSD}',
                               child: Icon(IconlyLight.wallet, size: 24.0, color: Theme.of(context).colorScheme.primary),
                             ),
                             JobIntroduce(
-                              title: 'Deadline',
+                              title: context.t.job.deadline,
                               content: DateFormat('dd/MM/yy').format(job.applicationDeadline.toLocal()),
                               child: Icon(
                                 IconlyLight.calendar,
@@ -255,7 +248,7 @@ class JobDetailPage extends HookConsumerWidget {
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
-                                    'Description',
+                                    context.t.common.description,
                                     style: TextStyle(
                                       fontWeight: selectedTabIndex.value == 0 ? FontWeight.bold : FontWeight.normal,
                                       color:
@@ -287,7 +280,7 @@ class JobDetailPage extends HookConsumerWidget {
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
-                                    'Company',
+                                    context.t.common.company,
                                     style: TextStyle(
                                       fontWeight: selectedTabIndex.value == 1 ? FontWeight.bold : FontWeight.normal,
                                       color:
@@ -315,7 +308,7 @@ class JobDetailPage extends HookConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Job Description',
+                                    context.t.common.jobDescription,
                                     style: Theme.of(
                                       context,
                                     ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -333,7 +326,7 @@ class JobDetailPage extends HookConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Company Overview',
+                                    context.t.common.companyOverview,
                                     style: Theme.of(
                                       context,
                                     ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -341,7 +334,7 @@ class JobDetailPage extends HookConsumerWidget {
                                   const SizedBox(height: 16.0),
                                   Flexible(
                                     child: Text(
-                                      job.company.description ?? 'No company details available',
+                                      job.company.description ?? '',
                                       style: Theme.of(
                                         context,
                                       ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSecondary),
@@ -349,7 +342,7 @@ class JobDetailPage extends HookConsumerWidget {
                                   ),
                                   const SizedBox(height: 16.0),
                                   Text(
-                                    'Company Address',
+                                    context.t.common.companyAddress,
                                     style: Theme.of(
                                       context,
                                     ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -364,7 +357,7 @@ class JobDetailPage extends HookConsumerWidget {
                                       ),
                                       const SizedBox(width: 8.0),
                                       Text(
-                                        job.company.location ?? 'Location',
+                                        job.company.location ?? '',
                                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                                           color: Theme.of(context).colorScheme.onSecondary,
                                           fontWeight: FontWeight.w500,
@@ -374,7 +367,7 @@ class JobDetailPage extends HookConsumerWidget {
                                   ),
                                   const SizedBox(height: 16.0),
                                   Text(
-                                    'Other Jobs',
+                                    context.t.common.otherJobs,
                                     style: Theme.of(
                                       context,
                                     ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -385,7 +378,7 @@ class JobDetailPage extends HookConsumerWidget {
                                         height: 220.0,
                                         child: Center(
                                           child: Text(
-                                            'No other jobs available.',
+                                            context.t.common.noOtherJobs,
                                             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                                               color: Theme.of(context).colorScheme.onSecondary,
                                               fontWeight: FontWeight.bold,
@@ -472,7 +465,10 @@ class _ApplyNavBar extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 32.0),
                   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                 ),
-                child: const Text('Apply', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Text(
+                  context.t.common.apply,
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
               ),
             };
           },
@@ -497,7 +493,7 @@ class _ApplyModal extends HookWidget {
   Widget build(BuildContext context) {
     final file = useState<FileSelectorResult?>(null);
     final controller = useTextEditingController();
-    final text = useState<String>('Upload new CV');
+    final text = useState<String>(context.t.job.uploadNewCV);
     return SafeArea(
       child: Container(
         height: 560.0,
@@ -514,7 +510,7 @@ class _ApplyModal extends HookWidget {
             spacing: 16.0,
             children: [
               Text(
-                'Attached CV',
+                context.t.job.attachCV,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.primary,
@@ -574,13 +570,16 @@ class _ApplyModal extends HookWidget {
                                 child: PdfViewerPage(data: file.value!.data),
                               ),
                               actions: [
-                                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text(context.t.common.close),
+                                ),
                               ],
                             ),
                       );
                     },
                     child: Text(
-                      'Preview',
+                      context.t.common.preview,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.onPrimary,
@@ -589,7 +588,7 @@ class _ApplyModal extends HookWidget {
                   ),
                 ),
               Text(
-                'Resume letter',
+                context.t.common.resumeLetter.title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.primary,
@@ -611,7 +610,7 @@ class _ApplyModal extends HookWidget {
                     borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
                     borderRadius: const BorderRadius.all(Radius.circular(12.0)),
                   ),
-                  hintText: 'Write a brief introduce about yourself',
+                  hintText: context.t.common.resumeLetter.description,
                   hintStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.5),
                     fontWeight: FontWeight.w500,
@@ -627,7 +626,7 @@ class _ApplyModal extends HookWidget {
                         return;
                       }
                       if (controller.text.trim().isEmpty) {
-                        NotificationService.error(context: context, message: 'Please write a reference letter');
+                        NotificationService.error(context: context, message: context.t.validation.file.cvFormat);
                         return;
                       }
                       await ref
@@ -640,7 +639,7 @@ class _ApplyModal extends HookWidget {
                         }
                       } else if (state is ApplyJobLoaded) {
                         if (context.mounted) {
-                          NotificationService.success(context: context, message: 'Job has been applied successfully!');
+                          NotificationService.success(context: context, message: context.t.job.applicationSuccess);
                           Navigator.pop(context);
                         }
                       }

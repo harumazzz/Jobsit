@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/network/api_constant.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
@@ -296,7 +297,7 @@ class ProfilePage extends HookConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  context.t.profile.information,
+                  context.t.job.information,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 IconButton(
@@ -413,6 +414,7 @@ class ProfilePage extends HookConsumerWidget {
                 ref.invalidate(searchJobsControllerProvider);
                 ref.invalidate(applyJobControllerProvider);
                 if (context.mounted) {
+                  NotificationService.info(context: context, message: context.t.login.logout);
                   const LoginRoute().go(context);
                 }
               },

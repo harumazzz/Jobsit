@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/network/api_constant.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../i18n/strings.g.dart';
 import '../../domain/entities/job.dart';
 import '../providers/job_provider.dart';
 
@@ -66,7 +67,7 @@ class JobCard extends HookConsumerWidget {
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Bookmark',
+                    tooltip: context.t.common.save,
                     onPressed: () async {
                       if (isBookmarkProcessing.value) {
                         return;
@@ -77,17 +78,17 @@ class JobCard extends HookConsumerWidget {
                         if (ref.read(savedJobControllerProvider.notifier).contains(job.id)) {
                           await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: job.id);
                           if (context.mounted) {
-                            NotificationService.error(context: context, message: 'Job has been removed successfully!');
+                            NotificationService.error(context: context, message: context.t.job.unsaveSuccess);
                           }
                         } else {
                           await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
                           if (context.mounted) {
-                            NotificationService.success(context: context, message: 'Job has been saved successfully!');
+                            NotificationService.success(context: context, message: context.t.job.saveSuccess);
                           }
                         }
                       } catch (e) {
                         if (context.mounted) {
-                          NotificationService.error(context: context, message: 'Error occurred while saving the job!');
+                          NotificationService.error(context: context, message: context.t.job.saveError);
                         }
                       } finally {
                         isBookmarkProcessing.value = false;
@@ -149,7 +150,7 @@ class JobCard extends HookConsumerWidget {
                     children: [
                       Icon(IconlyLight.timeCircle, size: 24.0, color: Theme.of(context).colorScheme.primary),
                       Text(
-                        '${DateTime.now().isBefore(job.applicationDeadline) ? job.applicationDeadline.difference(DateTime.now()).inDays : 0} days',
+                        '${DateTime.now().isBefore(job.applicationDeadline) ? job.applicationDeadline.difference(DateTime.now()).inDays : 0} ${context.t.common.days}',
                       ),
                     ],
                   ),
@@ -433,7 +434,7 @@ class AppliedJobCard extends StatelessWidget {
                 children: [
                   Chip(
                     label: Text(
-                      'Applied',
+                      context.t.job.applied,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: Theme.of(context).colorScheme.onPrimary,
                         fontWeight: FontWeight.w600,
@@ -448,7 +449,7 @@ class AppliedJobCard extends StatelessWidget {
                     children: [
                       Icon(IconlyLight.timeCircle, size: 24.0, color: Theme.of(context).colorScheme.primary),
                       Text(
-                        '${DateTime.now().isBefore(job.applicationDeadline) ? job.applicationDeadline.difference(DateTime.now()).inDays : 0} days',
+                        '${DateTime.now().isBefore(job.applicationDeadline) ? job.applicationDeadline.difference(DateTime.now()).inDays : 0} ${context.t.common.days}',
                       ),
                     ],
                   ),
