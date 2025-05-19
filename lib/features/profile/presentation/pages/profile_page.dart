@@ -303,7 +303,10 @@ class ProfilePage extends HookConsumerWidget {
                 IconButton(
                   tooltip: context.t.common.edit,
                   onPressed: () async {
-                    await const EditJobRoute().push(context);
+                    await ref.read(citiesControllerProvider.notifier).fetchCities();
+                    if (context.mounted) {
+                      await const EditJobRoute().push(context);
+                    }
                   },
                   icon: Icon(IconlyLight.editSquare, size: 24.0, color: Theme.of(context).colorScheme.primary),
                 ),

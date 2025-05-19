@@ -19,7 +19,7 @@ class NotificationService {
       height: 60.0,
       description: Text(
         message,
-        style: TextStyle(color: accentColor, fontSize: 14, fontWeight: FontWeight.w500),
+        style: TextStyle(color: accentColor, fontWeight: FontWeight.w500),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),

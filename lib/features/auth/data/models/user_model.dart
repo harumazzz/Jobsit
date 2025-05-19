@@ -95,19 +95,19 @@ abstract class UserCreationResponse with _$UserCreationResponse {
 
 @freezed
 sealed class MajorResponse with _$MajorResponse {
-  const factory MajorResponse({required int id, required String name}) = _MajorResponse;
+  const factory MajorResponse({required int id, required String? name}) = _MajorResponse;
   factory MajorResponse.fromJson(Map<String, dynamic> json) => _$MajorResponseFromJson(json);
 }
 
 @freezed
 sealed class PositionResponse with _$PositionResponse {
-  const factory PositionResponse({required int id, required String name}) = _PositionResponse;
+  const factory PositionResponse({required int id, required String? name}) = _PositionResponse;
   factory PositionResponse.fromJson(Map<String, dynamic> json) => _$PositionResponseFromJson(json);
 }
 
 @freezed
 sealed class ScheduleResponse with _$ScheduleResponse {
-  const factory ScheduleResponse({required int id, required String name}) = _ScheduleResponse;
+  const factory ScheduleResponse({required int id, required String? name}) = _ScheduleResponse;
   factory ScheduleResponse.fromJson(Map<String, dynamic> json) => _$ScheduleResponseFromJson(json);
 }
 
@@ -246,19 +246,19 @@ extension UserCreationResponseMapper on UserCreationResponse {
 
 extension MajorResponseMapper on MajorResponse {
   Major toEntity() {
-    return Major(id: id, name: name);
+    return Major(id: id, name: name ?? '');
   }
 }
 
 extension PositionResponseMapper on PositionResponse {
   Position toEntity() {
-    return Position(id: id, name: name);
+    return Position(id: id, name: name ?? '');
   }
 }
 
 extension ScheduleResponseMapper on ScheduleResponse {
   Schedule toEntity() {
-    return Schedule(id: id, name: name);
+    return Schedule(id: id, name: name ?? '');
   }
 }
 

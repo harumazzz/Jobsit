@@ -238,12 +238,14 @@ final class AuthRepositoryImpl implements AuthRepository {
     try {
       final Map<String, dynamic> value = {
         'candidateProfileDTO': jsonEncode({
-          'desiredJob': desiredJob,
-          'desiredWorkingProvince': desiredWorkingProvince,
-          'referenceLetter': referenceLetter,
-          'positionsDTOs': [...positions.map((e) => PositionRequest(id: e.id))],
-          'majorsDTOs': [...majors.map((e) => MajorRequest(id: e.id))],
-          'schedulesDTOs': [...schedules.map((e) => ScheduleRequest(id: e.id))],
+          'candidateOtherInfoDTO': {
+            'desiredJob': desiredJob,
+            'desiredWorkingProvince': desiredWorkingProvince,
+            'referenceLetter': referenceLetter,
+            'positionDTOs': [...positions.map((e) => PositionRequest(id: e.id).toJson())],
+            'majorDTOs': [...majors.map((e) => MajorRequest(id: e.id).toJson())],
+            'scheduleDTOs': [...schedules.map((e) => ScheduleRequest(id: e.id).toJson())],
+          },
         }),
       };
       if (cv != null) {

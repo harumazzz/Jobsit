@@ -18,6 +18,7 @@ import '../../../../shared/widgets/custom_button.dart';
 import '../../../auth/domain/entities/user.dart' show University;
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../jobs/domain/entities/job.dart';
+import '../../../jobs/presentation/pages/job_detail_page.dart';
 import '../../../jobs/presentation/providers/job_provider.dart';
 
 class PersonalInfoEditPage extends HookConsumerWidget {
@@ -597,12 +598,16 @@ class JobInfoEditPage extends HookConsumerWidget {
     if (ref.read(authControllerProvider) is! AuthAuthorized) {
       return Center(child: Text(context.t.auth.notAllowedToView));
     }
+    final currentState = ref.read(authControllerProvider) as AuthAuthorized;
+    final jobInfo = currentState.user.jobInfo;
 
     final formKey = useMemoized(GlobalKey<FormBuilderState>.new);
 
-    final jobWantedController = useTextEditingController();
-    final coverLetterController = useTextEditingController();
-    final cvPlaceholderController = useTextEditingController(text: context.t.job.cvPlaceholder);
+    final jobWantedController = useTextEditingController(text: jobInfo.desiredJob);
+    final coverLetterController = useTextEditingController(text: jobInfo.referenceLetter);
+    final cvPlaceholderController = useTextEditingController(
+      text: jobInfo.cv != null ? jobInfo.cv!.split('/').last : context.t.job.cvPlaceholder,
+    );
 
     final jobWantedFocusNode = useFocusNode();
     final positionFocusNode = useFocusNode();
@@ -613,10 +618,20 @@ class JobInfoEditPage extends HookConsumerWidget {
     final coverLetterFocusNode = useFocusNode();
 
     final cv = useState<FileSelectorResult?>(null);
-    final selectedPositions = useState<Set<Position>>({});
-    final selectedMajors = useState<Set<Major>>({});
-    final selectedJobTypes = useState<Set<Schedule>>({});
-    final selectedCity = useState<City?>(null);
+    final selectedPositions = useState<Set<Position>>(
+      jobInfo.positions.map((p) => Position(id: p.id, name: p.name)).toSet(),
+    );
+    final selectedMajors = useState<Set<Major>>(jobInfo.majors.map((m) => Major(id: m.id, name: m.name)).toSet());
+    final selectedJobTypes = useState<Set<Schedule>>(
+      jobInfo.schedules.map((s) => Schedule(id: s.id, name: s.name)).toSet(),
+    );
+    final selectedCity = useState<City?>(
+      jobInfo.desiredWorkingProvince != null
+          ? (ref.read(citiesControllerProvider) as CitiesLoaded).cities.firstWhere(
+            (city) => city.name.contains(jobInfo.desiredWorkingProvince!),
+          )
+          : null,
+    );
 
     final positionOverlayEntry = useState<OverlayEntry?>(null);
     final majorOverlayEntry = useState<OverlayEntry?>(null);
@@ -694,6 +709,24 @@ class JobInfoEditPage extends HookConsumerWidget {
       CitiesLoaded(cities: final citiesList) => citiesList,
       _ => <City>[],
     };
+
+    useEffect(
+      () {
+        if (citiesState is CitiesLoaded && jobInfo.desiredWorkingProvince != null && selectedCity.value?.code == -1) {
+          try {
+            final city = cities.firstWhere((c) => c.name == jobInfo.desiredWorkingProvince);
+            selectedCity.value = city;
+          } catch (e) {
+            debugPrint('City not found in initial load: $e');
+            selectedCity.value = null;
+          }
+        }
+        return null;
+      },
+      () {
+        return [citiesState, jobInfo.desiredWorkingProvince];
+      }(),
+    );
 
     if (positionState is! PositionLoaded ||
         majorState is! MajorLoaded ||
@@ -820,27 +853,31 @@ class JobInfoEditPage extends HookConsumerWidget {
                             if (selectedPositions.value.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(top: 8),
-                                child: Wrap(
-                                  spacing: 8,
-                                  runSpacing: 4,
-                                  children: [
-                                    ...selectedPositions.value.map(
-                                      (item) => Chip(
-                                        label: Text(item.name, style: const TextStyle(fontSize: 12)),
-                                        deleteIcon: const Icon(Icons.close_outlined, size: 14),
-                                        color: WidgetStateProperty.all(
-                                          Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.64),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      ...selectedPositions.value.map(
+                                        (item) => Padding(
+                                          padding: const EdgeInsets.only(right: 8),
+                                          child: Chip(
+                                            label: Text(item.name, style: const TextStyle(fontSize: 12)),
+                                            deleteIcon: const Icon(Icons.close_outlined, size: 14),
+                                            color: WidgetStateProperty.all(
+                                              Theme.of(context).colorScheme.primaryContainer.withAlpha(160),
+                                            ),
+                                            onDeleted: () {
+                                              final newItems = Set<Position>.from(selectedPositions.value)
+                                                ..remove(item);
+                                              selectedPositions.value = newItems;
+                                            },
+                                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                            visualDensity: VisualDensity.compact,
+                                          ),
                                         ),
-                                        onDeleted: () {
-                                          final newItems = Set<Position>.from(selectedPositions.value);
-                                          newItems.remove(item);
-                                          selectedPositions.value = newItems;
-                                        },
-                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                        visualDensity: VisualDensity.compact,
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                           ],
@@ -925,27 +962,30 @@ class JobInfoEditPage extends HookConsumerWidget {
                             if (selectedMajors.value.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(top: 8),
-                                child: Wrap(
-                                  spacing: 8,
-                                  runSpacing: 4,
-                                  children: [
-                                    ...selectedMajors.value.map(
-                                      (item) => Chip(
-                                        label: Text(item.name, style: const TextStyle(fontSize: 12)),
-                                        deleteIcon: const Icon(Icons.close_outlined, size: 14),
-                                        color: WidgetStateProperty.all(
-                                          Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.64),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      ...selectedMajors.value.map(
+                                        (item) => Padding(
+                                          padding: const EdgeInsets.only(right: 8),
+                                          child: Chip(
+                                            label: Text(item.name, style: const TextStyle(fontSize: 12)),
+                                            deleteIcon: const Icon(Icons.close_outlined, size: 14),
+                                            color: WidgetStateProperty.all(
+                                              Theme.of(context).colorScheme.primaryContainer.withAlpha(160),
+                                            ),
+                                            onDeleted: () {
+                                              final newItems = Set<Major>.from(selectedMajors.value)..remove(item);
+                                              selectedMajors.value = newItems;
+                                            },
+                                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                            visualDensity: VisualDensity.compact,
+                                          ),
                                         ),
-                                        onDeleted: () {
-                                          final newItems = Set<Major>.from(selectedMajors.value);
-                                          newItems.remove(item);
-                                          selectedMajors.value = newItems;
-                                        },
-                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                        visualDensity: VisualDensity.compact,
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                           ],
@@ -1021,36 +1061,35 @@ class JobInfoEditPage extends HookConsumerWidget {
                                   Overlay.of(context).insert(jobTypeOverlayEntry.value!);
                                 }
                               },
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [Icon(IconlyLight.arrowDown2, size: 16)],
-                              ),
+                              child: const Row(children: [Icon(IconlyLight.arrowDown2, size: 16)]),
                             ),
                             if (selectedJobTypes.value.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(top: 8),
-                                child: Wrap(
-                                  spacing: 8,
-                                  runSpacing: 4,
-                                  children: [
-                                    ...selectedJobTypes.value.map(
-                                      (item) => Chip(
-                                        label: Text(item.name, style: const TextStyle(fontSize: 12)),
-                                        deleteIcon: const Icon(Icons.close_outlined, size: 14),
-                                        color: WidgetStateProperty.all(
-                                          Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.64),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      ...selectedJobTypes.value.map(
+                                        (item) => Padding(
+                                          padding: const EdgeInsets.only(right: 8),
+                                          child: Chip(
+                                            label: Text(item.name, style: const TextStyle(fontSize: 12)),
+                                            deleteIcon: const Icon(Icons.close_outlined, size: 14),
+                                            color: WidgetStateProperty.all(
+                                              Theme.of(context).colorScheme.primaryContainer.withAlpha(160),
+                                            ),
+                                            onDeleted: () async {
+                                              final newItems = Set<Schedule>.from(selectedJobTypes.value)..remove(item);
+                                              selectedJobTypes.value = newItems;
+                                            },
+                                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                            visualDensity: VisualDensity.compact,
+                                          ),
                                         ),
-                                        onDeleted: () async {
-                                          final newItems = Set<Schedule>.from(selectedJobTypes.value);
-                                          newItems.remove(item);
-                                          selectedJobTypes.value = newItems;
-                                        },
-                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                        visualDensity: VisualDensity.compact,
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                           ],
@@ -1168,6 +1207,41 @@ class JobInfoEditPage extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16.0),
+                  if (cv.value != null)
+                    AnimatedOpacity(
+                      duration: const Duration(milliseconds: 300),
+                      opacity: 0.84,
+                      child: CustomButton(
+                        onPressed: () async {
+                          await showDialog(
+                            context: context,
+                            builder:
+                                (context) => AlertDialog(
+                                  title: Text(cv.value!.name),
+                                  content: SizedBox(
+                                    height: 600.0,
+                                    width: 400.0,
+                                    child: PdfViewerPage(data: cv.value!.data),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: Text(context.t.common.close),
+                                    ),
+                                  ],
+                                ),
+                          );
+                        },
+                        child: Text(
+                          context.t.common.preview,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 16.0),
                   Text(
                     context.t.job.coverLetter.title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -1206,7 +1280,8 @@ class JobInfoEditPage extends HookConsumerWidget {
                 }
                 if (formKey.currentState!.validate()) {
                   formKey.currentState!.save();
-                  if (cv.value == null && context.mounted) {
+                  final currentState = ref.read(authControllerProvider) as AuthAuthorized;
+                  if (cv.value == null && currentState.user.jobInfo.cv == null && context.mounted) {
                     NotificationService.error(context: context, message: context.t.job.uploadCV);
                     return;
                   }
