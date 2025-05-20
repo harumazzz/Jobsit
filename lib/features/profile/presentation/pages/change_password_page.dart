@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -17,6 +18,7 @@ class ChangePasswordPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final formKey = useMemoized(GlobalKey<FormBuilderState>.new);
+    final isSubmitting = useState(false);
     final currentPasswordController = useTextEditingController();
     final newPasswordController = useTextEditingController();
     final confirmPasswordController = useTextEditingController();
@@ -122,35 +124,16 @@ class ChangePasswordPage extends HookWidget {
                 const SizedBox(height: 40.0),
                 Consumer(
                   builder: (context, ref, child) {
-                    return CustomButton(
-                      onPressed: () async {
-                        if (currentPasswordFocusNode.hasFocus) {
-                          currentPasswordFocusNode.unfocus();
-                        }
-                        if (newPasswordFocusNode.hasFocus) {
-                          newPasswordFocusNode.unfocus();
-                        }
-                        if (confirmPasswordFocusNode.hasFocus) {
-                          confirmPasswordFocusNode.unfocus();
-                        }
-                        if (formKey.currentState!.validate()) {
-                          await ref
-                              .read(authControllerProvider.notifier)
-                              .changePassword(
-                                oldPassword: currentPasswordController.text,
-                                newPassword: newPasswordController.text,
-                                confirmPassword: confirmPasswordController.text,
-                              );
-                          if (context.mounted) {
-                            NotificationService.success(context: context, message: context.t.password.changeSuccess);
-                            context.pop();
-                          }
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text(context.t.password.change),
-                      ),
+                    return _ChangeButton(
+                      formKey: formKey,
+                      currentPasswordController: currentPasswordController,
+                      newPasswordController: newPasswordController,
+                      confirmPasswordController: confirmPasswordController,
+                      currentPasswordFocusNode: currentPasswordFocusNode,
+                      newPasswordFocusNode: newPasswordFocusNode,
+                      confirmPasswordFocusNode: confirmPasswordFocusNode,
+                      ref: ref,
+                      isSubmitting: isSubmitting,
                     );
                   },
                 ),
@@ -160,5 +143,85 @@ class ChangePasswordPage extends HookWidget {
         ),
       ),
     );
+  }
+}
+
+class _ChangeButton extends StatelessWidget {
+  const _ChangeButton({
+    required this.formKey,
+    required this.currentPasswordController,
+    required this.newPasswordController,
+    required this.confirmPasswordController,
+    required this.currentPasswordFocusNode,
+    required this.newPasswordFocusNode,
+    required this.confirmPasswordFocusNode,
+    required this.ref,
+    required this.isSubmitting,
+  });
+
+  final GlobalKey<FormBuilderState> formKey;
+
+  final TextEditingController currentPasswordController;
+
+  final TextEditingController newPasswordController;
+
+  final TextEditingController confirmPasswordController;
+
+  final FocusNode currentPasswordFocusNode;
+
+  final FocusNode newPasswordFocusNode;
+
+  final FocusNode confirmPasswordFocusNode;
+
+  final WidgetRef ref;
+
+  final ValueNotifier<bool> isSubmitting;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomButton(
+      onPressed: () async {
+        if (isSubmitting.value) {
+          return;
+        }
+        if (currentPasswordFocusNode.hasFocus) {
+          currentPasswordFocusNode.unfocus();
+        }
+        if (newPasswordFocusNode.hasFocus) {
+          newPasswordFocusNode.unfocus();
+        }
+        if (confirmPasswordFocusNode.hasFocus) {
+          confirmPasswordFocusNode.unfocus();
+        }
+        if (formKey.currentState!.validate()) {
+          await ref
+              .read(authControllerProvider.notifier)
+              .changePassword(
+                oldPassword: currentPasswordController.text,
+                newPassword: newPasswordController.text,
+                confirmPassword: confirmPasswordController.text,
+              );
+          if (context.mounted) {
+            NotificationService.success(context: context, message: context.t.password.changeSuccess);
+            context.pop();
+          }
+        }
+      },
+      child: Padding(padding: const EdgeInsets.symmetric(vertical: 8.0), child: Text(context.t.password.change)),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<GlobalKey<FormBuilderState>>('formKey', formKey));
+    properties.add(DiagnosticsProperty<TextEditingController>('currentPasswordController', currentPasswordController));
+    properties.add(DiagnosticsProperty<TextEditingController>('newPasswordController', newPasswordController));
+    properties.add(DiagnosticsProperty<TextEditingController>('confirmPasswordController', confirmPasswordController));
+    properties.add(DiagnosticsProperty<FocusNode>('currentPasswordFocusNode', currentPasswordFocusNode));
+    properties.add(DiagnosticsProperty<FocusNode>('newPasswordFocusNode', newPasswordFocusNode));
+    properties.add(DiagnosticsProperty<FocusNode>('confirmPasswordFocusNode', confirmPasswordFocusNode));
+    properties.add(DiagnosticsProperty<WidgetRef>('ref', ref));
+    properties.add(DiagnosticsProperty<ValueNotifier<bool>>('isSubmitting', isSubmitting));
   }
 }

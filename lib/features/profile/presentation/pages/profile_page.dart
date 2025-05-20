@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -6,7 +5,6 @@ import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../core/network/api_constant.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
@@ -50,45 +48,7 @@ class ProfilePage extends HookConsumerWidget {
                     return switch (ref.watch(authControllerProvider)) {
                       AuthAuthorized state =>
                         state.user.userInfo.avatar != null
-                            ? Container(
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Theme.of(context).primaryColor, width: 2.0),
-                              ),
-                              child: ClipOval(
-                                child: CachedNetworkImage(
-                                  imageUrl: queryImage(state.user.userInfo.avatar!),
-                                  width: 86.0,
-                                  height: 86.0,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) {
-                                    return Shimmer.fromColors(
-                                      baseColor: Colors.grey[300]!,
-                                      highlightColor: Colors.grey[100]!,
-                                      child: Container(
-                                        width: 48.0,
-                                        height: 48.0,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(8.0),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  errorWidget: (context, url, error) {
-                                    return Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.transparent,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: Theme.of(context).primaryColor, width: 2.0),
-                                      ),
-                                      child: const _NoAvatar(),
-                                    );
-                                  },
-                                ),
-                              ),
-                            )
+                            ? AvatarSection(state: state)
                             : Container(
                               decoration: BoxDecoration(
                                 color: Colors.transparent,
@@ -146,78 +106,15 @@ class ProfilePage extends HookConsumerWidget {
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 12.0)),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          sliver: SliverToBoxAdapter(
-            child: SwitchListTile.adaptive(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              trackColor: WidgetStatePropertyAll(
-                allowSearch.value
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.24),
-              ),
-              thumbColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
-              trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
-              title: Text(
-                context.t.job.allowSearch,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
-              ),
-              value: allowSearch.value,
-              onChanged: (bool? value) async {
-                if (isSearchableLoading.value) {
-                  return;
-                }
-                if (value == null) {
-                  return;
-                }
-                allowSearch.value = value;
-                isSearchableLoading.value = true;
-                try {
-                  await ref.read(authControllerProvider.notifier).updateSearchable(searchable: value);
-                } finally {
-                  isSearchableLoading.value = false;
-                }
-              },
-            ),
-          ),
-        ),
+        _JobModifier(allowSearch: allowSearch, isSearchableLoading: isSearchableLoading, ref: ref),
         const SliverToBoxAdapter(child: SizedBox(height: 8.0)),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           sliver: SliverToBoxAdapter(
-            child: SwitchListTile.adaptive(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              trackColor: WidgetStatePropertyAll(
-                emailNotification.value
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.24),
-              ),
-              thumbColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
-              trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
-              title: Text(
-                context.t.job.emailNotification,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
-              ),
-              value: emailNotification.value,
-              onChanged: (bool? value) async {
-                if (isMailReceiveLoading.value) {
-                  return;
-                }
-                if (value == null) {
-                  return;
-                }
-                isMailReceiveLoading.value = true;
-                emailNotification.value = value;
-                try {
-                  await ref.read(authControllerProvider.notifier).updateMailReceive(mailReceive: value);
-                } finally {
-                  isMailReceiveLoading.value = false;
-                }
-              },
+            child: _EmailSwitcher(
+              emailNotification: emailNotification,
+              isMailReceiveLoading: isMailReceiveLoading,
+              ref: ref,
             ),
           ),
         ),
@@ -256,33 +153,7 @@ class ProfilePage extends HookConsumerWidget {
             child: Consumer(
               builder: (context, ref, child) {
                 return switch (ref.watch(authControllerProvider)) {
-                  AuthAuthorized state => Card(
-                    margin: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-                    elevation: 1.0,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(height: 8.0),
-                        SimpleTile(title: state.user.userInfo.email, icon: IconlyLight.message),
-                        SimpleTile(title: state.user.userInfo.phone, icon: IconlyLight.calling),
-                        SimpleTile(title: state.user.userInfo.address ?? 'No address', icon: IconlyLight.location),
-                        SimpleTile(
-                          title:
-                              state.user.jobInfo.university == null
-                                  ? context.t.auth.university
-                                  : state.user.jobInfo.university!.name,
-                          icon: IconlyLight.home,
-                        ),
-                        SimpleTile(title: state.user.userInfo.birthDate ?? '01/01/2000', icon: IconlyLight.calendar),
-                        SimpleTile(
-                          title: state.user.userInfo.gender ? context.t.profile.female : context.t.profile.male,
-                          icon: IconlyLight.profile,
-                        ),
-                        const SizedBox(height: 8.0),
-                      ],
-                    ),
-                  ),
+                  AuthAuthorized state => _InfoCard(state: state),
                   _ => const CircularProgressIndicator.adaptive(),
                 };
               },
@@ -320,71 +191,7 @@ class ProfilePage extends HookConsumerWidget {
             child: Consumer(
               builder: (context, ref, child) {
                 return switch (ref.watch(authControllerProvider)) {
-                  AuthAuthorized state => Card(
-                    margin: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-                    elevation: 1.0,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 4.0,
-                      children: [
-                        const SizedBox(height: 8.0),
-                        JobTile(
-                          title: context.t.job.wanted,
-                          child: Text(
-                            state.user.jobInfo.desiredJob ?? '',
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w400),
-                          ),
-                        ),
-                        CarouselJobTile(
-                          title: context.t.job.position,
-                          count: state.user.jobInfo.positions.length,
-                          emptyBuilder: (_) => Text(context.t.profile.noPosition),
-                          builder: (context, index) {
-                            return DisabledButton(title: state.user.jobInfo.positions[index].name);
-                          },
-                        ),
-                        CarouselJobTile(
-                          title: context.t.job.major,
-                          count: state.user.jobInfo.majors.length,
-                          emptyBuilder: (_) => Text(context.t.profile.noMajor),
-                          builder: (context, index) {
-                            return DisabledButton(title: state.user.jobInfo.majors[index].name);
-                          },
-                        ),
-                        CarouselJobTile(
-                          title: context.t.job.type,
-                          count: state.user.jobInfo.schedules.length,
-                          emptyBuilder: (_) => Text(context.t.profile.noType),
-                          builder: (context, index) {
-                            return DisabledButton(title: state.user.jobInfo.schedules[index].name);
-                          },
-                        ),
-                        JobTile(
-                          title: context.t.auth.location,
-                          child: SimpleTile(
-                            icon: IconlyLight.location,
-                            title: state.user.jobInfo.desiredWorkingProvince ?? context.t.auth.city,
-                            spacing: 8.0,
-                            padding: EdgeInsets.zero,
-                          ),
-                        ),
-                        JobTile(
-                          title: context.t.job.cv,
-                          child: SizedBox(
-                            height: 40.0,
-                            child: DisabledButton(title: state.user.jobInfo.cv ?? context.t.profile.noCv),
-                          ),
-                        ),
-                        JobTile(
-                          title: context.t.job.coverLetter.title,
-                          child: SizedBox(height: 40.0, child: Text(state.user.jobInfo.referenceLetter ?? '')),
-                        ),
-                        const SizedBox.shrink(),
-                      ],
-                    ),
-                  ),
+                  AuthAuthorized state => _JobCard(state: state),
                   _ => const CircularProgressIndicator.adaptive(),
                 };
               },
@@ -428,6 +235,246 @@ class ProfilePage extends HookConsumerWidget {
         const SliverToBoxAdapter(child: SizedBox(height: 8.0)),
       ],
     );
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({required this.state});
+
+  final AuthAuthorized state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      elevation: 1.0,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 8.0),
+          SimpleTile(title: state.user.userInfo.email, icon: IconlyLight.message),
+          SimpleTile(title: state.user.userInfo.phone, icon: IconlyLight.calling),
+          SimpleTile(title: state.user.userInfo.address ?? 'No address', icon: IconlyLight.location),
+          SimpleTile(
+            title:
+                state.user.jobInfo.university == null ? context.t.auth.university : state.user.jobInfo.university!.name,
+            icon: IconlyLight.home,
+          ),
+          SimpleTile(title: state.user.userInfo.birthDate ?? '01/01/2000', icon: IconlyLight.calendar),
+          SimpleTile(
+            title: state.user.userInfo.gender ? context.t.profile.female : context.t.profile.male,
+            icon: IconlyLight.profile,
+          ),
+          const SizedBox(height: 8.0),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<AuthAuthorized>('state', state));
+  }
+}
+
+class _EmailSwitcher extends StatelessWidget {
+  const _EmailSwitcher({
+    super.key,
+    required this.emailNotification,
+    required this.isMailReceiveLoading,
+    required this.ref,
+  });
+
+  final ValueNotifier<bool> emailNotification;
+
+  final ValueNotifier<bool> isMailReceiveLoading;
+
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile.adaptive(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      contentPadding: EdgeInsets.zero,
+      controlAffinity: ListTileControlAffinity.leading,
+      trackColor: WidgetStatePropertyAll(
+        emailNotification.value
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.24),
+      ),
+      thumbColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
+      trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+      title: Text(
+        context.t.job.emailNotification,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+      ),
+      value: emailNotification.value,
+      onChanged: (bool? value) async {
+        if (isMailReceiveLoading.value) {
+          return;
+        }
+        if (value == null) {
+          return;
+        }
+        isMailReceiveLoading.value = true;
+        emailNotification.value = value;
+        try {
+          await ref.read(authControllerProvider.notifier).updateMailReceive(mailReceive: value);
+        } finally {
+          isMailReceiveLoading.value = false;
+        }
+      },
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<bool>>('emailNotification', emailNotification));
+    properties.add(DiagnosticsProperty<ValueNotifier<bool>>('isMailReceiveLoading', isMailReceiveLoading));
+    properties.add(DiagnosticsProperty<WidgetRef>('ref', ref));
+  }
+}
+
+class _JobCard extends StatelessWidget {
+  const _JobCard({super.key, required this.state});
+
+  final AuthAuthorized state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      elevation: 1.0,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 4.0,
+        children: [
+          const SizedBox(height: 8.0),
+          JobTile(
+            title: context.t.job.wanted,
+            child: Text(
+              state.user.jobInfo.desiredJob ?? '',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w400),
+            ),
+          ),
+          CarouselJobTile(
+            title: context.t.job.position,
+            count: state.user.jobInfo.positions.length,
+            emptyBuilder: (_) => Text(context.t.profile.noPosition),
+            builder: (context, index) {
+              return DisabledButton(title: state.user.jobInfo.positions[index].name);
+            },
+          ),
+          CarouselJobTile(
+            title: context.t.job.major,
+            count: state.user.jobInfo.majors.length,
+            emptyBuilder: (_) => Text(context.t.profile.noMajor),
+            builder: (context, index) {
+              return DisabledButton(title: state.user.jobInfo.majors[index].name);
+            },
+          ),
+          CarouselJobTile(
+            title: context.t.job.type,
+            count: state.user.jobInfo.schedules.length,
+            emptyBuilder: (_) => Text(context.t.profile.noType),
+            builder: (context, index) {
+              return DisabledButton(title: state.user.jobInfo.schedules[index].name);
+            },
+          ),
+          JobTile(
+            title: context.t.auth.location,
+            child: SimpleTile(
+              icon: IconlyLight.location,
+              title: state.user.jobInfo.desiredWorkingProvince ?? context.t.auth.city,
+              spacing: 8.0,
+              padding: EdgeInsets.zero,
+            ),
+          ),
+          JobTile(
+            title: context.t.job.cv,
+            child: SizedBox(
+              height: 40.0,
+              child: DisabledButton(title: state.user.jobInfo.cv ?? context.t.profile.noCv),
+            ),
+          ),
+          JobTile(
+            title: context.t.job.coverLetter.title,
+            child: SizedBox(height: 40.0, child: Text(state.user.jobInfo.referenceLetter ?? '')),
+          ),
+          const SizedBox.shrink(),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<AuthAuthorized>('state', state));
+  }
+}
+
+class _JobModifier extends StatelessWidget {
+  const _JobModifier({super.key, required this.allowSearch, required this.isSearchableLoading, required this.ref});
+
+  final ValueNotifier<bool> allowSearch;
+
+  final ValueNotifier<bool> isSearchableLoading;
+
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      sliver: SliverToBoxAdapter(
+        child: SwitchListTile.adaptive(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
+          trackColor: WidgetStatePropertyAll(
+            allowSearch.value
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.24),
+          ),
+          thumbColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
+          trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+          title: Text(
+            context.t.job.allowSearch,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          value: allowSearch.value,
+          onChanged: (bool? value) async {
+            if (isSearchableLoading.value) {
+              return;
+            }
+            if (value == null) {
+              return;
+            }
+            allowSearch.value = value;
+            isSearchableLoading.value = true;
+            try {
+              await ref.read(authControllerProvider.notifier).updateSearchable(searchable: value);
+            } finally {
+              isSearchableLoading.value = false;
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<bool>>('allowSearch', allowSearch));
+    properties.add(DiagnosticsProperty<ValueNotifier<bool>>('isSearchableLoading', isSearchableLoading));
+    properties.add(DiagnosticsProperty<WidgetRef>('ref', ref));
   }
 }
 

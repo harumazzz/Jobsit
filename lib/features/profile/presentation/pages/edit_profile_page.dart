@@ -18,7 +18,6 @@ import '../../../../shared/widgets/custom_button.dart';
 import '../../../auth/domain/entities/user.dart' show University;
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../jobs/domain/entities/job.dart';
-import '../../../jobs/presentation/pages/job_detail_page.dart';
 import '../../../jobs/presentation/providers/job_provider.dart';
 
 class PersonalInfoEditPage extends HookConsumerWidget {
@@ -131,55 +130,9 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                           shape: BoxShape.circle,
                           border: Border.all(color: Theme.of(context).primaryColor, width: 2.0),
                         ),
-                        child:
-                            image.value != null
-                                ? ClipOval(
-                                  child: Image.memory(image.value!.data, fit: BoxFit.cover, width: 86.0, height: 86.0),
-                                )
-                                : currentState.user.userInfo.avatar != null
-                                ? ClipOval(
-                                  child: CachedNetworkImage(
-                                    imageUrl: queryImage(currentState.user.userInfo.avatar!),
-                                    fit: BoxFit.cover,
-                                    width: 86.0,
-                                    height: 86.0,
-                                  ),
-                                )
-                                : const Icon(IconlyLight.profile, size: 48.0, color: Colors.grey),
+                        child: _ProfileImage(image: image, currentState: currentState),
                       ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          decoration: BoxDecoration(color: Theme.of(context).primaryColor, shape: BoxShape.circle),
-                          child: IconButton(
-                            icon: Icon(IconlyLight.edit, color: Theme.of(context).colorScheme.onPrimary, size: 16.0),
-                            onPressed: () async {
-                              final result = await ref.read(fileServiceProvider).uploadImage();
-                              result.fold(
-                                ifLeft: (_) => null,
-                                ifRight: (value) {
-                                  if (value.data.length > 512 * 1024) {
-                                    NotificationService.error(
-                                      context: context,
-                                      message: context.t.validation.file.avatarSize,
-                                    );
-                                    return;
-                                  }
-                                  if (!RegExp(r'\.(jpg|png)$', caseSensitive: false).hasMatch(value.path)) {
-                                    NotificationService.error(
-                                      context: context,
-                                      message: context.t.validation.format.mismatchImage,
-                                    );
-                                    return;
-                                  }
-                                  image.value = value;
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      ),
+                      _CustomUploadImage(image: image, ref: ref),
                     ],
                   ),
                 ),
@@ -295,51 +248,11 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16.0),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return MenuAnchor(
-                      style: MenuStyle(
-                        minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
-                        maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
-                        elevation: WidgetStateProperty.all(4.0),
-                      ),
-                      crossAxisUnconstrained: false,
-                      alignmentOffset: const Offset(0, 8),
-                      builder: (context, controller, child) {
-                        return FormBuilderField(
-                          name: 'gender',
-                          focusNode: genderFocusNode,
-                          validator: (value) => null,
-                          builder: (FormFieldState<dynamic> field) {
-                            return InputDecorator(
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                                contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                              ),
-                              child: GestureDetector(
-                                onTap: () async {
-                                  controller.open();
-                                },
-                                child: Text(selectedGender.value),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      menuChildren: [
-                        ...genderOptions.map((gender) {
-                          return MenuItemButton(
-                            onPressed: () async {
-                              selectedGender.value = gender;
-                              genderFocusNode.unfocus();
-                              FocusScope.of(context).requestFocus(cityFocusNode);
-                            },
-                            child: Text(gender),
-                          );
-                        }),
-                      ],
-                    );
-                  },
+                _GenderDropdown(
+                  selectedGender: selectedGender,
+                  genderFocusNode: genderFocusNode,
+                  cityFocusNode: cityFocusNode,
+                  genderOptions: genderOptions,
                 ),
                 const SizedBox(height: 16.0),
                 Text(
@@ -347,61 +260,13 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16.0),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return MenuAnchor(
-                      style: MenuStyle(
-                        minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
-                        maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
-                        elevation: WidgetStateProperty.all(4.0),
-                      ),
-                      crossAxisUnconstrained: false,
-                      alignmentOffset: const Offset(0, 8),
-                      builder: (context, controller, child) {
-                        return FormBuilderField(
-                          name: 'city',
-                          focusNode: cityFocusNode,
-                          validator: (value) => null,
-                          builder: (FormFieldState<dynamic> field) {
-                            return InputDecorator(
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                                contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                              ),
-                              child: GestureDetector(
-                                onTap: () async {
-                                  controller.open();
-                                },
-                                child: Text(
-                                  selectedCity.value != null ? selectedCity.value!.name : context.t.auth.selectCity,
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      menuChildren: [
-                        ...cityOptions.map((city) {
-                          return MenuItemButton(
-                            onPressed: () async {
-                              selectedDistrict.value = null;
-                              await ref.read(districtsControllerProvider.notifier).reset();
-                              selectedCity.value = city;
-                              await ref
-                                  .read(districtsControllerProvider.notifier)
-                                  .getDistricts(code: selectedCity.value!.code);
-
-                              cityFocusNode.unfocus();
-                              if (context.mounted) {
-                                FocusScope.of(context).requestFocus(districtFocusNode);
-                              }
-                            },
-                            child: Text(city.name),
-                          );
-                        }),
-                      ],
-                    );
-                  },
+                _CitiesDropdown(
+                  selectedCity: selectedCity,
+                  cityFocusNode: cityFocusNode,
+                  districtFocusNode: districtFocusNode,
+                  cityOptions: cityOptions,
+                  ref: ref,
+                  selectedDistrict: selectedDistrict,
                 ),
                 const SizedBox(height: 16.0),
                 Text(
@@ -409,68 +274,12 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16.0),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final state = ref.watch(districtsControllerProvider);
-                    return MenuAnchor(
-                      style: MenuStyle(
-                        minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
-                        maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
-                        elevation: WidgetStateProperty.all(4.0),
-                      ),
-                      crossAxisUnconstrained: false,
-                      alignmentOffset: const Offset(0, 8),
-                      builder: (context, controller, child) {
-                        return FormBuilderField(
-                          name: 'district',
-                          focusNode: districtFocusNode,
-                          validator: (value) => null,
-                          builder: (FormFieldState<dynamic> field) {
-                            final String displayText;
-                            var isEnabled = true;
-                            if (selectedCity.value == null) {
-                              displayText = context.t.auth.selectCity;
-                              isEnabled = false;
-                            } else if (state is! DistrictsLoaded) {
-                              displayText = context.t.auth.loadingDistrict;
-                              isEnabled = false;
-                            } else if (selectedDistrict.value != null) {
-                              displayText = selectedDistrict.value!.name;
-                            } else {
-                              displayText = context.t.auth.selectDistrict;
-                            }
-                            return InputDecorator(
-                              decoration: InputDecoration(
-                                border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                                contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                                enabled: isEnabled,
-                              ),
-                              child: GestureDetector(
-                                onTap: () async {
-                                  if (isEnabled) {
-                                    controller.open();
-                                  }
-                                },
-                                child: Text(displayText, style: isEnabled ? null : const TextStyle(color: Colors.grey)),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      menuChildren: [
-                        ...(state is DistrictsLoaded ? state.districts : []).map((district) {
-                          return MenuItemButton(
-                            onPressed: () async {
-                              selectedDistrict.value = district;
-                              districtFocusNode.unfocus();
-                              FocusScope.of(context).requestFocus(addressFocusNode);
-                            },
-                            child: Text(district.name),
-                          );
-                        }),
-                      ],
-                    );
-                  },
+                _DistrictsDropdown(
+                  selectedCity: selectedCity,
+                  districtFocusNode: districtFocusNode,
+                  addressFocusNode: addressFocusNode,
+                  ref: ref,
+                  selectedDistrict: selectedDistrict,
                 ),
                 const SizedBox(height: 16.0),
                 Text(
@@ -498,55 +307,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16.0),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final state = ref.watch(universityControllerProvider);
-                    return MenuAnchor(
-                      style: MenuStyle(
-                        minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
-                        maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
-                        elevation: WidgetStateProperty.all(4.0),
-                      ),
-                      crossAxisUnconstrained: false,
-                      alignmentOffset: const Offset(0, 8),
-                      menuChildren: [
-                        ...(state is UniversityLoaded ? state.universities : []).map((university) {
-                          return MenuItemButton(
-                            onPressed: () async {
-                              selectedUniversity.value = university;
-                              universityFocusNode.unfocus();
-                            },
-                            child: Text(university.name),
-                          );
-                        }),
-                      ],
-                      builder: (context, controller, child) {
-                        return FormBuilderField(
-                          name: 'university',
-                          focusNode: universityFocusNode,
-                          validator: (value) => null,
-                          builder: (FormFieldState<dynamic> field) {
-                            return InputDecorator(
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                                contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                              ),
-                              child: GestureDetector(
-                                onTap: () async {
-                                  controller.open();
-                                },
-                                child: Text(
-                                  selectedUniversity.value != null
-                                      ? selectedUniversity.value!.name
-                                      : context.t.auth.selectUniversity,
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
+                _UniversitiesDropdown(
+                  selectedUniversity: selectedUniversity,
+                  universityFocusNode: universityFocusNode,
+                  ref: ref,
                 ),
               ],
             ),
@@ -554,39 +318,446 @@ class PersonalInfoEditPage extends HookConsumerWidget {
         ),
       ),
       bottomNavigationBar: SafeArea(
-        child: Consumer(
-          builder: (context, ref, child) {
-            return _CustomNavbar(
-              onPressed: () async {
-                FocusScope.of(context).unfocus();
-                if (formKey.currentState!.validate()) {
-                  formKey.currentState!.save();
-                  await ref
-                      .read(authControllerProvider.notifier)
-                      .updateUserInfo(
-                        firstName: firstNameController.text,
-                        lastName: lastNameController.text,
-                        phone: phoneController.text,
-                        birthDay: DateFormat('dd-MM-yyyy').format(selectedDate.value!),
-                        gender: genderOptions.indexOf(selectedGender.value),
-                        location:
-                            '${selectedCity.value?.name}, ${selectedDistrict.value?.name}, ${addressController.text}',
-                        avatar: image.value,
-                        city: selectedCity.value!.name,
-                        district: selectedDistrict.value!.name,
-                        university: selectedUniversity.value!,
-                      );
-                  if (context.mounted) {
-                    NotificationService.success(context: context, message: context.t.profile.updateSuccess);
-                    context.pop();
-                  }
+        child: _CustomNavbar(
+          onPressed: () async {
+            FocusScope.of(context).unfocus();
+            if (formKey.currentState!.validate()) {
+              formKey.currentState!.save();
+              await ref
+                  .read(authControllerProvider.notifier)
+                  .updateUserInfo(
+                    firstName: firstNameController.text,
+                    lastName: lastNameController.text,
+                    phone: phoneController.text,
+                    birthDay: DateFormat('dd-MM-yyyy').format(selectedDate.value!),
+                    gender: genderOptions.indexOf(selectedGender.value),
+                    location: '${selectedCity.value?.name}, ${selectedDistrict.value?.name}, ${addressController.text}',
+                    avatar: image.value,
+                    city: selectedCity.value!.name,
+                    district: selectedDistrict.value!.name,
+                    university: selectedUniversity.value!,
+                  );
+              if (context.mounted) {
+                NotificationService.success(context: context, message: context.t.profile.updateSuccess);
+                context.pop();
+              }
+            }
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _UniversitiesDropdown extends StatelessWidget {
+  const _UniversitiesDropdown({required this.selectedUniversity, required this.universityFocusNode, required this.ref});
+
+  final ValueNotifier<University?> selectedUniversity;
+
+  final FocusNode universityFocusNode;
+
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final state = ref.watch(universityControllerProvider);
+        return MenuAnchor(
+          style: MenuStyle(
+            minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
+            maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
+            elevation: WidgetStateProperty.all(4.0),
+          ),
+          crossAxisUnconstrained: false,
+          alignmentOffset: const Offset(0, 8),
+          menuChildren: [
+            ...(state is UniversityLoaded ? state.universities : []).map((university) {
+              return MenuItemButton(
+                onPressed: () async {
+                  selectedUniversity.value = university;
+                  universityFocusNode.unfocus();
+                },
+                child: Text(university.name),
+              );
+            }),
+          ],
+          builder: (context, controller, child) {
+            return FormBuilderField(
+              name: 'university',
+              focusNode: universityFocusNode,
+              validator: (value) => null,
+              builder: (FormFieldState<dynamic> field) {
+                return InputDecorator(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  ),
+                  child: GestureDetector(
+                    onTap: () async {
+                      controller.open();
+                    },
+                    child: Text(
+                      selectedUniversity.value != null
+                          ? selectedUniversity.value!.name
+                          : context.t.auth.selectUniversity,
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<University?>>('selectedUniversity', selectedUniversity));
+    properties.add(DiagnosticsProperty<FocusNode>('universityFocusNode', universityFocusNode));
+    properties.add(DiagnosticsProperty<WidgetRef>('ref', ref));
+  }
+}
+
+class _DistrictsDropdown extends StatelessWidget {
+  const _DistrictsDropdown({
+    required this.selectedCity,
+    required this.districtFocusNode,
+    required this.addressFocusNode,
+    required this.ref,
+    required this.selectedDistrict,
+  });
+
+  final ValueNotifier<City?> selectedCity;
+
+  final FocusNode districtFocusNode;
+
+  final FocusNode addressFocusNode;
+
+  final WidgetRef ref;
+
+  final ValueNotifier<District?> selectedDistrict;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final state = ref.watch(districtsControllerProvider);
+        return MenuAnchor(
+          style: MenuStyle(
+            minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
+            maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
+            elevation: WidgetStateProperty.all(4.0),
+          ),
+          crossAxisUnconstrained: false,
+          alignmentOffset: const Offset(0, 8),
+          builder: (context, controller, child) {
+            return FormBuilderField(
+              name: 'district',
+              focusNode: districtFocusNode,
+              validator: (value) => null,
+              builder: (FormFieldState<dynamic> field) {
+                final String displayText;
+                var isEnabled = true;
+                if (selectedCity.value == null) {
+                  displayText = context.t.auth.selectCity;
+                  isEnabled = false;
+                } else if (state is! DistrictsLoaded) {
+                  displayText = context.t.auth.loadingDistrict;
+                  isEnabled = false;
+                } else if (selectedDistrict.value != null) {
+                  displayText = selectedDistrict.value!.name;
+                } else {
+                  displayText = context.t.auth.selectDistrict;
                 }
+                return InputDecorator(
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                    enabled: isEnabled,
+                  ),
+                  child: GestureDetector(
+                    onTap: () async {
+                      if (isEnabled) {
+                        controller.open();
+                      }
+                    },
+                    child: Text(displayText, style: isEnabled ? null : const TextStyle(color: Colors.grey)),
+                  ),
+                );
+              },
+            );
+          },
+          menuChildren: [
+            ...(state is DistrictsLoaded ? state.districts : []).map((district) {
+              return MenuItemButton(
+                onPressed: () async {
+                  selectedDistrict.value = district;
+                  districtFocusNode.unfocus();
+                  FocusScope.of(context).requestFocus(addressFocusNode);
+                },
+                child: Text(district.name),
+              );
+            }),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<City?>>('selectedCity', selectedCity));
+    properties.add(DiagnosticsProperty<FocusNode>('districtFocusNode', districtFocusNode));
+    properties.add(DiagnosticsProperty<FocusNode>('addressFocusNode', addressFocusNode));
+    properties.add(DiagnosticsProperty<WidgetRef>('ref', ref));
+    properties.add(DiagnosticsProperty<ValueNotifier<District?>>('selectedDistrict', selectedDistrict));
+  }
+}
+
+class _CitiesDropdown extends StatelessWidget {
+  const _CitiesDropdown({
+    required this.selectedCity,
+    required this.cityFocusNode,
+    required this.districtFocusNode,
+    required this.cityOptions,
+    required this.ref,
+    required this.selectedDistrict,
+  });
+
+  final ValueNotifier<City?> selectedCity;
+
+  final FocusNode cityFocusNode;
+
+  final FocusNode districtFocusNode;
+
+  final List<City> cityOptions;
+
+  final WidgetRef ref;
+
+  final ValueNotifier<District?> selectedDistrict;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return MenuAnchor(
+          style: MenuStyle(
+            minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
+            maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
+            elevation: WidgetStateProperty.all(4.0),
+          ),
+          crossAxisUnconstrained: false,
+          alignmentOffset: const Offset(0, 8),
+          builder: (context, controller, child) {
+            return FormBuilderField(
+              name: 'city',
+              focusNode: cityFocusNode,
+              validator: (value) => null,
+              builder: (FormFieldState<dynamic> field) {
+                return InputDecorator(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  ),
+                  child: GestureDetector(
+                    onTap: () async {
+                      controller.open();
+                    },
+                    child: Text(selectedCity.value != null ? selectedCity.value!.name : context.t.auth.selectCity),
+                  ),
+                );
+              },
+            );
+          },
+          menuChildren: [
+            ...cityOptions.map((city) {
+              return MenuItemButton(
+                onPressed: () async {
+                  selectedDistrict.value = null;
+                  await ref.read(districtsControllerProvider.notifier).reset();
+                  selectedCity.value = city;
+                  await ref.read(districtsControllerProvider.notifier).getDistricts(code: selectedCity.value!.code);
+
+                  cityFocusNode.unfocus();
+                  if (context.mounted) {
+                    FocusScope.of(context).requestFocus(districtFocusNode);
+                  }
+                },
+                child: Text(city.name),
+              );
+            }),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<City?>>('selectedCity', selectedCity));
+    properties.add(DiagnosticsProperty<FocusNode>('cityFocusNode', cityFocusNode));
+    properties.add(DiagnosticsProperty<FocusNode>('districtFocusNode', districtFocusNode));
+    properties.add(IterableProperty<City>('cityOptions', cityOptions));
+    properties.add(DiagnosticsProperty<WidgetRef>('ref', ref));
+    properties.add(DiagnosticsProperty<ValueNotifier<District?>>('selectedDistrict', selectedDistrict));
+  }
+}
+
+class _GenderDropdown extends StatelessWidget {
+  const _GenderDropdown({
+    required this.selectedGender,
+    required this.genderFocusNode,
+    required this.cityFocusNode,
+    required this.genderOptions,
+  });
+
+  final ValueNotifier<String> selectedGender;
+
+  final FocusNode genderFocusNode;
+
+  final FocusNode cityFocusNode;
+
+  final List<String> genderOptions;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return MenuAnchor(
+          style: MenuStyle(
+            minimumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, 0)),
+            maximumSize: WidgetStatePropertyAll(Size(constraints.maxWidth + 8, double.infinity)),
+            elevation: WidgetStateProperty.all(4.0),
+          ),
+          crossAxisUnconstrained: false,
+          alignmentOffset: const Offset(0, 8),
+          builder: (context, controller, child) {
+            return FormBuilderField(
+              name: 'gender',
+              focusNode: genderFocusNode,
+              validator: (value) => null,
+              builder: (FormFieldState<dynamic> field) {
+                return InputDecorator(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  ),
+                  child: GestureDetector(
+                    onTap: () async {
+                      controller.open();
+                    },
+                    child: Text(selectedGender.value),
+                  ),
+                );
+              },
+            );
+          },
+          menuChildren: [
+            ...genderOptions.map((gender) {
+              return MenuItemButton(
+                onPressed: () async {
+                  selectedGender.value = gender;
+                  genderFocusNode.unfocus();
+                  FocusScope.of(context).requestFocus(cityFocusNode);
+                },
+                child: Text(gender),
+              );
+            }),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<String>>('selectedGender', selectedGender));
+    properties.add(DiagnosticsProperty<FocusNode>('genderFocusNode', genderFocusNode));
+    properties.add(DiagnosticsProperty<FocusNode>('cityFocusNode', cityFocusNode));
+    properties.add(IterableProperty<String>('genderOptions', genderOptions));
+  }
+}
+
+class _CustomUploadImage extends StatelessWidget {
+  const _CustomUploadImage({required this.image, required this.ref});
+
+  final ValueNotifier<FileSelectorResult?> image;
+
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 0,
+      right: 0,
+      child: Container(
+        decoration: BoxDecoration(color: Theme.of(context).primaryColor, shape: BoxShape.circle),
+        child: IconButton(
+          icon: Icon(IconlyLight.edit, color: Theme.of(context).colorScheme.onPrimary, size: 16.0),
+          onPressed: () async {
+            final result = await ref.read(fileServiceProvider).uploadImage();
+            result.fold(
+              ifLeft: (_) => null,
+              ifRight: (value) {
+                if (value.data.length > 512 * 1024) {
+                  NotificationService.error(context: context, message: context.t.validation.file.avatarSize);
+                  return;
+                }
+                if (!RegExp(r'\.(jpg|png)$', caseSensitive: false).hasMatch(value.path)) {
+                  NotificationService.error(context: context, message: context.t.validation.format.mismatchImage);
+                  return;
+                }
+                image.value = value;
               },
             );
           },
         ),
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<FileSelectorResult?>>('image', image));
+    properties.add(DiagnosticsProperty<WidgetRef>('ref', ref));
+  }
+}
+
+class _ProfileImage extends StatelessWidget {
+  const _ProfileImage({required this.image, required this.currentState});
+
+  final ValueNotifier<FileSelectorResult?> image;
+
+  final AuthAuthorized currentState;
+
+  @override
+  Widget build(BuildContext context) {
+    return image.value != null
+        ? ClipOval(child: Image.memory(image.value!.data, fit: BoxFit.cover, width: 86.0, height: 86.0))
+        : currentState.user.userInfo.avatar != null
+        ? ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: queryImage(currentState.user.userInfo.avatar!),
+            fit: BoxFit.cover,
+            width: 86.0,
+            height: 86.0,
+          ),
+        )
+        : const Icon(IconlyLight.profile, size: 48.0, color: Colors.grey);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<FileSelectorResult?>>('image', image));
+    properties.add(DiagnosticsProperty<AuthAuthorized>('currentState', currentState));
   }
 }
 
@@ -796,90 +967,15 @@ class JobInfoEditPage extends HookConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            GestureDetector(
-                              onTap: () async {
-                                if (positionOverlayEntry.value != null) {
-                                  await hideAllDropdowns();
-                                  return;
-                                }
-                                await hideAllDropdowns();
-                                final RenderBox renderBox = positionKey.currentContext!.findRenderObject() as RenderBox;
-                                final Size size = renderBox.size;
-                                final Offset position = renderBox.localToGlobal(Offset.zero);
-                                positionOverlayEntry.value = OverlayEntry(
-                                  builder:
-                                      (context) => Positioned(
-                                        top: position.dy + size.height,
-                                        left: position.dx,
-                                        width: size.width,
-                                        child: Card(
-                                          elevation: 8,
-                                          margin: EdgeInsets.zero,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                          child: Container(
-                                            constraints: const BoxConstraints(maxHeight: 300),
-                                            child: ListView.builder(
-                                              padding: EdgeInsets.zero,
-                                              shrinkWrap: true,
-                                              itemCount: positions.length,
-                                              itemBuilder: (context, index) {
-                                                final position = positions[index];
-                                                return ListTile(
-                                                  title: Text(position.name),
-                                                  onTap: () async {
-                                                    final newSelection = Set<Position>.from(selectedPositions.value);
-                                                    newSelection.add(position);
-                                                    selectedPositions.value = newSelection;
-                                                    await hideAllDropdowns();
-                                                  },
-                                                  dense: true,
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                );
-                                if (context.mounted) {
-                                  Overlay.of(context).insert(positionOverlayEntry.value!);
-                                }
-                              },
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [Icon(IconlyLight.arrowDown2, size: 16)],
-                              ),
+                            _PositionDropdown(
+                              selectedPositions: selectedPositions,
+                              positionKey: positionKey,
+                              positions: positions,
+                              onTap: hideAllDropdowns,
+                              positionOverlayEntry: positionOverlayEntry,
                             ),
                             if (selectedPositions.value.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: [
-                                      ...selectedPositions.value.map(
-                                        (item) => Padding(
-                                          padding: const EdgeInsets.only(right: 8),
-                                          child: Chip(
-                                            label: Text(item.name, style: const TextStyle(fontSize: 12)),
-                                            deleteIcon: const Icon(Icons.close_outlined, size: 14),
-                                            color: WidgetStateProperty.all(
-                                              Theme.of(context).colorScheme.primaryContainer.withAlpha(160),
-                                            ),
-                                            onDeleted: () {
-                                              final newItems = Set<Position>.from(selectedPositions.value)
-                                                ..remove(item);
-                                              selectedPositions.value = newItems;
-                                            },
-                                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                            visualDensity: VisualDensity.compact,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                              _PositionSelector(selectedPositions: selectedPositions),
                           ],
                         ),
                       );
@@ -905,89 +1001,14 @@ class JobInfoEditPage extends HookConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            GestureDetector(
-                              onTap: () async {
-                                if (majorOverlayEntry.value != null) {
-                                  await hideAllDropdowns();
-                                  return;
-                                }
-                                await hideAllDropdowns();
-                                final RenderBox renderBox = majorKey.currentContext!.findRenderObject() as RenderBox;
-                                final Size size = renderBox.size;
-                                final Offset position = renderBox.localToGlobal(Offset.zero);
-                                majorOverlayEntry.value = OverlayEntry(
-                                  builder:
-                                      (context) => Positioned(
-                                        top: position.dy + size.height,
-                                        left: position.dx,
-                                        width: size.width,
-                                        child: Card(
-                                          elevation: 8,
-                                          margin: EdgeInsets.zero,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                          child: Container(
-                                            constraints: const BoxConstraints(maxHeight: 300),
-                                            child: ListView.builder(
-                                              padding: EdgeInsets.zero,
-                                              shrinkWrap: true,
-                                              itemCount: majors.length,
-                                              itemBuilder: (context, index) {
-                                                final major = majors[index];
-                                                return ListTile(
-                                                  title: Text(major.name),
-                                                  onTap: () async {
-                                                    final newSelection = Set<Major>.from(selectedMajors.value);
-                                                    newSelection.add(major);
-                                                    selectedMajors.value = newSelection;
-                                                    await hideAllDropdowns();
-                                                  },
-                                                  dense: true,
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                );
-                                if (context.mounted) {
-                                  Overlay.of(context).insert(majorOverlayEntry.value!);
-                                }
-                              },
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [Icon(IconlyLight.arrowDown2, size: 16)],
-                              ),
+                            _MajorSelector(
+                              selectedMajors: selectedMajors,
+                              majorKey: majorKey,
+                              majors: majors,
+                              onTap: hideAllDropdowns,
+                              majorOverlayEntry: majorOverlayEntry,
                             ),
-                            if (selectedMajors.value.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: [
-                                      ...selectedMajors.value.map(
-                                        (item) => Padding(
-                                          padding: const EdgeInsets.only(right: 8),
-                                          child: Chip(
-                                            label: Text(item.name, style: const TextStyle(fontSize: 12)),
-                                            deleteIcon: const Icon(Icons.close_outlined, size: 14),
-                                            color: WidgetStateProperty.all(
-                                              Theme.of(context).colorScheme.primaryContainer.withAlpha(160),
-                                            ),
-                                            onDeleted: () {
-                                              final newItems = Set<Major>.from(selectedMajors.value)..remove(item);
-                                              selectedMajors.value = newItems;
-                                            },
-                                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                            visualDensity: VisualDensity.compact,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                            if (selectedMajors.value.isNotEmpty) _MajorList(selectedMajors: selectedMajors),
                           ],
                         ),
                       );
@@ -1013,85 +1034,14 @@ class JobInfoEditPage extends HookConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            GestureDetector(
-                              onTap: () async {
-                                if (jobTypeOverlayEntry.value != null) {
-                                  await hideAllDropdowns();
-                                  return;
-                                }
-                                await hideAllDropdowns();
-                                final RenderBox renderBox = jobTypeKey.currentContext!.findRenderObject() as RenderBox;
-                                final Size size = renderBox.size;
-                                final Offset position = renderBox.localToGlobal(Offset.zero);
-                                jobTypeOverlayEntry.value = OverlayEntry(
-                                  builder:
-                                      (context) => Positioned(
-                                        top: position.dy + size.height,
-                                        left: position.dx,
-                                        width: size.width,
-                                        child: Card(
-                                          elevation: 8,
-                                          margin: EdgeInsets.zero,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                          child: Container(
-                                            constraints: const BoxConstraints(maxHeight: 300),
-                                            child: ListView.builder(
-                                              padding: EdgeInsets.zero,
-                                              shrinkWrap: true,
-                                              itemCount: jobTypes.length,
-                                              itemBuilder: (context, index) {
-                                                final jobType = jobTypes[index];
-                                                return ListTile(
-                                                  title: Text(jobType.name),
-                                                  onTap: () async {
-                                                    final newSelection = Set<Schedule>.from(selectedJobTypes.value);
-                                                    newSelection.add(jobType);
-                                                    selectedJobTypes.value = newSelection;
-                                                    await hideAllDropdowns();
-                                                  },
-                                                  dense: true,
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                );
-                                if (context.mounted) {
-                                  Overlay.of(context).insert(jobTypeOverlayEntry.value!);
-                                }
-                              },
-                              child: const Row(children: [Icon(IconlyLight.arrowDown2, size: 16)]),
+                            _JobTypeList(
+                              selectedJobTypes: selectedJobTypes,
+                              jobTypeKey: jobTypeKey,
+                              jobTypes: jobTypes,
+                              onTap: hideAllDropdowns,
+                              jobTypeOverlayEntry: jobTypeOverlayEntry,
                             ),
-                            if (selectedJobTypes.value.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: [
-                                      ...selectedJobTypes.value.map(
-                                        (item) => Padding(
-                                          padding: const EdgeInsets.only(right: 8),
-                                          child: Chip(
-                                            label: Text(item.name, style: const TextStyle(fontSize: 12)),
-                                            deleteIcon: const Icon(Icons.close_outlined, size: 14),
-                                            color: WidgetStateProperty.all(
-                                              Theme.of(context).colorScheme.primaryContainer.withAlpha(160),
-                                            ),
-                                            onDeleted: () async {
-                                              final newItems = Set<Schedule>.from(selectedJobTypes.value)..remove(item);
-                                              selectedJobTypes.value = newItems;
-                                            },
-                                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                            visualDensity: VisualDensity.compact,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                            if (selectedJobTypes.value.isNotEmpty) _ScheduleList(selectedJobTypes: selectedJobTypes),
                           ],
                         ),
                       );
@@ -1114,63 +1064,14 @@ class JobInfoEditPage extends HookConsumerWidget {
                           border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                           contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                         ),
-                        child: GestureDetector(
-                          onTap: () async {
-                            if (locationOverlayEntry.value != null) {
-                              await hideAllDropdowns();
-                              return;
-                            }
-                            await hideAllDropdowns();
-                            final RenderBox renderBox = locationKey.currentContext!.findRenderObject() as RenderBox;
-                            final Size size = renderBox.size;
-                            final Offset position = renderBox.localToGlobal(Offset.zero);
-                            locationOverlayEntry.value = OverlayEntry(
-                              builder:
-                                  (context) => Positioned(
-                                    top: position.dy + size.height,
-                                    left: position.dx,
-                                    width: size.width,
-                                    child: Card(
-                                      elevation: 8,
-                                      margin: EdgeInsets.zero,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                      child: Container(
-                                        constraints: const BoxConstraints(maxHeight: 300),
-                                        child: ListView.builder(
-                                          padding: EdgeInsets.zero,
-                                          shrinkWrap: true,
-                                          itemCount: cities.length,
-                                          itemBuilder: (context, index) {
-                                            final city = cities[index];
-                                            return ListTile(
-                                              title: Text(city.name),
-                                              onTap: () async {
-                                                selectedCity.value = city;
-                                                await hideAllDropdowns();
-                                                locationFocusNode.unfocus();
-                                                if (context.mounted) {
-                                                  FocusScope.of(context).requestFocus(cvFocusNode);
-                                                }
-                                              },
-                                              dense: true,
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                            );
-                            if (context.mounted) {
-                              Overlay.of(context).insert(locationOverlayEntry.value!);
-                            }
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(selectedCity.value != null ? selectedCity.value!.name : context.t.auth.location),
-                              const Icon(IconlyLight.arrowDown2, size: 16),
-                            ],
-                          ),
+                        child: _CitiesJobDropdown(
+                          selectedCity: selectedCity,
+                          locationFocusNode: locationFocusNode,
+                          cvFocusNode: cvFocusNode,
+                          locationOverlayEntry: locationOverlayEntry,
+                          cities: cities,
+                          locationKey: locationKey,
+                          hideAllDropdowns: hideAllDropdowns,
                         ),
                       );
                     },
@@ -1207,40 +1108,7 @@ class JobInfoEditPage extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16.0),
-                  if (cv.value != null)
-                    AnimatedOpacity(
-                      duration: const Duration(milliseconds: 300),
-                      opacity: 0.84,
-                      child: CustomButton(
-                        onPressed: () async {
-                          await showDialog(
-                            context: context,
-                            builder:
-                                (context) => AlertDialog(
-                                  title: Text(cv.value!.name),
-                                  content: SizedBox(
-                                    height: 600.0,
-                                    width: 400.0,
-                                    child: PdfViewerPage(data: cv.value!.data),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: Text(context.t.common.close),
-                                    ),
-                                  ],
-                                ),
-                          );
-                        },
-                        child: Text(
-                          context.t.common.preview,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
+                  if (cv.value != null) PreviewButton(file: cv),
                   const SizedBox(height: 16.0),
                   Text(
                     context.t.job.coverLetter.title,
@@ -1269,44 +1137,526 @@ class JobInfoEditPage extends HookConsumerWidget {
         ),
       ),
       bottomNavigationBar: SafeArea(
-        child: Consumer(
-          builder: (context, ref, child) {
-            return _CustomNavbar(
-              onPressed: () async {
-                await hideAllDropdowns();
+        child: _CustomNavbar(
+          onPressed: () async {
+            await hideAllDropdowns();
 
-                if (context.mounted) {
-                  FocusScope.of(context).unfocus();
-                }
-                if (formKey.currentState!.validate()) {
-                  formKey.currentState!.save();
-                  final currentState = ref.read(authControllerProvider) as AuthAuthorized;
-                  if (cv.value == null && currentState.user.jobInfo.cv == null && context.mounted) {
-                    NotificationService.error(context: context, message: context.t.job.uploadCV);
-                    return;
-                  }
-                  await ref
-                      .read(authControllerProvider.notifier)
-                      .updateJobInfo(
-                        desiredJob: jobWantedController.text,
-                        cv: cv.value,
-                        referenceLetter: coverLetterController.text,
-                        positions: selectedPositions.value.map((e) => e.toAuth()).toList(),
-                        majors: selectedMajors.value.map((e) => e.toAuth()).toList(),
-                        desiredWorkingProvince: selectedCity.value!.name,
-                        schedules: selectedJobTypes.value.map((e) => e.toAuth()).toList(),
-                      );
-                  if (context.mounted) {
-                    NotificationService.success(context: context, message: context.t.profile.updateSuccess);
-                    context.pop();
-                  }
-                }
-              },
-            );
+            if (context.mounted) {
+              FocusScope.of(context).unfocus();
+            }
+            if (formKey.currentState!.validate()) {
+              formKey.currentState!.save();
+              final currentState = ref.read(authControllerProvider) as AuthAuthorized;
+              if (cv.value == null && currentState.user.jobInfo.cv == null && context.mounted) {
+                NotificationService.error(context: context, message: context.t.job.uploadCV);
+                return;
+              }
+              await ref
+                  .read(authControllerProvider.notifier)
+                  .updateJobInfo(
+                    desiredJob: jobWantedController.text,
+                    cv: cv.value,
+                    referenceLetter: coverLetterController.text,
+                    positions: selectedPositions.value.map((e) => e.toAuth()).toList(),
+                    majors: selectedMajors.value.map((e) => e.toAuth()).toList(),
+                    desiredWorkingProvince: selectedCity.value!.name,
+                    schedules: selectedJobTypes.value.map((e) => e.toAuth()).toList(),
+                  );
+              if (context.mounted) {
+                NotificationService.success(context: context, message: context.t.profile.updateSuccess);
+                context.pop();
+              }
+            }
           },
         ),
       ),
     );
+  }
+}
+
+class _CitiesJobDropdown extends StatelessWidget {
+  const _CitiesJobDropdown({
+    required this.selectedCity,
+    required this.locationFocusNode,
+    required this.cvFocusNode,
+    required this.locationOverlayEntry,
+    required this.cities,
+    required this.locationKey,
+    required this.hideAllDropdowns,
+  });
+
+  final ValueNotifier<City?> selectedCity;
+
+  final FocusNode locationFocusNode;
+
+  final FocusNode cvFocusNode;
+
+  final ValueNotifier<OverlayEntry?> locationOverlayEntry;
+
+  final List<City> cities;
+
+  final GlobalKey<FormFieldState> locationKey;
+
+  final Future<void> Function() hideAllDropdowns;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        if (locationOverlayEntry.value != null) {
+          await hideAllDropdowns();
+          return;
+        }
+        await hideAllDropdowns();
+        final RenderBox renderBox = locationKey.currentContext!.findRenderObject() as RenderBox;
+        final Size size = renderBox.size;
+        final Offset position = renderBox.localToGlobal(Offset.zero);
+        locationOverlayEntry.value = OverlayEntry(
+          builder:
+              (context) => Positioned(
+                top: position.dy + size.height,
+                left: position.dx,
+                width: size.width,
+                child: Card(
+                  elevation: 8,
+                  margin: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  child: Container(
+                    constraints: const BoxConstraints(maxHeight: 300),
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: cities.length,
+                      itemBuilder: (context, index) {
+                        final city = cities[index];
+                        return ListTile(
+                          title: Text(city.name),
+                          onTap: () async {
+                            selectedCity.value = city;
+                            await hideAllDropdowns();
+                            locationFocusNode.unfocus();
+                            if (context.mounted) {
+                              FocusScope.of(context).requestFocus(cvFocusNode);
+                            }
+                          },
+                          dense: true,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+        );
+        if (context.mounted) {
+          Overlay.of(context).insert(locationOverlayEntry.value!);
+        }
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(selectedCity.value != null ? selectedCity.value!.name : context.t.auth.location),
+          const Icon(IconlyLight.arrowDown2, size: 16),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<City?>>('selectedCity', selectedCity));
+    properties.add(DiagnosticsProperty<FocusNode>('locationFocusNode', locationFocusNode));
+    properties.add(DiagnosticsProperty<FocusNode>('cvFocusNode', cvFocusNode));
+    properties.add(DiagnosticsProperty<ValueNotifier<OverlayEntry?>>('locationOverlayEntry', locationOverlayEntry));
+    properties.add(IterableProperty<City>('cities', cities));
+    properties.add(DiagnosticsProperty<GlobalKey<FormFieldState>>('locationKey', locationKey));
+    properties.add(ObjectFlagProperty<Future<void> Function()>.has('hideAllDropdowns', hideAllDropdowns));
+  }
+}
+
+class _ScheduleList extends StatelessWidget {
+  const _ScheduleList({super.key, required this.selectedJobTypes});
+
+  final ValueNotifier<Set<Schedule>> selectedJobTypes;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            ...selectedJobTypes.value.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Chip(
+                  label: Text(item.name, style: const TextStyle(fontSize: 12)),
+                  deleteIcon: const Icon(Icons.close_outlined, size: 14),
+                  color: WidgetStateProperty.all(Theme.of(context).colorScheme.primaryContainer.withAlpha(160)),
+                  onDeleted: () async {
+                    final newItems = Set<Schedule>.from(selectedJobTypes.value)..remove(item);
+                    selectedJobTypes.value = newItems;
+                  },
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<Set<Schedule>>>('selectedJobTypes', selectedJobTypes));
+  }
+}
+
+class _JobTypeList extends StatelessWidget {
+  const _JobTypeList({
+    required this.selectedJobTypes,
+    required this.jobTypeOverlayEntry,
+    required this.onTap,
+    required this.jobTypes,
+    required this.jobTypeKey,
+  });
+
+  final ValueNotifier<Set<Schedule>> selectedJobTypes;
+
+  final ValueNotifier<OverlayEntry?> jobTypeOverlayEntry;
+
+  final Future<void> Function() onTap;
+
+  final List<Schedule> jobTypes;
+
+  final GlobalKey<FormFieldState> jobTypeKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        if (jobTypeOverlayEntry.value != null) {
+          await onTap();
+          return;
+        }
+        await onTap();
+        final RenderBox renderBox = jobTypeKey.currentContext!.findRenderObject() as RenderBox;
+        final Size size = renderBox.size;
+        final Offset position = renderBox.localToGlobal(Offset.zero);
+        jobTypeOverlayEntry.value = OverlayEntry(
+          builder:
+              (context) => Positioned(
+                top: position.dy + size.height,
+                left: position.dx,
+                width: size.width,
+                child: Card(
+                  elevation: 8,
+                  margin: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  child: Container(
+                    constraints: const BoxConstraints(maxHeight: 300),
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: jobTypes.length,
+                      itemBuilder: (context, index) {
+                        final jobType = jobTypes[index];
+                        return ListTile(
+                          title: Text(jobType.name),
+                          onTap: () async {
+                            final newSelection = Set<Schedule>.from(selectedJobTypes.value);
+                            newSelection.add(jobType);
+                            selectedJobTypes.value = newSelection;
+                            await onTap();
+                          },
+                          dense: true,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+        );
+        if (context.mounted) {
+          Overlay.of(context).insert(jobTypeOverlayEntry.value!);
+        }
+      },
+      child: const Row(children: [Icon(IconlyLight.arrowDown2, size: 16)]),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<Set<Schedule>>>('selectedJobTypes', selectedJobTypes));
+    properties.add(DiagnosticsProperty<ValueNotifier<OverlayEntry?>>('jobTypeOverlayEntry', jobTypeOverlayEntry));
+    properties.add(ObjectFlagProperty<Future<void> Function()>.has('onTap', onTap));
+    properties.add(IterableProperty<Schedule>('jobTypes', jobTypes));
+    properties.add(DiagnosticsProperty<GlobalKey<FormFieldState>>('jobTypeKey', jobTypeKey));
+  }
+}
+
+class _MajorList extends StatelessWidget {
+  const _MajorList({super.key, required this.selectedMajors});
+
+  final ValueNotifier<Set<Major>> selectedMajors;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            ...selectedMajors.value.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Chip(
+                  label: Text(item.name, style: const TextStyle(fontSize: 12)),
+                  deleteIcon: const Icon(Icons.close_outlined, size: 14),
+                  color: WidgetStateProperty.all(Theme.of(context).colorScheme.primaryContainer.withAlpha(160)),
+                  onDeleted: () {
+                    final newItems = Set<Major>.from(selectedMajors.value)..remove(item);
+                    selectedMajors.value = newItems;
+                  },
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<Set<Major>>>('selectedMajors', selectedMajors));
+  }
+}
+
+class _MajorSelector extends StatelessWidget {
+  const _MajorSelector({
+    required this.majorOverlayEntry,
+    required this.selectedMajors,
+    required this.majors,
+    required this.onTap,
+    required this.majorKey,
+  });
+
+  final ValueNotifier<OverlayEntry?> majorOverlayEntry;
+
+  final ValueNotifier<Set<Major>> selectedMajors;
+
+  final List<Major> majors;
+
+  final Future<void> Function() onTap;
+
+  final GlobalKey<FormFieldState> majorKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        if (majorOverlayEntry.value != null) {
+          await onTap();
+          return;
+        }
+        await onTap();
+        final RenderBox renderBox = majorKey.currentContext!.findRenderObject() as RenderBox;
+        final Size size = renderBox.size;
+        final Offset position = renderBox.localToGlobal(Offset.zero);
+        majorOverlayEntry.value = OverlayEntry(
+          builder:
+              (context) => Positioned(
+                top: position.dy + size.height,
+                left: position.dx,
+                width: size.width,
+                child: Card(
+                  elevation: 8,
+                  margin: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  child: Container(
+                    constraints: const BoxConstraints(maxHeight: 300),
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: majors.length,
+                      itemBuilder: (context, index) {
+                        final major = majors[index];
+                        return ListTile(
+                          title: Text(major.name),
+                          onTap: () async {
+                            final newSelection = Set<Major>.from(selectedMajors.value);
+                            newSelection.add(major);
+                            selectedMajors.value = newSelection;
+                            await onTap();
+                          },
+                          dense: true,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+        );
+        if (context.mounted) {
+          Overlay.of(context).insert(majorOverlayEntry.value!);
+        }
+      },
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [Icon(IconlyLight.arrowDown2, size: 16)],
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<OverlayEntry?>>('majorOverlayEntry', majorOverlayEntry));
+    properties.add(DiagnosticsProperty<ValueNotifier<Set<Major>>>('selectedMajors', selectedMajors));
+    properties.add(IterableProperty<Major>('majors', majors));
+    properties.add(ObjectFlagProperty<Future<void> Function()>.has('onTap', onTap));
+    properties.add(DiagnosticsProperty<GlobalKey<FormFieldState>>('majorKey', majorKey));
+  }
+}
+
+class _PositionSelector extends StatelessWidget {
+  const _PositionSelector({required this.selectedPositions});
+
+  final ValueNotifier<Set<Position>> selectedPositions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            ...selectedPositions.value.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Chip(
+                  label: Text(item.name, style: const TextStyle(fontSize: 12)),
+                  deleteIcon: const Icon(Icons.close_outlined, size: 14),
+                  color: WidgetStateProperty.all(Theme.of(context).colorScheme.primaryContainer.withAlpha(160)),
+                  onDeleted: () {
+                    final newItems = Set<Position>.from(selectedPositions.value)..remove(item);
+                    selectedPositions.value = newItems;
+                  },
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<Set<Position>>>('selectedPositions', selectedPositions));
+  }
+}
+
+class _PositionDropdown extends StatelessWidget {
+  const _PositionDropdown({
+    required this.positionOverlayEntry,
+    required this.selectedPositions,
+    required this.positions,
+    required this.onTap,
+    required this.positionKey,
+  });
+
+  final ValueNotifier<OverlayEntry?> positionOverlayEntry;
+
+  final ValueNotifier<Set<Position>> selectedPositions;
+
+  final List<Position> positions;
+
+  final Future<void> Function() onTap;
+
+  final GlobalKey<FormFieldState> positionKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        if (positionOverlayEntry.value != null) {
+          await onTap();
+          return;
+        }
+        await onTap();
+        final RenderBox renderBox = positionKey.currentContext!.findRenderObject() as RenderBox;
+        final Size size = renderBox.size;
+        final Offset position = renderBox.localToGlobal(Offset.zero);
+        positionOverlayEntry.value = OverlayEntry(
+          builder:
+              (context) => Positioned(
+                top: position.dy + size.height,
+                left: position.dx,
+                width: size.width,
+                child: Card(
+                  elevation: 8,
+                  margin: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  child: Container(
+                    constraints: const BoxConstraints(maxHeight: 300),
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: positions.length,
+                      itemBuilder: (context, index) {
+                        final position = positions[index];
+                        return ListTile(
+                          title: Text(position.name),
+                          onTap: () async {
+                            final newSelection = Set<Position>.from(selectedPositions.value);
+                            newSelection.add(position);
+                            selectedPositions.value = newSelection;
+                            await onTap();
+                          },
+                          dense: true,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+        );
+        if (context.mounted) {
+          Overlay.of(context).insert(positionOverlayEntry.value!);
+        }
+      },
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [Icon(IconlyLight.arrowDown2, size: 16)],
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<OverlayEntry?>>('positionOverlayEntry', positionOverlayEntry));
+    properties.add(DiagnosticsProperty<ValueNotifier<Set<Position>>>('selectedPositions', selectedPositions));
+    properties.add(IterableProperty<Position>('positions', positions));
+    properties.add(ObjectFlagProperty<Future<void> Function()>.has('onTap', onTap));
+    properties.add(DiagnosticsProperty<GlobalKey<FormFieldState>>('positionKey', positionKey));
   }
 }
 

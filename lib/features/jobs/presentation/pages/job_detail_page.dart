@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:pdfx/pdfx.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:intl/intl.dart';
 
@@ -639,40 +638,7 @@ class _ApplyModal extends HookWidget {
                   );
                 },
               ),
-              if (file.value != null)
-                AnimatedOpacity(
-                  duration: const Duration(milliseconds: 300),
-                  opacity: 0.84,
-                  child: CustomButton(
-                    onPressed: () async {
-                      await showDialog(
-                        context: context,
-                        builder:
-                            (context) => AlertDialog(
-                              title: Text(file.value!.name),
-                              content: SizedBox(
-                                height: 600.0,
-                                width: 400.0,
-                                child: PdfViewerPage(data: file.value!.data),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text(context.t.common.close),
-                                ),
-                              ],
-                            ),
-                      );
-                    },
-                    child: Text(
-                      context.t.common.preview,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                    ),
-                  ),
-                ),
+              if (file.value != null) PreviewButton(file: file),
               Text(
                 context.t.common.resumeLetter.title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -704,44 +670,7 @@ class _ApplyModal extends HookWidget {
                 ),
               ),
               const SizedBox.shrink(),
-              Consumer(
-                builder: (context, ref, child) {
-                  return CustomButton(
-                    onPressed: () async {
-                      if (file.value == null) {
-                        return;
-                      }
-                      if (controller.text.trim().isEmpty) {
-                        NotificationService.error(context: context, message: context.t.validation.file.cvFormat);
-                        return;
-                      }
-                      await ref
-                          .read(applyJobControllerProvider.notifier)
-                          .applyJob(jobId: jobId, referenceLetter: controller.text, cv: file.value!);
-                      final state = ref.read(applyJobControllerProvider);
-                      if (state is ApplyJobError) {
-                        if (context.mounted) {
-                          NotificationService.error(context: context, message: state.message);
-                        }
-                      } else if (state is ApplyJobLoaded) {
-                        if (context.mounted) {
-                          NotificationService.success(context: context, message: context.t.job.applicationSuccess);
-                          Navigator.pop(context);
-                        }
-                      }
-                    },
-                    child: Center(
-                      child: Text(
-                        'Submit',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+              _ApplyButton(jobId: jobId, file: file, controller: controller),
             ],
           ),
         ),
@@ -756,38 +685,62 @@ class _ApplyModal extends HookWidget {
   }
 }
 
-class PdfViewerPage extends StatefulWidget {
-  const PdfViewerPage({super.key, required this.data});
+class _ApplyButton extends StatelessWidget {
+  const _ApplyButton({required this.jobId, required this.file, required this.controller});
 
-  final Uint8List data;
+  final int jobId;
+
+  final ValueNotifier<FileSelectorResult?> file;
+
+  final TextEditingController controller;
 
   @override
-  State<PdfViewerPage> createState() => _PdfViewerPageState();
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, child) {
+        return CustomButton(
+          onPressed: () async {
+            if (file.value == null) {
+              return;
+            }
+            if (controller.text.trim().isEmpty) {
+              NotificationService.error(context: context, message: context.t.validation.file.cvFormat);
+              return;
+            }
+            await ref
+                .read(applyJobControllerProvider.notifier)
+                .applyJob(jobId: jobId, referenceLetter: controller.text, cv: file.value!);
+            final state = ref.read(applyJobControllerProvider);
+            if (state is ApplyJobError) {
+              if (context.mounted) {
+                NotificationService.error(context: context, message: state.message);
+              }
+            } else if (state is ApplyJobLoaded) {
+              if (context.mounted) {
+                NotificationService.success(context: context, message: context.t.job.applicationSuccess);
+                Navigator.pop(context);
+              }
+            }
+          },
+          child: Center(
+            child: Text(
+              context.t.common.apply,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IterableProperty<Uint8List>('data', [data]));
-  }
-}
-
-class _PdfViewerPageState extends State<PdfViewerPage> {
-  late PdfController _pdfController;
-
-  @override
-  void initState() {
-    super.initState();
-    _pdfController = PdfController(document: PdfDocument.openData(widget.data));
-  }
-
-  @override
-  void dispose() {
-    _pdfController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(children: [PdfView(controller: _pdfController, scrollDirection: Axis.vertical)]);
+    properties.add(IntProperty('jobId', jobId));
+    properties.add(DiagnosticsProperty<ValueNotifier<FileSelectorResult?>>('file', file));
+    properties.add(DiagnosticsProperty<TextEditingController>('controller', controller));
   }
 }

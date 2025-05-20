@@ -1,6 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
+import '../../../../core/network/api_constant.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 class SimpleTile extends StatelessWidget {
   const SimpleTile({
@@ -131,5 +137,70 @@ class CarouselJobTile extends StatelessWidget {
     properties.add(IntProperty('count', count));
     properties.add(ObjectFlagProperty<Widget Function(BuildContext context, int index)>.has('builder', builder));
     properties.add(ObjectFlagProperty<Widget Function(BuildContext context)>.has('emptyBuilder', emptyBuilder));
+  }
+}
+
+class AvatarSection extends StatelessWidget {
+  const AvatarSection({super.key, required this.state});
+
+  final AuthAuthorized state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        shape: BoxShape.circle,
+        border: Border.all(color: Theme.of(context).primaryColor, width: 2.0),
+      ),
+      child: ClipOval(
+        child: CachedNetworkImage(
+          imageUrl: queryImage(state.user.userInfo.avatar!),
+          width: 86.0,
+          height: 86.0,
+          fit: BoxFit.cover,
+          placeholder: (context, url) {
+            return Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                width: 48.0,
+                height: 48.0,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.0)),
+              ),
+            );
+          },
+          errorWidget: (context, url, error) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.all(color: Theme.of(context).primaryColor, width: 2.0),
+              ),
+              child: const _NoAvatar(),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<AuthAuthorized>('state', state));
+  }
+}
+
+class _NoAvatar extends StatelessWidget {
+  const _NoAvatar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(
+      IconlyLight.image,
+      size: 48.0,
+      color: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.64),
+    );
   }
 }

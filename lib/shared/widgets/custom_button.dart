@@ -1,6 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
+import 'package:pdfx/pdfx.dart';
+
+import '../../core/services/file_service.dart';
+import '../../i18n/strings.g.dart';
 
 class CustomButton extends StatelessWidget {
   const CustomButton({super.key, this.onPressed, required this.child, this.color});
@@ -193,5 +197,81 @@ class DisabledButton extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
+  }
+}
+
+class PreviewButton extends StatelessWidget {
+  const PreviewButton({super.key, required this.file});
+
+  final ValueNotifier<FileSelectorResult?> file;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 300),
+      opacity: 0.84,
+      child: CustomButton(
+        onPressed: () async {
+          await showDialog(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: Text(file.value!.name),
+                  content: SizedBox(height: 600.0, width: 400.0, child: _PdfViewerPage(data: file.value!.data)),
+                  actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(context.t.common.close))],
+                ),
+          );
+        },
+        child: Text(
+          context.t.common.preview,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<FileSelectorResult?>>('file', file));
+  }
+}
+
+class _PdfViewerPage extends StatefulWidget {
+  const _PdfViewerPage({super.key, required this.data});
+
+  final Uint8List data;
+
+  @override
+  State<_PdfViewerPage> createState() => __PdfViewerPageState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IterableProperty<Uint8List>('data', [data]));
+  }
+}
+
+class __PdfViewerPageState extends State<_PdfViewerPage> {
+  late PdfController _pdfController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pdfController = PdfController(document: PdfDocument.openData(widget.data));
+  }
+
+  @override
+  void dispose() {
+    _pdfController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(children: [PdfView(controller: _pdfController, scrollDirection: Axis.vertical)]);
   }
 }

@@ -39,26 +39,7 @@ class JobCard extends HookConsumerWidget {
                 spacing: 8.0,
                 children: [
                   job.company.logo != null
-                      ? CachedNetworkImage(
-                        imageUrl: queryImage(job.company.logo!),
-                        width: 48.0,
-                        height: 48.0,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) {
-                          return Shimmer.fromColors(
-                            baseColor: Colors.grey[300]!,
-                            highlightColor: Colors.grey[100]!,
-                            child: Container(
-                              width: 48.0,
-                              height: 48.0,
-                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.0)),
-                            ),
-                          );
-                        },
-                        errorWidget: (context, url, error) {
-                          return Icon(IconlyLight.image, size: 48.0, color: Theme.of(context).colorScheme.primary);
-                        },
-                      )
+                      ? _JobImage(job: job)
                       : Icon(IconlyLight.image, size: 48.0, color: Theme.of(context).colorScheme.primary),
                   Expanded(
                     child: Column(
@@ -66,39 +47,11 @@ class JobCard extends HookConsumerWidget {
                       children: [Text(job.title), Text(job.company.name ?? '')],
                     ),
                   ),
-                  IconButton(
-                    tooltip: context.t.common.save,
-                    onPressed: () async {
-                      if (isBookmarkProcessing.value) {
-                        return;
-                      }
-                      isBookmarkProcessing.value = true;
-                      await Future.delayed(const Duration(milliseconds: 100));
-                      try {
-                        if (ref.read(savedJobControllerProvider.notifier).contains(job.id)) {
-                          await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: job.id);
-                          if (context.mounted) {
-                            NotificationService.error(context: context, message: context.t.job.unsaveSuccess);
-                          }
-                        } else {
-                          await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
-                          if (context.mounted) {
-                            NotificationService.success(context: context, message: context.t.job.saveSuccess);
-                          }
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          NotificationService.error(context: context, message: context.t.job.saveError);
-                        }
-                      } finally {
-                        isBookmarkProcessing.value = false;
-                      }
-                    },
-                    icon: Icon(
-                      isHighlighted ? IconlyBold.bookmark : IconlyLight.bookmark,
-                      size: 24.0,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                  _BookmarkButton(
+                    job: job,
+                    isBookmarkProcessing: isBookmarkProcessing,
+                    ref: ref,
+                    isHighlighted: isHighlighted,
                   ),
                 ],
               ),
@@ -168,6 +121,71 @@ class JobCard extends HookConsumerWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Job>('job', job));
     properties.add(ObjectFlagProperty<Future<void> Function()>.has('onPressed', onPressed));
+  }
+}
+
+class _BookmarkButton extends StatelessWidget {
+  const _BookmarkButton({
+    super.key,
+    required this.job,
+    required this.isBookmarkProcessing,
+    required this.ref,
+    required this.isHighlighted,
+  });
+
+  final Job job;
+
+  final ValueNotifier<bool> isBookmarkProcessing;
+
+  final WidgetRef ref;
+
+  final bool isHighlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: context.t.common.save,
+      onPressed: () async {
+        if (isBookmarkProcessing.value) {
+          return;
+        }
+        isBookmarkProcessing.value = true;
+        await Future.delayed(const Duration(milliseconds: 100));
+        try {
+          if (ref.read(savedJobControllerProvider.notifier).contains(job.id)) {
+            await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: job.id);
+            if (context.mounted) {
+              NotificationService.error(context: context, message: context.t.job.unsaveSuccess);
+            }
+          } else {
+            await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
+            if (context.mounted) {
+              NotificationService.success(context: context, message: context.t.job.saveSuccess);
+            }
+          }
+        } catch (e) {
+          if (context.mounted) {
+            NotificationService.error(context: context, message: context.t.job.saveError);
+          }
+        } finally {
+          isBookmarkProcessing.value = false;
+        }
+      },
+      icon: Icon(
+        isHighlighted ? IconlyBold.bookmark : IconlyLight.bookmark,
+        size: 24.0,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Job>('job', job));
+    properties.add(DiagnosticsProperty<ValueNotifier<bool>>('isBookmarkProcessing', isBookmarkProcessing));
+    properties.add(DiagnosticsProperty<WidgetRef>('ref', ref));
+    properties.add(DiagnosticsProperty<bool>('isHighlighted', isHighlighted));
   }
 }
 
@@ -344,6 +362,42 @@ class JobIntroduce extends StatelessWidget {
   }
 }
 
+class _JobImage extends StatelessWidget {
+  const _JobImage({required this.job});
+
+  final Job job;
+
+  @override
+  Widget build(BuildContext context) {
+    return CachedNetworkImage(
+      imageUrl: queryImage(job.company.logo!),
+      width: 48.0,
+      height: 48.0,
+      fit: BoxFit.cover,
+      placeholder: (context, url) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Container(
+            width: 48.0,
+            height: 48.0,
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.0)),
+          ),
+        );
+      },
+      errorWidget: (context, url, error) {
+        return Icon(IconlyLight.image, size: 48.0, color: Theme.of(context).colorScheme.primary);
+      },
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Job>('job', job));
+  }
+}
+
 class AppliedJobCard extends StatelessWidget {
   const AppliedJobCard({super.key, required this.job, required this.onPressed});
 
@@ -367,26 +421,7 @@ class AppliedJobCard extends StatelessWidget {
                 spacing: 8.0,
                 children: [
                   job.company.logo != null
-                      ? CachedNetworkImage(
-                        imageUrl: queryImage(job.company.logo!),
-                        width: 48.0,
-                        height: 48.0,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) {
-                          return Shimmer.fromColors(
-                            baseColor: Colors.grey[300]!,
-                            highlightColor: Colors.grey[100]!,
-                            child: Container(
-                              width: 48.0,
-                              height: 48.0,
-                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.0)),
-                            ),
-                          );
-                        },
-                        errorWidget: (context, url, error) {
-                          return Icon(IconlyLight.image, size: 48.0, color: Theme.of(context).colorScheme.primary);
-                        },
-                      )
+                      ? _JobImage(job: job)
                       : Icon(IconlyLight.image, size: 48.0, color: Theme.of(context).colorScheme.primary),
                   Expanded(
                     child: Column(
