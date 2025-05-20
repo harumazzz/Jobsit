@@ -19,6 +19,8 @@ import '../../domain/entities/job.dart';
 import '../providers/job_provider.dart';
 import '../widgets/job_card.dart';
 
+enum _JobTabType { description, company }
+
 class JobDetailPage extends HookConsumerWidget {
   const JobDetailPage({super.key, required this.jobId});
 
@@ -27,7 +29,7 @@ class JobDetailPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pageController = usePageController();
     final isSelected = useState(ref.read(savedJobControllerProvider.notifier).contains(jobId));
-    final selectedTabIndex = useState(0);
+    final selectedTabIndex = useState(_JobTabType.description.index);
     final isBookmarkProcessing = useState(false);
 
     return Scaffold(
@@ -41,45 +43,7 @@ class JobDetailPage extends HookConsumerWidget {
             surfaceTintColor: const Color(0xFff5fafd),
             flexibleSpace: const FlexibleSpaceBar(title: Text('Job Detail'), centerTitle: true),
             actions: [
-              Consumer(
-                builder: (context, ref, child) {
-                  final state = ref.watch(jobDetailControllerProvider);
-                  return switch (state) {
-                    JobDetailLoading() => const Center(child: CircularProgressIndicator()),
-                    JobDetailError() => const SizedBox.shrink(),
-                    JobDetailInitial() => const SizedBox.shrink(),
-                    JobDetailLoaded(job: final job) => IconButton(
-                      icon: Icon(isSelected.value ? IconlyBold.bookmark : IconlyLight.bookmark),
-                      tooltip: context.t.common.save,
-                      iconSize: 30.0,
-                      color: Theme.of(context).colorScheme.primary,
-                      onPressed: () async {
-                        if (isBookmarkProcessing.value) {
-                          return;
-                        }
-                        isBookmarkProcessing.value = true;
-                        try {
-                          await Future.delayed(const Duration(milliseconds: 100));
-                          isSelected.value = !isSelected.value;
-                          if (ref.read(savedJobControllerProvider.notifier).contains(state.job.id)) {
-                            await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: jobId);
-                            if (context.mounted) {
-                              NotificationService.error(context: context, message: context.t.job.unsaveSuccess);
-                            }
-                          } else {
-                            await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
-                            if (context.mounted) {
-                              NotificationService.success(context: context, message: context.t.job.saveSuccess);
-                            }
-                          }
-                        } finally {
-                          isBookmarkProcessing.value = false;
-                        }
-                      },
-                    ),
-                  };
-                },
-              ),
+              _BookmarkButton(jobId: jobId, isSelected: isSelected, isBookmarkProcessing: isBookmarkProcessing),
             ],
           ),
           Consumer(
@@ -97,41 +61,7 @@ class JobDetailPage extends HookConsumerWidget {
                       children: [
                         const SizedBox(height: 16.0),
                         job.company.logo != null
-                            ? Container(
-                              alignment: Alignment.center,
-                              width: 86.0,
-                              height: 86.0,
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2.0),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: CachedNetworkImage(
-                                imageUrl: queryImage(job.company.logo!),
-                                fit: BoxFit.contain,
-                                placeholder: (context, url) {
-                                  return Shimmer.fromColors(
-                                    baseColor: Colors.grey[300]!,
-                                    highlightColor: Colors.grey[100]!,
-                                    child: Container(
-                                      width: 48.0,
-                                      height: 48.0,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(8.0),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                errorWidget: (context, url, error) {
-                                  return Icon(
-                                    IconlyLight.image,
-                                    size: 48.0,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  );
-                                },
-                              ),
-                            )
+                            ? _JobImage(job: job)
                             : Icon(IconlyLight.image, size: 48.0, color: Theme.of(context).colorScheme.primary),
                         const SizedBox(height: 16.0),
                         Text(
@@ -192,108 +122,9 @@ class JobDetailPage extends HookConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 24.0),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            JobIntroduce(
-                              title: context.t.job.position,
-                              content: job.positions.isNotEmpty ? job.positions[0].name : '',
-                              child: Icon(
-                                IconlyLight.profile,
-                                size: 24.0,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                            JobIntroduce(
-                              title: context.t.job.type,
-                              content: job.schedules.isNotEmpty ? job.schedules[0].name : ' ',
-                              child: Icon(IconlyLight.work, size: 24.0, color: Theme.of(context).colorScheme.primary),
-                            ),
-                            JobIntroduce(
-                              title: context.t.job.salary,
-                              content: '\$${job.minInUSD} - \$${job.maxInUSD}',
-                              child: Icon(IconlyLight.wallet, size: 24.0, color: Theme.of(context).colorScheme.primary),
-                            ),
-                            JobIntroduce(
-                              title: context.t.job.deadline,
-                              content: DateFormat('dd/MM/yy').format(job.applicationDeadline.toLocal()),
-                              child: Icon(
-                                IconlyLight.calendar,
-                                size: 24.0,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                          ],
-                        ),
+                        _JobDisplay(job: job),
                         const SizedBox(height: 24.0),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () async {
-                                  selectedTabIndex.value = 0;
-                                  pageController.jumpToPage(0);
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                                  decoration: BoxDecoration(
-                                    color: selectedTabIndex.value == 0 ? Colors.white : Colors.transparent,
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(12.0),
-                                      bottomLeft: Radius.circular(12.0),
-                                    ),
-                                    border: Border.all(
-                                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
-                                    ),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    context.t.common.description,
-                                    style: TextStyle(
-                                      fontWeight: selectedTabIndex.value == 0 ? FontWeight.bold : FontWeight.normal,
-                                      color:
-                                          selectedTabIndex.value == 0
-                                              ? Theme.of(context).colorScheme.primary
-                                              : Theme.of(context).colorScheme.onSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () async {
-                                  selectedTabIndex.value = 1;
-                                  pageController.jumpToPage(1);
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                                  decoration: BoxDecoration(
-                                    color: selectedTabIndex.value == 1 ? Colors.white : Colors.transparent,
-                                    borderRadius: const BorderRadius.only(
-                                      topRight: Radius.circular(12.0),
-                                      bottomRight: Radius.circular(12.0),
-                                    ),
-                                    border: Border.all(
-                                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
-                                    ),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    context.t.common.company,
-                                    style: TextStyle(
-                                      fontWeight: selectedTabIndex.value == 1 ? FontWeight.bold : FontWeight.normal,
-                                      color:
-                                          selectedTabIndex.value == 1
-                                              ? Theme.of(context).colorScheme.primary
-                                              : Theme.of(context).colorScheme.onSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        _JobTabs(pageController: pageController, selectedTabIndex: selectedTabIndex),
                         const SizedBox(height: 24.0),
                         Container(
                           padding: const EdgeInsets.all(16.0),
@@ -304,106 +135,17 @@ class JobDetailPage extends HookConsumerWidget {
                               selectedTabIndex.value = index;
                             },
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    context.t.common.jobDescription,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 16.0),
-                                  Text(
-                                    job.description,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSecondary),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    context.t.common.companyOverview,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 16.0),
-                                  Flexible(
-                                    child: Text(
-                                      job.company.description ?? '',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSecondary),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16.0),
-                                  Text(
-                                    context.t.common.companyAddress,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 16.0),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        IconlyLight.location,
-                                        size: 24.0,
-                                        color: Theme.of(context).colorScheme.primary,
-                                      ),
-                                      const SizedBox(width: 8.0),
-                                      Text(
-                                        job.company.location ?? '',
-                                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSecondary,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 16.0),
-                                  Text(
-                                    context.t.common.otherJobs,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 16.0),
-                                  relatedJobs.isEmpty
-                                      ? SizedBox(
-                                        height: 220.0,
-                                        child: Center(
-                                          child: Text(
-                                            context.t.common.noOtherJobs,
-                                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                              color: Theme.of(context).colorScheme.onSecondary,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                      : CarouselSlider(
-                                        options: CarouselOptions(height: 220.0, autoPlay: true),
-                                        items: [
-                                          ...relatedJobs.map((e) {
-                                            return JobCard(
-                                              job: e,
-                                              onPressed: () async {
-                                                final jobDetailState = ref.read(jobDetailControllerProvider.notifier);
-                                                await jobDetailState.getJobDetail(jobId: e.id);
-                                                if (context.mounted) {
-                                                  JobDetailRoute(id: e.id).pushReplacement(context);
-                                                }
-                                              },
-                                            );
-                                          }),
-                                        ],
-                                      ),
-                                ],
+                              _JobDescription(job: job),
+                              _JobInfo(
+                                job: job,
+                                relatedJobs: relatedJobs,
+                                onPressed: (job) async {
+                                  final jobDetailState = ref.read(jobDetailControllerProvider.notifier);
+                                  await jobDetailState.getJobDetail(jobId: job.id);
+                                  if (context.mounted) {
+                                    JobDetailRoute(id: job.id).pushReplacement(context);
+                                  }
+                                },
                               ),
                             ],
                           ),
@@ -424,6 +166,350 @@ class JobDetailPage extends HookConsumerWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(IntProperty('jobId', jobId));
+  }
+}
+
+class _JobInfo extends StatelessWidget {
+  const _JobInfo({required this.job, required this.relatedJobs, required this.onPressed});
+
+  final Job job;
+
+  final Future<void> Function(Job job) onPressed;
+
+  final List<Job> relatedJobs;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.t.common.companyOverview,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16.0),
+        Flexible(
+          child: Text(
+            job.company.description ?? '',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSecondary),
+          ),
+        ),
+        const SizedBox(height: 16.0),
+        Text(
+          context.t.common.companyAddress,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16.0),
+        Row(
+          children: [
+            Icon(IconlyLight.location, size: 24.0, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 8.0),
+            Text(
+              job.company.location ?? '',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16.0),
+        Text(
+          context.t.common.otherJobs,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16.0),
+        relatedJobs.isEmpty
+            ? SizedBox(
+              height: 220.0,
+              child: Center(
+                child: Text(
+                  context.t.common.noOtherJobs,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSecondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            )
+            : CarouselSlider(
+              options: CarouselOptions(height: 220.0, autoPlay: true),
+              items: [
+                ...relatedJobs.map((e) {
+                  return JobCard(job: e, onPressed: () async => onPressed(e));
+                }),
+              ],
+            ),
+      ],
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Job>('job', job));
+    properties.add(IterableProperty<Job>('relatedJobs', relatedJobs));
+    properties.add(ObjectFlagProperty<Future<void> Function(Job job)>.has('onPressed', onPressed));
+  }
+}
+
+class _JobDescription extends StatelessWidget {
+  const _JobDescription({required this.job});
+
+  final Job job;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.t.common.jobDescription,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16.0),
+        Text(
+          job.description,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSecondary),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Job>('job', job));
+  }
+}
+
+class _JobTabs extends StatelessWidget {
+  const _JobTabs({required this.selectedTabIndex, required this.pageController});
+
+  final ValueNotifier<int> selectedTabIndex;
+
+  final PageController pageController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () async {
+              selectedTabIndex.value = _JobTabType.description.index;
+              pageController.jumpToPage(_JobTabType.description.index);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              decoration: BoxDecoration(
+                color: selectedTabIndex.value == _JobTabType.description.index ? Colors.white : Colors.transparent,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12.0),
+                  bottomLeft: Radius.circular(12.0),
+                ),
+                border: Border.all(color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8)),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                context.t.common.description,
+                style: TextStyle(
+                  fontWeight:
+                      selectedTabIndex.value == _JobTabType.description.index ? FontWeight.bold : FontWeight.normal,
+                  color:
+                      selectedTabIndex.value == _JobTabType.description.index
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSecondary,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: GestureDetector(
+            onTap: () async {
+              selectedTabIndex.value = _JobTabType.company.index;
+              pageController.jumpToPage(_JobTabType.company.index);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              decoration: BoxDecoration(
+                color: selectedTabIndex.value == _JobTabType.company.index ? Colors.white : Colors.transparent,
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(12.0),
+                  bottomRight: Radius.circular(12.0),
+                ),
+                border: Border.all(color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8)),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                context.t.common.company,
+                style: TextStyle(
+                  fontWeight: selectedTabIndex.value == _JobTabType.company.index ? FontWeight.bold : FontWeight.normal,
+                  color:
+                      selectedTabIndex.value == _JobTabType.company.index
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSecondary,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<int>>('selectedTabIndex', selectedTabIndex));
+    properties.add(DiagnosticsProperty<PageController>('pageController', pageController));
+  }
+}
+
+class _JobDisplay extends StatelessWidget {
+  const _JobDisplay({required this.job});
+
+  final Job job;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        JobIntroduce(
+          title: context.t.job.position,
+          content: job.positions.isNotEmpty ? job.positions[0].name : '',
+          child: Icon(IconlyLight.profile, size: 24.0, color: Theme.of(context).colorScheme.primary),
+        ),
+        JobIntroduce(
+          title: context.t.job.type,
+          content: job.schedules.isNotEmpty ? job.schedules[0].name : ' ',
+          child: Icon(IconlyLight.work, size: 24.0, color: Theme.of(context).colorScheme.primary),
+        ),
+        JobIntroduce(
+          title: context.t.job.salary,
+          content: '\$${job.minInUSD} - \$${job.maxInUSD}',
+          child: Icon(IconlyLight.wallet, size: 24.0, color: Theme.of(context).colorScheme.primary),
+        ),
+        JobIntroduce(
+          title: context.t.job.deadline,
+          content: DateFormat('dd/MM/yy').format(job.applicationDeadline.toLocal()),
+          child: Icon(IconlyLight.calendar, size: 24.0, color: Theme.of(context).colorScheme.primary),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Job>('job', job));
+  }
+}
+
+class _JobImage extends StatelessWidget {
+  const _JobImage({required this.job});
+
+  final Job job;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      width: 86.0,
+      height: 86.0,
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2.0),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: CachedNetworkImage(
+        imageUrl: queryImage(job.company.logo!),
+        fit: BoxFit.contain,
+        placeholder: (context, url) {
+          return Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              width: 48.0,
+              height: 48.0,
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.0)),
+            ),
+          );
+        },
+        errorWidget: (context, url, error) {
+          return Icon(IconlyLight.image, size: 48.0, color: Theme.of(context).colorScheme.primary);
+        },
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Job>('job', job));
+  }
+}
+
+class _BookmarkButton extends StatelessWidget {
+  const _BookmarkButton({required this.jobId, required this.isSelected, required this.isBookmarkProcessing});
+
+  final int jobId;
+
+  final ValueNotifier<bool> isSelected;
+
+  final ValueNotifier<bool> isBookmarkProcessing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final state = ref.watch(jobDetailControllerProvider);
+        return switch (state) {
+          JobDetailLoading() => const Center(child: CircularProgressIndicator()),
+          JobDetailError() => const SizedBox.shrink(),
+          JobDetailInitial() => const SizedBox.shrink(),
+          JobDetailLoaded(job: final job) => IconButton(
+            icon: Icon(isSelected.value ? IconlyBold.bookmark : IconlyLight.bookmark),
+            tooltip: context.t.common.save,
+            iconSize: 30.0,
+            color: Theme.of(context).colorScheme.primary,
+            onPressed: () async {
+              if (isBookmarkProcessing.value) {
+                return;
+              }
+              isBookmarkProcessing.value = true;
+              try {
+                await Future.delayed(const Duration(milliseconds: 100));
+                isSelected.value = !isSelected.value;
+                if (ref.read(savedJobControllerProvider.notifier).contains(state.job.id)) {
+                  await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: jobId);
+                  if (context.mounted) {
+                    NotificationService.error(context: context, message: context.t.job.unsaveSuccess);
+                  }
+                } else {
+                  await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
+                  if (context.mounted) {
+                    NotificationService.success(context: context, message: context.t.job.saveSuccess);
+                  }
+                }
+              } finally {
+                isBookmarkProcessing.value = false;
+              }
+            },
+          ),
+        };
+      },
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<bool>>('isSelected', isSelected));
+    properties.add(DiagnosticsProperty<ValueNotifier<bool>>('isBookmarkProcessing', isBookmarkProcessing));
     properties.add(IntProperty('jobId', jobId));
   }
 }

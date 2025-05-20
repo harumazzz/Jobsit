@@ -195,53 +195,7 @@ class _JobPage extends HookConsumerWidget {
                       elevation: const WidgetStatePropertyAll(1.0),
                     ),
                   ),
-                  FloatingActionButton(
-                    backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                    tooltip: context.t.common.filter,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-                      side: BorderSide(color: Theme.of(context).colorScheme.primaryContainer),
-                    ),
-                    elevation: 2.0,
-                    onPressed: () async {
-                      if (isLoading.value) {
-                        return;
-                      }
-                      isLoading.value = true;
-                      try {
-                        final citiesController = ref.read(citiesControllerProvider.notifier);
-                        final scheduleController = ref.read(scheduleControllerProvider.notifier);
-                        final positionController = ref.read(positionControllerProvider.notifier);
-                        final majorController = ref.read(majorControllerProvider.notifier);
-                        await Future.wait([
-                          citiesController.fetchCities(),
-                          scheduleController.getSchedules(),
-                          positionController.getPositions(),
-                          majorController.getMajors(),
-                        ]);
-                        final jobFilterState = ref.read(jobFilterControllerProvider);
-                        if (context.mounted) {
-                          await showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            builder: (context) {
-                              return _FilterModal(
-                                jobTypes: jobFilterState.schedules,
-                                jobPositions: jobFilterState.positions,
-                                jobMajors: jobFilterState.majors,
-                                jobCity: jobFilterState.city,
-                                searchController: controller,
-                                searchNode: node,
-                              );
-                            },
-                          );
-                        }
-                      } finally {
-                        isLoading.value = false;
-                      }
-                    },
-                    child: Icon(IconlyLight.filter, color: Theme.of(context).colorScheme.primaryContainer),
-                  ),
+                  _CustomFilter(controller: controller, isLoading: isLoading, ref: ref, node: node),
                 ],
               ),
             ),
@@ -270,44 +224,7 @@ class _JobPage extends HookConsumerWidget {
                       keys: const [0],
                       hasNextPage: jobState.finished,
                     );
-                    return PagedSliverList<int, Job>(
-                      state: state,
-                      fetchNextPage: () async {
-                        if (!context.mounted) {
-                          return;
-                        }
-                        final controller = ref.read(searchJobsControllerProvider.notifier);
-                        if (ref.read(jobFilterControllerProvider.notifier).isEmpty) {
-                          await controller.searchJobs(page: page.value, limit: 10);
-                        } else {
-                          final jobFilterState = ref.read(jobFilterControllerProvider) as JobFilterOnSearch;
-                          await controller.filterJobs(
-                            page: page.value,
-                            limit: 10,
-                            city: jobFilterState.city,
-                            title: jobFilterState.title,
-                            schedules: jobFilterState.schedulesList,
-                            positions: jobFilterState.positionsList,
-                            majors: jobFilterState.majorsList,
-                          );
-                        }
-                        page.value++;
-                      },
-                      builderDelegate: PagedChildBuilderDelegate<Job>(
-                        itemBuilder: (context, item, index) {
-                          return JobCard(
-                            job: item,
-                            onPressed: () async {
-                              final jobDetailState = ref.read(jobDetailControllerProvider.notifier);
-                              await jobDetailState.getJobDetail(jobId: item.id);
-                              if (context.mounted) {
-                                await JobDetailRoute(id: item.id).push(context);
-                              }
-                            },
-                          );
-                        },
-                      ),
-                    );
+                    return _CustomPagedList(page: page, ref: ref, state: state);
                 }
               },
             ),
@@ -315,6 +232,138 @@ class _JobPage extends HookConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+class _CustomFilter extends StatelessWidget {
+  const _CustomFilter({required this.isLoading, required this.ref, required this.controller, required this.node});
+
+  final ValueNotifier<bool> isLoading;
+
+  final WidgetRef ref;
+
+  final TextEditingController controller;
+
+  final FocusNode node;
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      backgroundColor: Theme.of(context).colorScheme.onPrimary,
+      tooltip: context.t.common.filter,
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+        side: BorderSide(color: Theme.of(context).colorScheme.primaryContainer),
+      ),
+      elevation: 2.0,
+      onPressed: () async {
+        if (isLoading.value) {
+          return;
+        }
+        isLoading.value = true;
+        try {
+          final citiesController = ref.read(citiesControllerProvider.notifier);
+          final scheduleController = ref.read(scheduleControllerProvider.notifier);
+          final positionController = ref.read(positionControllerProvider.notifier);
+          final majorController = ref.read(majorControllerProvider.notifier);
+          await Future.wait([
+            citiesController.fetchCities(),
+            scheduleController.getSchedules(),
+            positionController.getPositions(),
+            majorController.getMajors(),
+          ]);
+          final jobFilterState = ref.read(jobFilterControllerProvider);
+          if (context.mounted) {
+            await showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (context) {
+                return _FilterModal(
+                  jobTypes: jobFilterState.schedules,
+                  jobPositions: jobFilterState.positions,
+                  jobMajors: jobFilterState.majors,
+                  jobCity: jobFilterState.city,
+                  searchController: controller,
+                  searchNode: node,
+                );
+              },
+            );
+          }
+        } finally {
+          isLoading.value = false;
+        }
+      },
+      child: Icon(IconlyLight.filter, color: Theme.of(context).colorScheme.primaryContainer),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ValueNotifier<bool>>('isLoading', isLoading));
+    properties.add(DiagnosticsProperty<WidgetRef>('ref', ref));
+    properties.add(DiagnosticsProperty<TextEditingController>('controller', controller));
+    properties.add(DiagnosticsProperty<FocusNode>('node', node));
+  }
+}
+
+class _CustomPagedList extends StatelessWidget {
+  const _CustomPagedList({required this.state, required this.ref, required this.page});
+
+  final PagingState<int, Job> state;
+
+  final WidgetRef ref;
+
+  final ValueNotifier<int> page;
+
+  @override
+  Widget build(BuildContext context) {
+    return PagedSliverList<int, Job>(
+      state: state,
+      fetchNextPage: () async {
+        if (!context.mounted) {
+          return;
+        }
+        final controller = ref.read(searchJobsControllerProvider.notifier);
+        if (ref.read(jobFilterControllerProvider.notifier).isEmpty) {
+          await controller.searchJobs(page: page.value, limit: 10);
+        } else {
+          final jobFilterState = ref.read(jobFilterControllerProvider) as JobFilterOnSearch;
+          await controller.filterJobs(
+            page: page.value,
+            limit: 10,
+            city: jobFilterState.city,
+            title: jobFilterState.title,
+            schedules: jobFilterState.schedulesList,
+            positions: jobFilterState.positionsList,
+            majors: jobFilterState.majorsList,
+          );
+        }
+        page.value++;
+      },
+      builderDelegate: PagedChildBuilderDelegate<Job>(
+        itemBuilder: (context, item, index) {
+          return JobCard(
+            job: item,
+            onPressed: () async {
+              final jobDetailState = ref.read(jobDetailControllerProvider.notifier);
+              await jobDetailState.getJobDetail(jobId: item.id);
+              if (context.mounted) {
+                await JobDetailRoute(id: item.id).push(context);
+              }
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<PagingState<int, Job>>('state', state));
+    properties.add(DiagnosticsProperty<WidgetRef>('ref', ref));
+    properties.add(DiagnosticsProperty<ValueNotifier<int>>('page', page));
   }
 }
 
@@ -348,7 +397,7 @@ class _FilterModal extends HookWidget {
     final citySelection = useState<City?>(jobCity);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      height: MediaQuery.of(context).size.height * 0.7,
+      height: MediaQuery.of(context).size.height * 0.75,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -491,39 +540,14 @@ class _FilterModal extends HookWidget {
           const SizedBox(height: 50.0),
           Consumer(
             builder: (context, ref, child) {
-              return CustomButton(
-                onPressed: () async {
-                  final majorState = ref.read(majorControllerProvider);
-                  final positionState = ref.read(positionControllerProvider);
-                  final scheduleState = ref.read(scheduleControllerProvider);
-                  final List<Major>? major =
-                      majorState is MajorLoaded ? majorSelection.value.map((e) => majorState.majors[e]).toList() : null;
-                  final List<Position>? position =
-                      positionState is PositionLoaded
-                          ? jobPositionSelection.value.map((e) => positionState.positions[e]).toList()
-                          : null;
-                  final List<Schedule>? schedule =
-                      scheduleState is ScheduleLoaded
-                          ? jobTypeSelection.value.map((e) => scheduleState.schedules[e]).toList()
-                          : null;
-                  Navigator.of(context).pop();
-                  await ref
-                      .read(jobFilterControllerProvider.notifier)
-                      .saveFilteredJob(
-                        schedules: jobTypeSelection.value,
-                        positions: jobPositionSelection.value,
-                        majors: majorSelection.value,
-                        title: searchController.text,
-                        city: citySelection.value,
-                        schedulesList: schedule,
-                        positionsList: position,
-                        majorsList: major,
-                      );
-                  if (searchNode.hasFocus) {
-                    searchNode.unfocus();
-                  }
-                },
-                child: Center(child: Text(context.t.common.applyFilter)),
+              return _FilterButton(
+                ref: ref,
+                searchController: searchController,
+                searchNode: searchNode,
+                jobTypeSelection: jobTypeSelection,
+                jobPositionSelection: jobPositionSelection,
+                majorSelection: majorSelection,
+                citySelection: citySelection,
               );
             },
           ),
@@ -541,6 +565,83 @@ class _FilterModal extends HookWidget {
     properties.add(IterableProperty<int>('jobTypes', jobTypes));
     properties.add(IterableProperty<int>('jobPositions', jobPositions));
     properties.add(IterableProperty<int>('jobMajors', jobMajors));
+  }
+}
+
+class _FilterButton extends StatelessWidget {
+  const _FilterButton({
+    super.key,
+    required this.ref,
+    required this.searchController,
+    required this.searchNode,
+    required this.jobTypeSelection,
+    required this.jobPositionSelection,
+    required this.majorSelection,
+    required this.citySelection,
+  });
+
+  final WidgetRef ref;
+
+  final TextEditingController searchController;
+
+  final FocusNode searchNode;
+
+  final ValueNotifier<Set<int>> jobTypeSelection;
+
+  final ValueNotifier<Set<int>> jobPositionSelection;
+
+  final ValueNotifier<Set<int>> majorSelection;
+
+  final ValueNotifier<City?> citySelection;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomButton(
+      onPressed: () async {
+        final majorState = ref.read(majorControllerProvider);
+        final positionState = ref.read(positionControllerProvider);
+        final scheduleState = ref.read(scheduleControllerProvider);
+        final List<Major>? major =
+            majorState is MajorLoaded ? majorSelection.value.map((e) => majorState.majors[e]).toList() : null;
+        final List<Position>? position =
+            positionState is PositionLoaded
+                ? jobPositionSelection.value.map((e) => positionState.positions[e]).toList()
+                : null;
+        final List<Schedule>? schedule =
+            scheduleState is ScheduleLoaded
+                ? jobTypeSelection.value.map((e) => scheduleState.schedules[e]).toList()
+                : null;
+        Navigator.of(context).pop();
+        await ref
+            .read(jobFilterControllerProvider.notifier)
+            .saveFilteredJob(
+              schedules: jobTypeSelection.value,
+              positions: jobPositionSelection.value,
+              majors: majorSelection.value,
+              title: searchController.text,
+              city: citySelection.value,
+              schedulesList: schedule,
+              positionsList: position,
+              majorsList: major,
+            );
+        if (searchNode.hasFocus) {
+          searchNode.unfocus();
+        }
+      },
+      child: Center(child: Text(context.t.common.applyFilter)),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<WidgetRef>('ref', ref));
+    properties.add(DiagnosticsProperty<TextEditingController>('searchController', searchController));
+    properties.add(DiagnosticsProperty<FocusNode>('searchNode', searchNode));
+    properties.add(DiagnosticsProperty<ValueNotifier<Set<int>>>('jobTypeSelection', jobTypeSelection));
+    properties.add(DiagnosticsProperty<ValueNotifier<Set<int>>>('jobPositionSelection', jobPositionSelection));
+    properties.add(DiagnosticsProperty<ValueNotifier<Set<int>>>('majorSelection', majorSelection));
+    properties.add(DiagnosticsProperty<ValueNotifier<City?>>('citySelection', citySelection));
   }
 }
 
