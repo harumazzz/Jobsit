@@ -331,7 +331,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                     phone: phoneController.text,
                     birthDay: DateFormat('dd-MM-yyyy').format(selectedDate.value!),
                     gender: genderOptions.indexOf(selectedGender.value),
-                    location: '${selectedCity.value?.name}, ${selectedDistrict.value?.name}, ${addressController.text}',
+                    location: addressController.text,
                     avatar: image.value,
                     city: selectedCity.value!.name,
                     district: selectedDistrict.value!.name,
@@ -1348,44 +1348,49 @@ class _JobTypeList extends StatelessWidget {
         final Size size = renderBox.size;
         final Offset position = renderBox.localToGlobal(Offset.zero);
         jobTypeOverlayEntry.value = OverlayEntry(
-          builder:
-              (context) => Positioned(
-                top: position.dy + size.height,
-                left: position.dx,
-                width: size.width,
-                child: Card(
-                  elevation: 8,
-                  margin: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  child: Container(
-                    constraints: const BoxConstraints(maxHeight: 300),
-                    child: ListView.builder(
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      itemCount: jobTypes.length,
-                      itemBuilder: (context, index) {
-                        final jobType = jobTypes[index];
-                        return ListTile(
-                          title: Text(jobType.name),
-                          onTap: () async {
-                            final newSelection = Set<Schedule>.from(selectedJobTypes.value);
-                            newSelection.add(jobType);
-                            selectedJobTypes.value = newSelection;
-                            await onTap();
-                          },
-                          dense: true,
-                        );
-                      },
-                    ),
+          builder: (context) {
+            return Positioned(
+              top: position.dy + size.height,
+              left: position.dx,
+              width: size.width,
+              child: Card(
+                elevation: 8,
+                margin: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                child: Container(
+                  constraints: const BoxConstraints(maxHeight: 300),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: jobTypes.length,
+                    itemBuilder: (context, index) {
+                      final jobType = jobTypes[index];
+                      return ListTile(
+                        title: Text(jobType.name),
+                        onTap: () async {
+                          final newSelection = Set<Schedule>.from(selectedJobTypes.value);
+                          newSelection.add(jobType);
+                          selectedJobTypes.value = newSelection;
+                          await onTap();
+                        },
+                        dense: true,
+                      );
+                    },
                   ),
                 ),
               ),
+            );
+          },
         );
         if (context.mounted) {
           Overlay.of(context).insert(jobTypeOverlayEntry.value!);
         }
       },
-      child: const Row(children: [Icon(IconlyLight.arrowDown2, size: 16)]),
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [Icon(IconlyLight.arrowDown2, size: 16)],
+      ),
     );
   }
 
@@ -1474,38 +1479,39 @@ class _MajorSelector extends StatelessWidget {
         final Size size = renderBox.size;
         final Offset position = renderBox.localToGlobal(Offset.zero);
         majorOverlayEntry.value = OverlayEntry(
-          builder:
-              (context) => Positioned(
-                top: position.dy + size.height,
-                left: position.dx,
-                width: size.width,
-                child: Card(
-                  elevation: 8,
-                  margin: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  child: Container(
-                    constraints: const BoxConstraints(maxHeight: 300),
-                    child: ListView.builder(
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      itemCount: majors.length,
-                      itemBuilder: (context, index) {
-                        final major = majors[index];
-                        return ListTile(
-                          title: Text(major.name),
-                          onTap: () async {
-                            final newSelection = Set<Major>.from(selectedMajors.value);
-                            newSelection.add(major);
-                            selectedMajors.value = newSelection;
-                            await onTap();
-                          },
-                          dense: true,
-                        );
-                      },
-                    ),
+          builder: (context) {
+            return Positioned(
+              top: position.dy + size.height,
+              left: position.dx,
+              width: size.width,
+              child: Card(
+                elevation: 8,
+                margin: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                child: Container(
+                  constraints: const BoxConstraints(maxHeight: 300),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: majors.length,
+                    itemBuilder: (context, index) {
+                      final major = majors[index];
+                      return ListTile(
+                        title: Text(major.name),
+                        onTap: () async {
+                          final newSelection = Set<Major>.from(selectedMajors.value);
+                          newSelection.add(major);
+                          selectedMajors.value = newSelection;
+                          await onTap();
+                        },
+                        dense: true,
+                      );
+                    },
                   ),
                 ),
               ),
+            );
+          },
         );
         if (context.mounted) {
           Overlay.of(context).insert(majorOverlayEntry.value!);
@@ -1604,38 +1610,39 @@ class _PositionDropdown extends StatelessWidget {
         final Size size = renderBox.size;
         final Offset position = renderBox.localToGlobal(Offset.zero);
         positionOverlayEntry.value = OverlayEntry(
-          builder:
-              (context) => Positioned(
-                top: position.dy + size.height,
-                left: position.dx,
-                width: size.width,
-                child: Card(
-                  elevation: 8,
-                  margin: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  child: Container(
-                    constraints: const BoxConstraints(maxHeight: 300),
-                    child: ListView.builder(
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      itemCount: positions.length,
-                      itemBuilder: (context, index) {
-                        final position = positions[index];
-                        return ListTile(
-                          title: Text(position.name),
-                          onTap: () async {
-                            final newSelection = Set<Position>.from(selectedPositions.value);
-                            newSelection.add(position);
-                            selectedPositions.value = newSelection;
-                            await onTap();
-                          },
-                          dense: true,
-                        );
-                      },
-                    ),
+          builder: (context) {
+            return Positioned(
+              top: position.dy + size.height,
+              left: position.dx,
+              width: size.width,
+              child: Card(
+                elevation: 8,
+                margin: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                child: Container(
+                  constraints: const BoxConstraints(maxHeight: 300),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: positions.length,
+                    itemBuilder: (context, index) {
+                      final position = positions[index];
+                      return ListTile(
+                        title: Text(position.name),
+                        onTap: () async {
+                          final newSelection = Set<Position>.from(selectedPositions.value);
+                          newSelection.add(position);
+                          selectedPositions.value = newSelection;
+                          await onTap();
+                        },
+                        dense: true,
+                      );
+                    },
                   ),
                 ),
               ),
+            );
+          },
         );
         if (context.mounted) {
           Overlay.of(context).insert(positionOverlayEntry.value!);

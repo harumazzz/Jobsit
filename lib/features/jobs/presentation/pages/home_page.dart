@@ -142,6 +142,12 @@ class _JobPage extends HookConsumerWidget {
       if (state is SearchJobsInitial) {
         await ref.read(searchJobsControllerProvider.notifier).searchJobs(page: page.value, limit: 10);
         page.value++;
+        final scheduleController = ref.read(scheduleControllerProvider.notifier);
+        final positionController = ref.read(positionControllerProvider.notifier);
+        final majorController = ref.read(majorControllerProvider.notifier);
+        await scheduleController.getSchedules();
+        await positionController.getPositions();
+        await majorController.getMajors();
       }
     });
 

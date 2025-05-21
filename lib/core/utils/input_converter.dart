@@ -97,7 +97,7 @@ class InputConverter extends Equatable {
   static String? validateFirstName(String? input, BuildContext context) {
     return FormBuilderValidators.compose([
       FormBuilderValidators.required(errorText: context.t.validation.required.firstName),
-      FormBuilderValidators.minLength(6, errorText: context.t.validation.length.firstName),
+      FormBuilderValidators.minLength(2, errorText: context.t.validation.length.firstName),
       FormBuilderValidators.maxLength(32, errorText: context.t.validation.length.firstName),
       FormBuilderValidators.match(RegExp(r'^(?!.*\s$)'), errorText: context.t.validation.format.noTrailingSpace),
     ])(input);
@@ -106,7 +106,7 @@ class InputConverter extends Equatable {
   static String? validateLastName(String? input, BuildContext context) {
     return FormBuilderValidators.compose([
       FormBuilderValidators.required(errorText: context.t.validation.required.lastName),
-      FormBuilderValidators.minLength(6, errorText: context.t.validation.length.lastName),
+      FormBuilderValidators.minLength(2, errorText: context.t.validation.length.lastName),
       FormBuilderValidators.maxLength(32, errorText: context.t.validation.length.lastName),
       FormBuilderValidators.match(RegExp(r'^(?!.*\s$)'), errorText: context.t.validation.format.noTrailingSpace),
     ])(input);
@@ -134,7 +134,7 @@ class InputConverter extends Equatable {
         if (value == null || value.isEmpty) {
           return null;
         }
-        if (!RegExp(r'^[a-zA-Z0-9_.\-/ ]+$').hasMatch(value)) {
+        if (value.contains('_') || value.contains('-') || value.contains('.') || value.contains('/')) {
           return context.t.validation.format.address;
         }
         if (value.endsWith(' ')) {
