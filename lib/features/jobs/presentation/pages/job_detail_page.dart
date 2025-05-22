@@ -31,6 +31,13 @@ class JobDetailPage extends HookConsumerWidget {
     final selectedTabIndex = useState(_JobTabType.description.index);
     final isBookmarkProcessing = useState(false);
 
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(jobDetailControllerProvider.notifier).getJobDetail(jobId: jobId);
+      });
+      return null;
+    }, [jobId]);
+
     return Scaffold(
       backgroundColor: const Color(0xFff5fafd),
       body: CustomScrollView(
@@ -139,12 +146,7 @@ class JobDetailPage extends HookConsumerWidget {
                                 job: job,
                                 relatedJobs: relatedJobs,
                                 onPressed: (job) async {
-                                  if (context.mounted) {
-                                    JobDetailRoute(id: job.id).pushReplacement(context);
-                                  }
-                                  await Future.delayed(const Duration(milliseconds: 100));
-                                  final jobDetailState = ref.read(jobDetailControllerProvider.notifier);
-                                  await jobDetailState.getJobDetail(jobId: job.id);
+                                  JobDetailRoute(id: job.id).pushReplacement(context);
                                 },
                               ),
                             ],

@@ -58,11 +58,11 @@ class SavedJobsPage extends HookWidget {
                     return PagedSliverList<int, Job>(
                       state: state,
                       fetchNextPage: () async {
-                        final controller = ref.read(searchJobsControllerProvider.notifier);
+                        final controller = ref.read(savedJobControllerProvider.notifier);
                         if (!jobState.finished) {
-                          await controller.searchJobs(page: page.value, limit: 10);
+                          await controller.getSavedJobs();
+                          page.value++;
                         }
-                        page.value++;
                       },
                       builderDelegate: PagedChildBuilderDelegate<Job>(
                         itemBuilder: (context, item, index) {
@@ -76,6 +76,9 @@ class SavedJobsPage extends HookWidget {
                               }
                             },
                           );
+                        },
+                        newPageProgressIndicatorBuilder: (context) {
+                          return const SizedBox.shrink();
                         },
                       ),
                     );
