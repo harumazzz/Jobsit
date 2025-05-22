@@ -49,7 +49,7 @@ class JobDetailPage extends HookConsumerWidget {
             builder: (context, ref, child) {
               final state = ref.watch(jobDetailControllerProvider);
               return switch (state) {
-                JobDetailLoading() => const SliverFillRemaining(child: Center(child: CircularProgressIndicator())),
+                JobDetailLoading() => const SliverToBoxAdapter(child: JobDetailShimmerCard()),
                 JobDetailError() => SliverFillRemaining(child: Center(child: Text(context.t.job.detailError))),
                 JobDetailInitial() => SliverFillRemaining(child: Center(child: Text(context.t.job.detailError))),
                 JobDetailLoaded(job: final job, relatedJobs: final relatedJobs) => SliverPadding(
@@ -139,11 +139,12 @@ class JobDetailPage extends HookConsumerWidget {
                                 job: job,
                                 relatedJobs: relatedJobs,
                                 onPressed: (job) async {
-                                  final jobDetailState = ref.read(jobDetailControllerProvider.notifier);
-                                  await jobDetailState.getJobDetail(jobId: job.id);
                                   if (context.mounted) {
                                     JobDetailRoute(id: job.id).pushReplacement(context);
                                   }
+                                  await Future.delayed(const Duration(milliseconds: 100));
+                                  final jobDetailState = ref.read(jobDetailControllerProvider.notifier);
+                                  await jobDetailState.getJobDetail(jobId: job.id);
                                 },
                               ),
                             ],
@@ -467,7 +468,7 @@ class _BookmarkButton extends StatelessWidget {
       builder: (context, ref, child) {
         final state = ref.watch(jobDetailControllerProvider);
         return switch (state) {
-          JobDetailLoading() => const Center(child: CircularProgressIndicator()),
+          JobDetailLoading() => const SizedBox(width: 30, height: 30),
           JobDetailError() => const SizedBox.shrink(),
           JobDetailInitial() => const SizedBox.shrink(),
           JobDetailLoaded(job: final job) => IconButton(
@@ -527,7 +528,7 @@ class _ApplyNavBar extends StatelessWidget {
           builder: (context, ref, child) {
             final state = ref.watch(jobDetailControllerProvider);
             return switch (state) {
-              JobDetailLoading() => const Center(child: CircularProgressIndicator()),
+              JobDetailLoading() => const JobDetailNavBarShimmer(),
               JobDetailError() => const SizedBox.shrink(),
               JobDetailInitial() => const SizedBox.shrink(),
               JobDetailLoaded() => ElevatedButton(
@@ -744,5 +745,208 @@ class _ApplyButton extends StatelessWidget {
     properties.add(IntProperty('jobId', jobId));
     properties.add(DiagnosticsProperty<ValueNotifier<FileSelectorResult?>>('file', file));
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller));
+  }
+}
+
+class JobDetailShimmerCard extends StatelessWidget {
+  const JobDetailShimmerCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDarkMode ? Colors.grey[700]! : Colors.grey[300]!;
+    final highlightColor = isDarkMode ? Colors.grey[600]! : Colors.grey[100]!;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Company Logo
+          Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Container(
+              alignment: Alignment.center,
+              width: 86.0,
+              height: 86.0,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.grey[400]!, width: 2.0),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16.0),
+
+          // Job Title
+          Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Container(
+              width: 200,
+              height: 24.0,
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
+            ),
+          ),
+          const SizedBox(height: 12.0),
+
+          // Company Name
+          Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Container(
+              width: 150,
+              height: 18.0,
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
+            ),
+          ),
+          const SizedBox(height: 12.0),
+
+          // Location
+          Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  width: 24.0,
+                  height: 24.0,
+                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                ),
+                const SizedBox(width: 4.0),
+                Container(
+                  width: 120,
+                  height: 16.0,
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12.0),
+
+          // Job Categories/Majors
+          Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                3,
+                (index) => Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                  padding: const EdgeInsets.all(5),
+                  width: 80,
+                  height: 30,
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24.0),
+
+          // Job Display Cards (Salary, Exp, etc.)
+          Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(3, (index) => _buildShimmerJobDisplayItem()),
+            ),
+          ),
+          const SizedBox(height: 24.0),
+
+          // Tab Indicators
+          Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                  width: 100,
+                  height: 40,
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                ),
+                Container(
+                  width: 100,
+                  height: 40,
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24.0),
+
+          // Content Area
+          Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Column(
+              children: List.generate(
+                5,
+                (index) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Container(
+                    width: double.infinity,
+                    height: 16.0,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerJobDisplayItem() {
+    return Column(
+      children: [
+        Container(width: 50, height: 50, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+        const SizedBox(height: 8.0),
+        Container(
+          width: 60,
+          height: 12,
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
+        ),
+        const SizedBox(height: 4.0),
+        Container(
+          width: 80,
+          height: 16,
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
+        ),
+      ],
+    );
+  }
+}
+
+class JobDetailNavBarShimmer extends StatelessWidget {
+  const JobDetailNavBarShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDarkMode ? Colors.grey[700]! : Colors.grey[300]!;
+    final highlightColor = isDarkMode ? Colors.grey[600]! : Colors.grey[100]!;
+
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+        child: Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            width: double.infinity,
+            height: 56.0,
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12.0)),
+          ),
+        ),
+      ),
+    );
   }
 }

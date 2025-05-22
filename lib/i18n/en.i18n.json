@@ -118,7 +118,12 @@
     "noPosition": "No position available",
     "noMajor": "No major available",
     "noType": "No schedules available",
-    "noCv": "No CV available"
+    "noCv": "No CV available",
+    "selectDateOfBirth": "Select date of birth",
+    "selectGender": "Select gender",
+    "selectCity": "Select city",
+    "selectDistrict": "Select district",
+    "selectUniversity": "Select university"
   },
   "job": {
     "saveSuccess": "Job saved successfully",
@@ -153,7 +158,10 @@
     "attachCV": "Attached CV",
     "jobPosition": "Job Position",
     "noJobDesire": "No job desired",
-    "noReferenceLetter": "No reference letter"
+    "noReferenceLetter": "No reference letter",
+    "noSavedJob": "No saved job available",
+    "noAppliedJob": "No applied job available",
+    "noJobFound": "No job found"
   },
   "validation": {
     "required": {
@@ -174,7 +182,9 @@
       "specialization": "Please select specialization",
       "workType": "Please select work type",
       "workLocation": "Please select work location",
-      "cv": "Please upload your CV"
+      "cv": "Please upload your CV",
+      "major": "Please select major",
+      "dateOfBirth": "Please select date of birth"
     },
     "length": {
       "firstName": "First name must be between 2 and 32 characters",
@@ -186,7 +196,8 @@
       "password": "Password must be between 6 and 32 characters",
       "phone": "Phone number must be between 8 and 13 characters",
       "address": "Address must be between 8 and 255 characters",
-      "desiredJob": "Desired job must be between 8 and 255 characters"
+      "desiredJob": "Desired job must be between 8 and 255 characters",
+      "dateOfBirth": "Date of birth must not be in the future"
     },
     "format": {
       "email": "Invalid email address",

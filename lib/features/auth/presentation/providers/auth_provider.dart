@@ -188,6 +188,10 @@ class AuthController extends _$AuthController {
     }
   }
 
+  void reset() {
+    state = const AuthState.initial();
+  }
+
   Future<void> getCandidateData(int userId) async {
     assert(state is AuthInitial, 'State must be initialized to get candidate data');
     try {

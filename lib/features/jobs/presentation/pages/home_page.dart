@@ -225,6 +225,13 @@ class _JobPage extends HookConsumerWidget {
                       child: Center(child: Text(jobState.message, style: Theme.of(context).textTheme.bodyLarge)),
                     );
                   case SearchJobsLoaded():
+                    if (jobState.jobs.isEmpty) {
+                      return SliverFillRemaining(
+                        child: Center(
+                          child: Text(context.t.job.noJobFound, style: Theme.of(context).textTheme.bodyLarge),
+                        ),
+                      );
+                    }
                     final state = PagingState<int, Job>(
                       pages: [jobState.jobs],
                       keys: const [0],

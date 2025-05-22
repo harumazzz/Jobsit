@@ -43,6 +43,13 @@ class SavedJobsPage extends HookWidget {
                   case SavedJobError():
                     return const SliverToBoxAdapter(child: SizedBox.shrink());
                   case SavedJobLoaded():
+                    if (jobState.jobs.isEmpty) {
+                      return SliverFillRemaining(
+                        child: Center(
+                          child: Text(context.t.job.noSavedJob, style: Theme.of(context).textTheme.bodyLarge),
+                        ),
+                      );
+                    }
                     final state = PagingState<int, Job>(
                       pages: [jobState.jobs.values.toList()],
                       keys: const [0],
@@ -52,19 +59,8 @@ class SavedJobsPage extends HookWidget {
                       state: state,
                       fetchNextPage: () async {
                         final controller = ref.read(searchJobsControllerProvider.notifier);
-                        if (ref.read(jobFilterControllerProvider.notifier).isEmpty) {
+                        if (!jobState.finished) {
                           await controller.searchJobs(page: page.value, limit: 10);
-                        } else {
-                          final jobFilterState = ref.read(jobFilterControllerProvider) as JobFilterOnSearch;
-                          await controller.filterJobs(
-                            page: page.value,
-                            limit: 10,
-                            city: jobFilterState.city,
-                            schedules: jobFilterState.schedulesList,
-                            positions: jobFilterState.positionsList,
-                            majors: jobFilterState.majorsList,
-                            title: jobFilterState.title,
-                          );
                         }
                         page.value++;
                       },

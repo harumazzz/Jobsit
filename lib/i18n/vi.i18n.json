@@ -118,7 +118,12 @@
     "noPosition": "Không có vị trí nào",
     "noMajor": "Không có chuyên ngành nào",
     "noType": "Không có loại công việc nào",
-    "noCv": "Không có CV nào"
+    "noCv": "Không có CV nào",
+    "selectDateOfBirth": "Chọn ngày sinh",
+    "selectGender": "Chọn giới tính",
+    "selectCity": "Chọn thành phố",
+    "selectDistrict": "Chọn quận",
+    "selectUniversity": "Chọn trường đại học"
   },
   "job": {
     "saveSuccess": "Lưu việc làm thành công!",
@@ -153,7 +158,10 @@
     "attachCV": "Đính kèm CV",
     "jobPosition": "Vị trí công việc",
     "noJobDesire": "Không có công việc mong muốn",
-    "noReferenceLetter": "Không có thư giới thiệu"
+    "noReferenceLetter": "Không có thư giới thiệu",
+    "noSavedJob": "Không có công việc nào đã lưu",
+    "noAppliedJob": "Không có công việc nào đã ứng tuyển",
+    "noJobFound": "Không tìm thấy công việc"
   },
   "validation": {
     "required": {
@@ -174,7 +182,9 @@
       "specialization": "Vui lòng chọn chuyên ngành",
       "workType": "Vui lòng chọn hình thức làm việc",
       "workLocation": "Vui lòng chọn địa điểm làm việc",
-      "cv": "Vui lòng tải lên CV đính kèm"
+      "cv": "Vui lòng tải lên CV đính kèm",
+      "major": "Vui lòng chọn chuyên ngành",
+      "dateOfBirth": "Vui lòng chọn ngày sinh"
     },
     "length": {
       "firstName": "Họ và tên lót phải có độ dài từ 2 đến 32 ký tự",
@@ -186,7 +196,8 @@
       "password": "Mật khẩu phải có độ dài từ 6 đến 32 ký tự",
       "phone": "Số điện thoại phải có độ dài từ 8 đến 13 ký tự",
       "address": "Địa chỉ nơi ở phải có độ dài từ 8 đến 255 ký tự",
-      "desiredJob": "Công việc mong muốn phải có độ dài từ 8 đến 255 ký tự"
+      "desiredJob": "Công việc mong muốn phải có độ dài từ 8 đến 255 ký tự",
+      "dateOfBirth": "Ngày sinh không hợp lệ"
     },
     "format": {
       "email": "Địa chỉ email không đúng",

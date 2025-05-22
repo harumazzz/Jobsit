@@ -16,13 +16,7 @@ class NotificationService {
     required IconData iconData,
   }) async {
     ElegantNotification(
-      description: Flexible(
-        child: Text(
-          message,
-          style: TextStyle(color: accentColor, fontWeight: FontWeight.w500),
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
+      description: Text(message, style: TextStyle(color: accentColor, fontWeight: FontWeight.w500)),
       icon: _CustomIcon(iconData: iconData, iconColor: Colors.white, lineColor: accentColor),
       background: backgroundColor,
       progressIndicatorColor: accentColor,

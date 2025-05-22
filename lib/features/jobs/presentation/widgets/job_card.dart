@@ -146,10 +146,6 @@ class _BookmarkButton extends StatelessWidget {
     return IconButton(
       tooltip: context.t.common.save,
       onPressed: () async {
-        if (isBookmarkProcessing.value) {
-          return;
-        }
-        isBookmarkProcessing.value = true;
         await Future.delayed(const Duration(milliseconds: 100));
         try {
           if (ref.read(savedJobControllerProvider.notifier).contains(job.id)) {
@@ -168,7 +164,9 @@ class _BookmarkButton extends StatelessWidget {
             NotificationService.error(context: context, message: context.t.job.saveError);
           }
         } finally {
-          isBookmarkProcessing.value = false;
+          if (context.mounted) {
+            isBookmarkProcessing.value = false;
+          }
         }
       },
       icon: Icon(

@@ -12,10 +12,8 @@ import '../../../../core/network/api_constant.dart';
 import '../../../../core/services/file_service.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../core/services/notification_service.dart';
-import '../../../../core/services/shared_prefs_service.dart';
 import '../../../../core/utils/input_converter.dart';
 import '../../../../i18n/strings.g.dart';
-import '../../../../injection_container.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../auth/domain/entities/user.dart' show University;
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -191,6 +189,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   controller: emailController,
                   focusNode: emailFocusNode,
                   keyboardType: TextInputType.emailAddress,
+                  readOnly: true,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
@@ -212,11 +211,24 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                   focusNode: dateFocusNode,
                   initialValue: selectedDate.value,
                   inputType: InputType.date,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                    suffixIcon: Icon(IconlyLight.calendar),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                    suffixIcon: Tooltip(
+                      message: context.t.profile.selectDateOfBirth,
+                      child: const Icon(IconlyLight.calendar),
+                    ),
                   ),
+                  format: DateFormat('dd/MM/yyyy'),
+                  validator: (value) {
+                    if (value == null) {
+                      return context.t.validation.required.dateOfBirth;
+                    }
+                    if (value.isAfter(DateTime.now())) {
+                      return context.t.validation.length.dateOfBirth;
+                    }
+                    return null;
+                  },
                   onChanged: (value) async => selectedDate.value = value,
                   onFieldSubmitted: (_) async {
                     dateFocusNode.unfocus();
@@ -325,6 +337,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
             FocusScope.of(context).unfocus();
             if (formKey.currentState!.validate()) {
               formKey.currentState!.save();
+              final userId = (ref.read(authControllerProvider) as AuthAuthorized).user.userId;
               await ref
                   .read(authControllerProvider.notifier)
                   .updateUserInfo(
@@ -339,7 +352,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                     district: selectedDistrict.value!.name,
                     university: selectedUniversity.value!,
                   );
-              final userId = await InjectionContainer.get<IAuthStorageService>().getUserId();
+              ref.read(authControllerProvider.notifier).reset();
               await ref.read(authControllerProvider.notifier).getCandidateData(userId!);
               if (context.mounted) {
                 NotificationService.success(context: context, message: context.t.profile.updateSuccess);
@@ -393,13 +406,30 @@ class _UniversitiesDropdown extends StatelessWidget {
               validator: (value) => null,
               builder: (FormFieldState<dynamic> field) {
                 return InputDecorator(
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                    suffixIcon: Tooltip(
+                      message: context.t.profile.selectUniversity,
+                      child: IconButton(
+                        icon: const Icon(IconlyLight.arrowDown2),
+                        onPressed: () async {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                      ),
+                    ),
                   ),
                   child: GestureDetector(
                     onTap: () async {
-                      controller.open();
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
                     },
                     child: Text(
                       selectedUniversity.value != null
@@ -481,11 +511,28 @@ class _DistrictsDropdown extends StatelessWidget {
                     border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
                     contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     enabled: isEnabled,
+                    suffixIcon: Tooltip(
+                      message: context.t.profile.selectDistrict,
+                      child: IconButton(
+                        icon: const Icon(IconlyLight.arrowDown2),
+                        onPressed: () async {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                      ),
+                    ),
                   ),
                   child: GestureDetector(
                     onTap: () async {
                       if (isEnabled) {
-                        controller.open();
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
                       }
                     },
                     child: Text(displayText, style: isEnabled ? null : const TextStyle(color: Colors.grey)),
@@ -563,13 +610,30 @@ class _CitiesDropdown extends StatelessWidget {
               validator: (value) => null,
               builder: (FormFieldState<dynamic> field) {
                 return InputDecorator(
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                    suffixIcon: Tooltip(
+                      message: context.t.profile.selectCity,
+                      child: IconButton(
+                        icon: const Icon(IconlyLight.arrowDown2),
+                        onPressed: () async {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                      ),
+                    ),
                   ),
                   child: GestureDetector(
                     onTap: () async {
-                      controller.open();
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
                     },
                     child: Text(selectedCity.value != null ? selectedCity.value!.name : context.t.auth.selectCity),
                   ),
@@ -647,13 +711,30 @@ class _GenderDropdown extends StatelessWidget {
               validator: (value) => null,
               builder: (FormFieldState<dynamic> field) {
                 return InputDecorator(
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                    suffixIcon: Tooltip(
+                      message: context.t.profile.selectGender,
+                      child: IconButton(
+                        icon: const Icon(IconlyLight.arrowDown2),
+                        onPressed: () async {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                      ),
+                    ),
                   ),
                   child: GestureDetector(
                     onTap: () async {
-                      controller.open();
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
                     },
                     child: Text(selectedGender.value),
                   ),
@@ -1158,13 +1239,25 @@ class JobInfoEditPage extends HookConsumerWidget {
             if (context.mounted) {
               FocusScope.of(context).unfocus();
             }
+            if (selectedPositions.value.isEmpty && context.mounted) {
+              NotificationService.error(context: context, message: context.t.validation.required.jobPosition);
+              return;
+            }
+            if (selectedMajors.value.isEmpty && context.mounted) {
+              NotificationService.error(context: context, message: context.t.validation.required.major);
+              return;
+            }
+            if (selectedJobTypes.value.isEmpty && context.mounted) {
+              NotificationService.error(context: context, message: context.t.validation.required.workType);
+              return;
+            }
+            if (cv.value == null && currentState.user.jobInfo.cv == null && context.mounted) {
+              NotificationService.error(context: context, message: context.t.job.uploadCV);
+              return;
+            }
             if (formKey.currentState!.validate()) {
               formKey.currentState!.save();
-              final currentState = ref.read(authControllerProvider) as AuthAuthorized;
-              if (cv.value == null && currentState.user.jobInfo.cv == null && context.mounted) {
-                NotificationService.error(context: context, message: context.t.job.uploadCV);
-                return;
-              }
+              final userId = (ref.read(authControllerProvider) as AuthAuthorized).user.userId;
               await ref
                   .read(authControllerProvider.notifier)
                   .updateJobInfo(
@@ -1176,8 +1269,8 @@ class JobInfoEditPage extends HookConsumerWidget {
                     desiredWorkingProvince: selectedCity.value!.name,
                     schedules: selectedJobTypes.value.map((e) => e.toAuth()).toList(),
                   );
-              final userId = await InjectionContainer.get<IAuthStorageService>().getUserId();
-              await ref.read(authControllerProvider.notifier).getCandidateData(userId!);
+              ref.read(authControllerProvider.notifier).reset();
+              await ref.read(authControllerProvider.notifier).getCandidateData(userId);
               if (context.mounted) {
                 NotificationService.success(context: context, message: context.t.profile.updateSuccess);
                 context.pop();

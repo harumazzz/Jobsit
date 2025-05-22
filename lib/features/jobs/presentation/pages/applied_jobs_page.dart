@@ -53,6 +53,13 @@ class AppliedJobsPage extends HookConsumerWidget {
                       ),
                     );
                   case ApplyJobLoaded():
+                    if (jobState.jobs.isEmpty) {
+                      return SliverFillRemaining(
+                        child: Center(
+                          child: Text(context.t.job.noAppliedJob, style: Theme.of(context).textTheme.bodyLarge),
+                        ),
+                      );
+                    }
                     final state = PagingState<int, Job>(
                       pages: [jobState.jobs],
                       keys: const [0],

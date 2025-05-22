@@ -26,6 +26,8 @@ class ProfilePage extends HookConsumerWidget {
     final emailNotification = useState(state.user.userInfo.mailReceive);
     final isSearchableLoading = useState(false);
     final isMailReceiveLoading = useState(false);
+    final isSelectedJobEdit = useState(false);
+    final isSelectedProfileEdit = useState(false);
     return CustomScrollView(
       slivers: [
         SliverAppBar(
@@ -134,11 +136,16 @@ class ProfilePage extends HookConsumerWidget {
                 IconButton(
                   tooltip: context.t.common.edit,
                   onPressed: () async {
+                    if (isSelectedProfileEdit.value) {
+                      return;
+                    }
+                    isSelectedProfileEdit.value = true;
                     await ref.read(citiesControllerProvider.notifier).fetchCities();
                     await ref.read(universityControllerProvider.notifier).getUniversities();
                     if (context.mounted) {
                       await const EditProfileRoute().push(context);
                     }
+                    isSelectedProfileEdit.value = false;
                   },
                   icon: Icon(IconlyLight.editSquare, size: 24.0, color: Theme.of(context).colorScheme.primary),
                 ),
@@ -174,10 +181,15 @@ class ProfilePage extends HookConsumerWidget {
                 IconButton(
                   tooltip: context.t.common.edit,
                   onPressed: () async {
+                    if (isSelectedJobEdit.value) {
+                      return;
+                    }
+                    isSelectedJobEdit.value = true;
                     await ref.read(citiesControllerProvider.notifier).fetchCities();
                     if (context.mounted) {
                       await const EditJobRoute().push(context);
                     }
+                    isSelectedJobEdit.value = false;
                   },
                   icon: Icon(IconlyLight.editSquare, size: 24.0, color: Theme.of(context).colorScheme.primary),
                 ),
