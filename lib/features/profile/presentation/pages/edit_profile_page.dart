@@ -12,8 +12,10 @@ import '../../../../core/network/api_constant.dart';
 import '../../../../core/services/file_service.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/shared_prefs_service.dart';
 import '../../../../core/utils/input_converter.dart';
 import '../../../../i18n/strings.g.dart';
+import '../../../../injection_container.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../auth/domain/entities/user.dart' show University;
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -337,6 +339,8 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                     district: selectedDistrict.value!.name,
                     university: selectedUniversity.value!,
                   );
+              final userId = await InjectionContainer.get<IAuthStorageService>().getUserId();
+              await ref.read(authControllerProvider.notifier).getCandidateData(userId!);
               if (context.mounted) {
                 NotificationService.success(context: context, message: context.t.profile.updateSuccess);
                 context.pop();
@@ -1172,6 +1176,8 @@ class JobInfoEditPage extends HookConsumerWidget {
                     desiredWorkingProvince: selectedCity.value!.name,
                     schedules: selectedJobTypes.value.map((e) => e.toAuth()).toList(),
                   );
+              final userId = await InjectionContainer.get<IAuthStorageService>().getUserId();
+              await ref.read(authControllerProvider.notifier).getCandidateData(userId!);
               if (context.mounted) {
                 NotificationService.success(context: context, message: context.t.profile.updateSuccess);
                 context.pop();
