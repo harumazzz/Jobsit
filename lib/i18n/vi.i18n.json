@@ -161,7 +161,8 @@
     "noReferenceLetter": "Không có thư xin việc",
     "noSavedJob": "Không có công việc nào đã lưu",
     "noAppliedJob": "Không có công việc nào đã ứng tuyển",
-    "noJobFound": "Không tìm thấy công việc"
+    "noJobFound": "Không tìm thấy công việc",
+    "jobDetail": "Chi tiết công việc"
   },
   "validation": {
     "required": {

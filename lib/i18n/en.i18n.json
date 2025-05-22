@@ -161,7 +161,8 @@
     "noReferenceLetter": "No reference letter",
     "noSavedJob": "No saved job available",
     "noAppliedJob": "No applied job available",
-    "noJobFound": "No job found"
+    "noJobFound": "No job found",
+    "jobDetail": "Job Detail"
   },
   "validation": {
     "required": {

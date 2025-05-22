@@ -4,8 +4,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'cache_interceptor.g.dart';
 
+/// Provides a [DioCacheInterceptor] instance.
+///
+/// This interceptor is configured to cache responses in memory
+/// ([MemCacheStore]). It will serve cached data on 500 errors and
+/// network failures. Cached data is considered fresh for up to 7 days.
 @riverpod
-DioCacheInterceptor cacheInterceptor(Ref ref) {
+DioCacheInterceptor cacheInterceptor(final Ref ref) {
   final cacheOption = CacheOptions(
     store: MemCacheStore(),
     hitCacheOnErrorCodes: const [500],

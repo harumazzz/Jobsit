@@ -59,6 +59,7 @@ dev_dependencies:
   injectable_generator: ^2.7.0
   go_router_builder: ^2.8.2
   slang_build_runner: ^4.7.0
+  very_good_analysis: ^7.0.0
 flutter:
   uses-material-design: true
   assets:

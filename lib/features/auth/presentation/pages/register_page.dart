@@ -11,7 +11,14 @@ import '../../../../shared/widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
 
+/// The registration page for new users.
+///
+/// Allows users to create a new account by providing their first name,
+/// last name, email, password, and phone number. It includes form validation
+/// and navigation to OTP verification upon successful registration.
+/// Also provides options for social registration.
 class RegisterPage extends ConsumerStatefulWidget {
+  /// Creates a [RegisterPage].
   const RegisterPage({super.key});
 
   @override
@@ -71,15 +78,24 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final state = ref.watch(authControllerProvider);
-    ref.listen<AuthState>(authControllerProvider, (previous, next) async {
+    ref.listen<AuthState>(authControllerProvider, (
+      final previous,
+      final next,
+    ) async {
       switch (next) {
         case AuthError _:
-          NotificationService.error(context: context, message: context.t.registration.emailExists);
+          NotificationService.error(
+            context: context,
+            message: context.t.registration.emailExists,
+          );
           break;
         case AuthRegistered _:
-          NotificationService.success(context: context, message: context.t.registration.success);
+          NotificationService.success(
+            context: context,
+            message: context.t.registration.success,
+          );
           OtpVerificationRoute(email: _emailController.text).go(context);
           break;
         default:
@@ -90,29 +106,41 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFefeff0),
       appBar: AppBar(
-        title: Text(context.t.auth.register, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          context.t.auth.register,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         backgroundColor: const Color(0xFFefeff0),
       ),
       body: FormBuilder(
         key: _formKey,
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 20.0),
+                const SizedBox(height: 20),
                 FormBuilderTextField(
                   name: 'first_name',
                   keyboardType: TextInputType.name,
                   controller: _firstNameController,
                   decoration: InputDecoration(
-                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
                     labelText: context.t.auth.firstName,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 15,
+                      horizontal: 20,
+                    ),
                   ),
-                  validator: (value) => InputConverter.validateFirstName(value, context),
+                  validator:
+                      (final value) => InputConverter.validateFirstName(
+                        value,
+                        context,
+                      ),
                   focusNode: _firstNameFocusNode,
                   onSubmitted: (_) async {
                     if (_firstNameFocusNode.hasFocus) {
@@ -121,17 +149,26 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     FocusScope.of(context).requestFocus(_lastNameFocusNode);
                   },
                 ),
-                const SizedBox(height: 20.0),
+                const SizedBox(height: 20),
                 FormBuilderTextField(
                   name: 'last_name',
                   keyboardType: TextInputType.name,
                   controller: _lastNameController,
                   decoration: InputDecoration(
-                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
                     labelText: context.t.auth.lastName,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 15,
+                      horizontal: 20,
+                    ),
                   ),
-                  validator: (value) => InputConverter.validateLastName(value, context),
+                  validator:
+                      (final value) => InputConverter.validateLastName(
+                        value,
+                        context,
+                      ),
                   focusNode: _lastNameFocusNode,
                   onSubmitted: (_) async {
                     if (_lastNameFocusNode.hasFocus) {
@@ -140,68 +177,86 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     FocusScope.of(context).requestFocus(_emailFocusNode);
                   },
                 ),
-                const SizedBox(height: 20.0),
+                const SizedBox(height: 20),
                 RegisterEmailTextField(
                   controller: _emailController,
                   focusNode: _emailFocusNode,
-                  onFieldSubmitted: (value) {
+                  onFieldSubmitted: (final value) {
                     if (_emailFocusNode.hasFocus) {
                       _emailFocusNode.unfocus();
                     }
                     FocusScope.of(context).requestFocus(_passwordFocusNode);
                   },
                 ),
-                const SizedBox(height: 20.0),
+                const SizedBox(height: 20),
                 AuthTextField(
                   name: 'password',
                   keyboardType: TextInputType.visiblePassword,
                   focusNode: _passwordFocusNode,
                   controller: _passwordController,
                   label: context.t.auth.password,
-                  validator: (value) => InputConverter.validatePassword(value, context),
-                  onFieldSubmitted: (value) {
+                  validator:
+                      (final value) => InputConverter.validatePassword(
+                        value,
+                        context,
+                      ),
+                  onFieldSubmitted: (final value) {
                     if (_passwordFocusNode.hasFocus) {
                       _passwordFocusNode.unfocus();
                     }
-                    FocusScope.of(context).requestFocus(_confirmPasswordFocusNode);
+                    FocusScope.of(context).requestFocus(
+                      _confirmPasswordFocusNode,
+                    );
                   },
                 ),
-                const SizedBox(height: 20.0),
+                const SizedBox(height: 20),
                 AuthTextField(
                   name: 'confirm_password',
                   controller: _confirmPasswordController,
-                  validator: (value) {
-                    return InputConverter.validateConfirmPassword(value, context, _passwordController.text);
-                  },
+                  validator:
+                      (final value) => InputConverter.validateConfirmPassword(
+                        value,
+                        context,
+                        _passwordController.text,
+                      ),
                   label: context.t.auth.confirmPassword,
                   focusNode: _confirmPasswordFocusNode,
                   keyboardType: TextInputType.visiblePassword,
-                  onFieldSubmitted: (value) {
+                  onFieldSubmitted: (final value) {
                     if (_confirmPasswordFocusNode.hasFocus) {
                       _confirmPasswordFocusNode.unfocus();
                     }
                     FocusScope.of(context).requestFocus(_phoneFocusNode);
                   },
                 ),
-                const SizedBox(height: 20.0),
+                const SizedBox(height: 20),
                 FormBuilderTextField(
                   name: 'phone',
                   controller: _phoneController,
                   focusNode: _phoneFocusNode,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
-                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
                     labelText: context.t.auth.phone,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 15,
+                      horizontal: 20,
+                    ),
                   ),
-                  validator: (value) => InputConverter.validatePhone(value, context),
+                  validator:
+                      (final value) => InputConverter.validatePhone(
+                        value,
+                        context,
+                      ),
                   onSubmitted: (_) async {
                     if (_phoneFocusNode.hasFocus) {
                       _phoneFocusNode.unfocus();
                     }
                   },
                 ),
-                const SizedBox(height: 20.0),
+                const SizedBox(height: 20),
                 Text.rich(
                   textAlign: TextAlign.center,
                   TextSpan(
@@ -220,7 +275,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20.0),
+                const SizedBox(height: 20),
                 switch (state) {
                   AuthLoading() => const CircularProgressIndicator(),
                   _ => SizedBox(
@@ -243,9 +298,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     ),
                   ),
                 },
-                const SizedBox(height: 20.0),
+                const SizedBox(height: 20),
                 Text(context.t.auth.orContinueWith),
-                const SizedBox(height: 12.0),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -253,24 +308,27 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.red,
                         shape: const CircleBorder(),
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8),
                       ),
-                      icon: SvgPicture.asset('assets/images/icon_google.svg', height: 36.0),
+                      icon: SvgPicture.asset('assets/images/icon_google.svg', height: 36),
                       onPressed: () async {
                         // TODO(self): Implement Google registration
                       },
                     ),
-                    const SizedBox(width: 20.0),
+                    const SizedBox(width: 20),
                     IconButton(
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.blue,
                         shape: const CircleBorder(),
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8),
                       ),
                       icon: SvgPicture.asset(
                         'assets/images/icon_facebook.svg',
-                        height: 36.0,
-                        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                        height: 36,
+                        colorFilter: const ColorFilter.mode(
+                          Colors.white,
+                          BlendMode.srcIn,
+                        ),
                       ),
                       onPressed: () async {
                         // TODO(self): Implement Facebook registration
@@ -285,7 +343,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       ),
       bottomNavigationBar: SafeArea(
         child: Container(
-          margin: const EdgeInsets.only(bottom: 30.0),
+          margin: const EdgeInsets.only(bottom: 30),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -295,7 +353,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 highlightColor: Colors.transparent,
                 hoverColor: Colors.transparent,
                 onTap: () async => const LoginRoute().go(context),
-                child: Text(' ${context.t.auth.login}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(
+                  ' ${context.t.auth.login}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),

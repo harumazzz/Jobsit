@@ -4,29 +4,45 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 
+/// A utility class for displaying styled notifications (toasts).
+///
+/// This class provides static methods to show success, error, and info
+/// notifications using the `ElegantNotification` package. It is not
+/// meant to be instantiated.
 class NotificationService {
+  /// Private constructor to prevent instantiation.
   const NotificationService._();
 
-  static void _showNotification({
-    required BuildContext context,
-    required String message,
-    required NotificationType notificationType,
-    required Color backgroundColor,
-    required Color accentColor,
-    required IconData iconData,
+  /// Displays an `ElegantNotification` with the specified parameters.
+  ///
+  /// This is a private helper method used by the public static methods.
+  static Future<void> _showNotification({
+    required final BuildContext context,
+    required final String message,
+    required final NotificationType notificationType,
+    required final Color backgroundColor,
+    required final Color accentColor,
+    required final IconData iconData,
   }) async {
     ElegantNotification(
-      description: Text(message, style: TextStyle(color: accentColor, fontWeight: FontWeight.w500)),
-      icon: _CustomIcon(iconData: iconData, iconColor: Colors.white, lineColor: accentColor),
+      description: Text(
+        message,
+        style: TextStyle(color: accentColor, fontWeight: FontWeight.w500),
+      ),
+      icon: _CustomIcon(
+        iconData: iconData,
+        iconColor: Colors.white,
+        lineColor: accentColor,
+      ),
       background: backgroundColor,
       progressIndicatorColor: accentColor,
       progressIndicatorBackground: backgroundColor,
-      borderRadius: BorderRadius.circular(16.0),
+      borderRadius: BorderRadius.circular(16),
       toastDuration: const Duration(seconds: 5),
       border: Border.all(color: accentColor),
       closeButton:
-          (onDismiss) => IconButton(
-            padding: const EdgeInsets.only(right: 8.0),
+          (final onDismiss) => IconButton(
+            padding: const EdgeInsets.only(right: 8),
             constraints: const BoxConstraints(),
             icon: Icon(Icons.close_outlined, color: accentColor, size: 20),
             onPressed: onDismiss,
@@ -36,7 +52,14 @@ class NotificationService {
     ).show(context);
   }
 
-  static void success({required BuildContext context, required String message}) {
+  /// Shows a success notification.
+  ///
+  /// [context] The build context.
+  /// [message] The message to display.
+  static void success({
+    required final BuildContext context,
+    required final String message,
+  }) {
     _showNotification(
       context: context,
       message: message,
@@ -47,7 +70,14 @@ class NotificationService {
     );
   }
 
-  static void error({required BuildContext context, required String message}) {
+  /// Shows an error notification.
+  ///
+  /// [context] The build context.
+  /// [message] The message to display.
+  static void error({
+    required final BuildContext context,
+    required final String message,
+  }) {
     _showNotification(
       context: context,
       message: message,
@@ -58,7 +88,14 @@ class NotificationService {
     );
   }
 
-  static void info({required BuildContext context, required String message}) {
+  /// Shows an informational notification.
+  ///
+  /// [context] The build context.
+  /// [message] The message to display.
+  static void info({
+    required final BuildContext context,
+    required final String message,
+  }) {
     _showNotification(
       context: context,
       message: message,
@@ -70,25 +107,48 @@ class NotificationService {
   }
 }
 
+/// A custom icon widget used within the `ElegantNotification`.
+///
+/// Displays a circular avatar with an icon, styled with a specific
+/// background color for the circle (lineColor) and icon color.
 class _CustomIcon extends StatelessWidget {
-  const _CustomIcon({required this.iconData, required this.iconColor, required this.lineColor});
+  /// Creates a [_CustomIcon].
+  ///
+  /// [iconData] The icon to display.
+  /// [iconColor] The color of the icon.
+  /// [lineColor] The background color of the circle surrounding the icon.
+  const _CustomIcon({
+    required this.iconData,
+    required this.iconColor,
+    required this.lineColor,
+  });
 
+  /// The icon to be displayed.
   final IconData iconData;
 
+  /// The color of the [iconData].
   final Color iconColor;
 
+  /// The background color of the circular avatar.
   final Color lineColor;
 
   @override
-  Widget build(BuildContext context) {
-    return CircleAvatar(backgroundColor: lineColor, radius: 20.0, child: Icon(iconData, color: iconColor, size: 20.0));
-  }
+  Widget build(final BuildContext context) => CircleAvatar(
+    backgroundColor: lineColor,
+    radius: 20,
+    child: Icon(
+      iconData,
+      color: iconColor,
+      size: 20,
+    ),
+  );
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<IconData>('iconData', iconData));
-    properties.add(ColorProperty('iconColor', iconColor));
-    properties.add(ColorProperty('lineColor', lineColor));
+    properties
+      ..add(DiagnosticsProperty<IconData>('iconData', iconData))
+      ..add(ColorProperty('iconColor', iconColor))
+      ..add(ColorProperty('lineColor', lineColor));
   }
 }
