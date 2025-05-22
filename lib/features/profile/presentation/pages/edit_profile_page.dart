@@ -97,9 +97,6 @@ class PersonalInfoEditPage extends HookConsumerWidget {
         }
       }
     });
-    if (selectedCity.value != null && ref.watch(districtsControllerProvider) is! DistrictsLoaded) {
-      return Scaffold(body: Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)));
-    }
     final selectedDate = useState<DateTime?>(
       currentState.user.userInfo.birthDate != null
           ? DateFormat('dd-MM-yyyy').parse(currentState.user.userInfo.birthDate!)

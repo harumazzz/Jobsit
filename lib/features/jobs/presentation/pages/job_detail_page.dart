@@ -778,8 +778,6 @@ class JobDetailShimmerCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16.0),
-
-          // Job Title
           Shimmer.fromColors(
             baseColor: baseColor,
             highlightColor: highlightColor,
@@ -790,8 +788,6 @@ class JobDetailShimmerCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12.0),
-
-          // Company Name
           Shimmer.fromColors(
             baseColor: baseColor,
             highlightColor: highlightColor,
@@ -802,8 +798,6 @@ class JobDetailShimmerCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12.0),
-
-          // Location
           Shimmer.fromColors(
             baseColor: baseColor,
             highlightColor: highlightColor,
@@ -826,8 +820,6 @@ class JobDetailShimmerCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12.0),
-
-          // Job Categories/Majors
           Shimmer.fromColors(
             baseColor: baseColor,
             highlightColor: highlightColor,
