@@ -1,6 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../i18n/strings.g.dart';
+
 /// Interface for a secure storage service.
 ///
 /// Provides methods to read, write, and delete data securely.
@@ -178,5 +180,51 @@ abstract class StorageModule {
       aOptions: androidOption,
       iOptions: iosOption,
     );
+  }
+}
+
+/// Service for managing application locale preferences.
+///
+/// This service provides methods to save and retrieve the user's preferred
+/// using secure storage, allowing the app to remember language preferences
+/// between sessions.
+@lazySingleton
+class LocaleService {
+  /// Creates a new instance of [LocaleService].
+  ///
+  /// The storage dependency is injected and used for
+  /// persistent storage of locale preferences.
+  const LocaleService(this._secureStorageService);
+
+  final ISecureStorageService _secureStorageService;
+  static const String _localeKey = 'app_locale';
+
+  /// Saves the current locale to secure storage.
+  ///
+  /// This persists the user's language preference between app sessions.
+  Future<void> saveLocale(final AppLocale locale) async {
+    await _secureStorageService.write(_localeKey, locale.languageCode);
+  }
+
+  /// Loads the saved locale from secure storage.
+  ///
+  /// Returns null if no locale has been saved previously.
+  Future<AppLocale?> getSavedLocale() async {
+    final String? savedLocaleCode = await _secureStorageService.read(
+      _localeKey,
+    );
+    if (savedLocaleCode == null) {
+      return null;
+    }
+
+    return AppLocale.values.firstWhere(
+      (final locale) => locale.languageCode == savedLocaleCode,
+      orElse: () => AppLocale.en,
+    );
+  }
+
+  /// Clears the saved locale from secure storage.
+  Future<void> clearSavedLocale() async {
+    await _secureStorageService.delete(_localeKey);
   }
 }

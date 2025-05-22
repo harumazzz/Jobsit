@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../core/services/file_service.dart';
-import '../../../auth/data/models/user_model.dart' as auth_user_model; // aliased
+import '../../../auth/data/models/user_model.dart';
 import '../../domain/entities/job.dart';
 
 part 'job_model.freezed.dart';
@@ -372,7 +372,7 @@ sealed class AppliedJobResponse with _$AppliedJobResponse {
     required final int id, // ID of the application record
     @JsonKey(name: 'jobDTO') required final JobResponse job,
     // ignore: lines_longer_than_80_chars
-    @JsonKey(name: 'candidateDTO') required final auth_user_model.GetUserResponse candidate,
+    @JsonKey(name: 'candidateDTO') required final GetUserResponse candidate,
     required final String appliedDate,
     required final String referenceLetter,
     required final String email,

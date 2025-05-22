@@ -968,6 +968,8 @@ class _LanguageSelector extends HookWidget {
           ),
           onPressed: () async {
             await LocaleSettings.setLocale(AppLocale.vi);
+            final localeService = InjectionContainer.get<LocaleService>();
+            await localeService.saveLocale(AppLocale.vi);
             isVietnamese.value = true;
           },
         ),
@@ -985,6 +987,8 @@ class _LanguageSelector extends HookWidget {
           ),
           onPressed: () async {
             await LocaleSettings.setLocale(AppLocale.en);
+            final localeService = InjectionContainer.get<LocaleService>();
+            await localeService.saveLocale(AppLocale.en);
             isVietnamese.value = false;
           },
         ),

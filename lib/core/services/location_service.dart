@@ -4,6 +4,7 @@ import 'package:dart_either/dart_either.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:retrofit/error_logger.dart';
 import 'package:retrofit/http.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
