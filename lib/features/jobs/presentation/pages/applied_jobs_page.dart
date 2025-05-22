@@ -16,7 +16,7 @@ class AppliedJobsPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final jobState = ref.read(applyJobControllerProvider);
-      if (jobState is ApplyJobInitial) {
+      if (jobState is ApplyJobInitial || jobState is ApplyJobError) {
         await ref.read(applyJobControllerProvider.notifier).getJobApplied(page: 0);
       }
     });

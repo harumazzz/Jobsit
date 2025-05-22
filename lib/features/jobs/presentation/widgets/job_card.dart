@@ -155,7 +155,7 @@ class _BookmarkButton extends StatelessWidget {
           if (ref.read(savedJobControllerProvider.notifier).contains(job.id)) {
             await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: job.id);
             if (context.mounted) {
-              NotificationService.error(context: context, message: context.t.job.unsaveSuccess);
+              NotificationService.success(context: context, message: context.t.job.unsaveSuccess);
             }
           } else {
             await ref.read(savedJobControllerProvider.notifier).addJob(job: job);

@@ -481,12 +481,11 @@ class _BookmarkButton extends StatelessWidget {
               }
               isBookmarkProcessing.value = true;
               try {
-                await Future.delayed(const Duration(milliseconds: 100));
                 isSelected.value = !isSelected.value;
                 if (ref.read(savedJobControllerProvider.notifier).contains(state.job.id)) {
                   await ref.read(savedJobControllerProvider.notifier).removeJob(jobId: jobId);
                   if (context.mounted) {
-                    NotificationService.error(context: context, message: context.t.job.unsaveSuccess);
+                    NotificationService.success(context: context, message: context.t.job.unsaveSuccess);
                   }
                 } else {
                   await ref.read(savedJobControllerProvider.notifier).addJob(job: job);
@@ -626,9 +625,7 @@ class _ApplyModal extends HookWidget {
                         const FileSelector(label: 'CV', extensions: ['pdf']),
                       ]);
                       result.fold(
-                        ifLeft: (error) {
-                          NotificationService.error(context: context, message: error.message);
-                        },
+                        ifLeft: (_) => null,
                         ifRight: (e) {
                           if (e.data.length > 512 * 1024) {
                             NotificationService.error(context: context, message: context.t.validation.file.cvFormat);
@@ -718,7 +715,7 @@ class _ApplyButton extends StatelessWidget {
             final state = ref.read(applyJobControllerProvider);
             if (state is ApplyJobError) {
               if (context.mounted) {
-                NotificationService.error(context: context, message: state.message);
+                NotificationService.error(context: context, message: context.t.job.appliedJob);
               }
             } else if (state is ApplyJobLoaded) {
               if (context.mounted) {
