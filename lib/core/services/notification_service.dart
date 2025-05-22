@@ -16,12 +16,12 @@ class NotificationService {
     required IconData iconData,
   }) async {
     ElegantNotification(
-      height: 60.0,
-      description: Text(
-        message,
-        style: TextStyle(color: accentColor, fontWeight: FontWeight.w500),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
+      description: Flexible(
+        child: Text(
+          message,
+          style: TextStyle(color: accentColor, fontWeight: FontWeight.w500),
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
       icon: _CustomIcon(iconData: iconData, iconColor: Colors.white, lineColor: accentColor),
       background: backgroundColor,

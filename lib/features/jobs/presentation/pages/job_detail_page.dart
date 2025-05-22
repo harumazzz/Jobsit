@@ -630,6 +630,10 @@ class _ApplyModal extends HookWidget {
                           NotificationService.error(context: context, message: error.message);
                         },
                         ifRight: (e) {
+                          if (e.data.length > 512 * 1024) {
+                            NotificationService.error(context: context, message: context.t.validation.file.cvFormat);
+                            return;
+                          }
                           text.value = e.name;
                           file.value = e;
                         },
@@ -701,10 +705,11 @@ class _ApplyButton extends StatelessWidget {
         return CustomButton(
           onPressed: () async {
             if (file.value == null) {
+              NotificationService.error(context: context, message: context.t.validation.required.cv);
               return;
             }
             if (controller.text.trim().isEmpty) {
-              NotificationService.error(context: context, message: context.t.validation.file.cvFormat);
+              NotificationService.error(context: context, message: context.t.job.noReferenceLetter);
               return;
             }
             await ref

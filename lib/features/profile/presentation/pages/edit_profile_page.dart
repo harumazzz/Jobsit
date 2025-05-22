@@ -1090,11 +1090,15 @@ class JobInfoEditPage extends HookConsumerWidget {
                     readOnly: true,
                     onTap: () async {
                       final result = await ref.read(fileServiceProvider).uploadFile([
-                        FileSelector(label: context.t.job.cv, extensions: ['pdf', 'docx']),
+                        FileSelector(label: context.t.job.cv, extensions: ['pdf']),
                       ]);
                       result.fold(
                         ifLeft: (value) => null,
                         ifRight: (value) {
+                          if (value.data.length > 512 * 1024) {
+                            NotificationService.error(context: context, message: context.t.validation.file.cvFormat);
+                            return;
+                          }
                           cv.value = value;
                           cvPlaceholderController.text = value.name;
                           cvFocusNode.unfocus();
@@ -1121,6 +1125,12 @@ class JobInfoEditPage extends HookConsumerWidget {
                     focusNode: coverLetterFocusNode,
                     minLines: 5,
                     maxLines: 5,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return context.t.job.noReferenceLetter;
+                      }
+                      return null;
+                    },
                     decoration: InputDecoration(
                       hintText: context.t.job.coverLetter.description,
                       border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),

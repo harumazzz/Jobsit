@@ -151,7 +151,9 @@
     "deadline": "Deadline",
     "uploadNewCV": "Upload New CV",
     "attachCV": "Attached CV",
-    "jobPosition": "Job Position"
+    "jobPosition": "Job Position",
+    "noJobDesire": "No job desired",
+    "noReferenceLetter": "No reference letter"
   },
   "validation": {
     "required": {

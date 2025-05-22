@@ -151,7 +151,9 @@
     "deadline": "Hạn nộp",
     "uploadNewCV": "Tải lên CV mới",
     "attachCV": "Đính kèm CV",
-    "jobPosition": "Vị trí công việc"
+    "jobPosition": "Vị trí công việc",
+    "noJobDesire": "Không có công việc mong muốn",
+    "noReferenceLetter": "Không có thư giới thiệu"
   },
   "validation": {
     "required": {

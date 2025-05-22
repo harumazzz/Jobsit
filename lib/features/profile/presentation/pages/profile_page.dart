@@ -190,7 +190,8 @@ class ProfilePage extends HookConsumerWidget {
           sliver: SliverToBoxAdapter(
             child: Consumer(
               builder: (context, ref, child) {
-                return switch (ref.watch(authControllerProvider)) {
+                final it = ref.watch(authControllerProvider);
+                return switch (it) {
                   AuthAuthorized state => _JobCard(state: state),
                   _ => const CircularProgressIndicator.adaptive(),
                 };
@@ -358,7 +359,7 @@ class _JobCard extends StatelessWidget {
           JobTile(
             title: context.t.job.wanted,
             child: Text(
-              state.user.jobInfo.desiredJob ?? '',
+              state.user.jobInfo.desiredJob ?? context.t.job.noJobDesire,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w400),
             ),
           ),
@@ -404,7 +405,10 @@ class _JobCard extends StatelessWidget {
           ),
           JobTile(
             title: context.t.job.coverLetter.title,
-            child: SizedBox(height: 40.0, child: Text(state.user.jobInfo.referenceLetter ?? '')),
+            child: SizedBox(
+              height: 40.0,
+              child: Text(state.user.jobInfo.referenceLetter ?? context.t.job.noReferenceLetter),
+            ),
           ),
           const SizedBox.shrink(),
         ],
