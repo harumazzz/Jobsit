@@ -60,9 +60,9 @@ dev_dependencies:
   go_router_builder: ^2.8.2
   slang_build_runner: ^4.7.0
   very_good_analysis: ^7.0.0
+  dart_code_metrics_presets: ^2.22.0
 flutter:
   uses-material-design: true
   assets:
-    - test/
     - assets/
     - assets/images/

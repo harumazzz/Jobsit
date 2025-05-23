@@ -24,10 +24,58 @@ analyzer:
     unnecessary_non_null_assertion: ignore
   language:
     strict-casts: true
+  plugins: 
+    - custom_lint
+    
 include: package:flutter_lints/flutter.yaml
 formatter:
   trailing_commas: preserve
+dart_code_metrics:
+  extends:
+    - package:dart_code_metrics_presets/all.yaml
+  metrics:
+    cyclomatic-complexity: 10
+    number-of-parameters: 4
+    maximum-nesting-level: 3
+    source-lines-of-code: 50
+    number-of-methods: 10
 
+  anti-patterns:
+    - long-method
+    - long-parameter-list
+    - god-class
+    - excessive-nesting
+  
+  rules:
+    - no-equal-then-else
+    - no-boolean-literal-compare
+    - no-magic-number
+    - prefer-match-file-name
+    - avoid-duplicate-exports
+    - prefer-early-return
+
+    - avoid-nested-conditional-expressions
+    - avoid-unnecessary-type-assertions
+    - avoid-missing-enum-constant-in-map
+    - newline-before-return
+
+   
+    - avoid-global-state
+    - avoid-long-files
+    - avoid-returning-widgets
+    - prefer-moving-to-variable
+    - avoid-throw-in-catch-block
+    - avoid-dynamic
+    - avoid-nested-switches
+    - avoid-preserve-whitespace
+    - no-object-declaration
+    - prefer-extracting-callbacks
+
+    
+    - avoid-unnecessary-type-casts
+    - double-literal-format
+    - avoid-ignoring-return-values
+    
 linter:
   rules:
     - always_put_control_body_on_new_line
@@ -172,3 +220,5 @@ linter:
     - avoid_renaming_method_parameters
     - avoid_returning_this
     - avoid_single_cascade_in_expression_statements
+    - use_colored_box
+    - prefer_const_constructors_in_immutables
