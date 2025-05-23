@@ -1,17 +1,23 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:elegant_notification/elegant_notification.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
+import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
 
+/// A page that allows users to request a password reset by entering email.
+///
+/// It handles form validation and interacts with the [authControllerProvider]
+/// to initiate the forgot password process. On success, it navigates to the
+/// OTP verification page.
 class ForgotPasswordPage extends ConsumerStatefulWidget {
+  /// Creates a [ForgotPasswordPage].
   const ForgotPasswordPage({super.key});
 
   @override
@@ -23,10 +29,13 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
   late FocusNode _emailFocusNode;
 
+  late TextEditingController _emailController;
+
   @override
   void initState() {
     _formKey = GlobalKey<FormBuilderState>();
     _emailFocusNode = FocusNode();
+    _emailController = TextEditingController();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _emailFocusNode.requestFocus();
@@ -35,46 +44,57 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
   @override
   void dispose() {
+    _emailController.dispose();
     _emailFocusNode.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final state = ref.watch(authControllerProvider);
-    ref.listen<AuthState>(authControllerProvider, (previous, next) async {
+    ref.listen<AuthState>(authControllerProvider, (
+      final previous,
+      final next,
+    ) async {
       if (next is AuthForgotPassword) {
-        ElegantNotification.success(
-          background: const Color(0xFFDEF2ED),
-          description: const Text('Verification code sent to your email. Please check your inbox.'),
-        ).show(context);
-        // TODO(self): Navigate to OTP verification page for reset password
+        NotificationService.success(
+          context: context,
+          message: context.t.auth.forgotPasswordSuccess,
+        );
+        VerifyForgotPasswordOTPRoute(email: _emailController.text).go(context);
       }
       if (next is AuthError) {
-        ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
+        NotificationService.error(context: context, message: next.message);
       }
     });
     return Scaffold(
       body: FormBuilder(
         key: _formKey,
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 20.0,
+            spacing: 20,
             children: [
-              Text('Forgot Password', style: Theme.of(context).textTheme.headlineLarge),
+              Text(
+                context.t.auth.forgotPassword,
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
               Text.rich(
                 textAlign: TextAlign.center,
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: 'Please enter your Registered Email.\n',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey),
+                      text: '${context.t.auth.pleaseEnterEmail}.\n',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.grey,
+                      ),
                     ),
                     TextSpan(
-                      text: 'We will send a link to reset your password.',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey),
+                      text: context.t.auth.sendCodeThroughMail,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.grey,
+                      ),
                     ),
                   ],
                   style: Theme.of(context).textTheme.bodyLarge,
@@ -82,16 +102,26 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               ),
               FormBuilderTextField(
                 name: 'email',
+                controller: _emailController,
                 focusNode: _emailFocusNode,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                  labelText: 'Email',
-                  contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                  ),
+                  labelText: context.t.auth.email,
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 15,
+                    horizontal: 20,
+                  ),
                 ),
-                validator: InputConverter.validateEmail,
-                onSubmitted: (value) {
+                validator:
+                    (final value) => InputConverter.validateEmail(
+                      value,
+                      context,
+                    ),
+                onSubmitted: (final value) {
                   if (_emailFocusNode.hasFocus) {
                     _emailFocusNode.unfocus();
                   }
@@ -105,11 +135,15 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                   child: CustomButton(
                     onPressed: () {
                       if (_formKey.currentState!.saveAndValidate()) {
-                        final email = _formKey.currentState!.value['email'] as String;
-                        ref.read(authControllerProvider.notifier).forgotPassword(email: email);
+                        final email = _emailController.text;
+                        ref
+                            .read(authControllerProvider.notifier)
+                            .forgotPassword(
+                              email: email,
+                            );
                       }
                     },
-                    child: const Text('Send'),
+                    child: Text(context.t.auth.send),
                   ),
                 ),
               },
@@ -120,7 +154,13 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 onTap: () async {
                   const LoginRoute().go(context);
                 },
-                child: const Text('Return to Sign In', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                child: Text(
+                  context.t.auth.returnToSignIn,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ],
           ),
@@ -130,16 +170,26 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   }
 }
 
+/// A page that allows users to reset their password using a reset token.
+///
+/// It requires a [resetToken] obtained from the forgot password flow.
+/// The page handles form validation for the new password and confirmation,
+/// and interacts with the [authControllerProvider] to perform the reset.
+/// On success, it navigates to the login page.
 class ResetPasswordPage extends ConsumerStatefulWidget {
+  /// Creates a [ResetPasswordPage].
+  ///
+  /// [resetToken] is the token required to authorize the password reset.
   const ResetPasswordPage({super.key, required this.resetToken});
 
+  /// The token received via email or other means to reset the password.
   final String resetToken;
 
   @override
   ConsumerState<ResetPasswordPage> createState() => _ResetPasswordPageState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('resetToken', resetToken));
   }
@@ -179,64 +229,75 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final state = ref.watch(authControllerProvider);
-    ref.listen<AuthState>(authControllerProvider, (previous, next) async {
+    ref.listen<AuthState>(authControllerProvider, (
+      final previous,
+      final next,
+    ) async {
       if (next is AuthResetPassword) {
-        ElegantNotification.success(
-          background: const Color(0xFFDEF2ED),
-          description: const Text('Password reset successfully. Please login with your new password.'),
-        ).show(context);
+        NotificationService.success(
+          context: context,
+          message: context.t.auth.passwordResetSuccess,
+        );
         const LoginRoute().go(context);
       }
       if (next is AuthError && context.mounted) {
-        ElegantNotification.error(background: const Color(0xFFFCE8DB), description: Text(next.message)).show(context);
+        NotificationService.error(context: context, message: next.message);
       }
     });
     return Scaffold(
       body: FormBuilder(
         key: _formKey,
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 20.0,
+            spacing: 20,
             children: [
-              Text('Reset Password', style: Theme.of(context).textTheme.headlineLarge),
               Text(
-                'Please enter new password',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey),
+                context.t.auth.resetPassword.title,
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+              Text(
+                context.t.auth.resetPassword.description,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Colors.grey,
+                ),
               ),
               AuthTextField(
                 controller: _passwordController,
                 name: 'password',
                 focusNode: _passwordFocusNode,
                 keyboardType: TextInputType.visiblePassword,
-                label: 'Password',
-                validator: InputConverter.validatePassword,
-                onFieldSubmitted: (value) async {
+                label: context.t.auth.password,
+                validator:
+                    (final value) => InputConverter.validatePassword(
+                      value,
+                      context,
+                    ),
+                onFieldSubmitted: (final value) async {
                   if (_passwordFocusNode.hasFocus) {
                     _passwordFocusNode.unfocus();
                   }
-                  FocusScope.of(context).requestFocus(_confirmPasswordFocusNode);
+                  FocusScope.of(context).requestFocus(
+                    _confirmPasswordFocusNode,
+                  );
                 },
               ),
               AuthTextField(
                 controller: _confirmPasswordController,
                 name: 'confirm_password',
-                label: 'Confirm Password',
+                label: context.t.auth.confirmPassword,
                 focusNode: _confirmPasswordFocusNode,
                 keyboardType: TextInputType.visiblePassword,
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(),
-                  (value) {
-                    if (value != _passwordController.text) {
-                      return 'Confirm Password does not match';
-                    }
-                    return null;
-                  },
-                ]),
-                onFieldSubmitted: (value) async {
+                validator:
+                    (final value) => InputConverter.validateConfirmPassword(
+                      value,
+                      context,
+                      _passwordController.text,
+                    ),
+                onFieldSubmitted: (final value) async {
                   if (_confirmPasswordFocusNode.hasFocus) {
                     _confirmPasswordFocusNode.unfocus();
                   }
@@ -259,7 +320,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                             );
                       }
                     },
-                    child: const Text('Reset'),
+                    child: Text(context.t.auth.reset),
                   ),
                 ),
               },
@@ -270,7 +331,13 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                 onTap: () async {
                   const LoginRoute().go(context);
                 },
-                child: const Text('Return to Sign In', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                child: Text(
+                  context.t.auth.returnToSignIn,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ],
           ),

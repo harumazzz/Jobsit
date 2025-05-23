@@ -35,10 +35,13 @@ dependencies:
   carousel_slider: ^5.0.0
   shimmer: ^3.0.0
   cached_network_image: ^3.4.1
-  intl: ^0.19.0
+  intl: 0.20.2
   file_selector: ^1.0.3
   image_picker: ^1.1.2
   path: ^1.9.1
+  pdfx: ^2.9.1
+  slang: ^4.7.1
+  slang_flutter: ^4.7.0
 
 dev_dependencies:
   flutter_test:
@@ -55,11 +58,11 @@ dev_dependencies:
   retrofit_generator: ^9.1.9
   injectable_generator: ^2.7.0
   go_router_builder: ^2.8.2
+  slang_build_runner: ^4.7.0
+  very_good_analysis: ^7.0.0
 flutter:
   uses-material-design: true
   assets:
     - test/
-    - test/core/
-    - test/core/util/
     - assets/
     - assets/images/

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dart_either/dart_either.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,19 +15,34 @@ import '../models/job_model.dart';
 
 part 'job_repository_impl.g.dart';
 
+/// Provides an instance of [JobRepository].
+///
+/// This repository handles job-related data operations, interacting with
+/// [JobRemoteDataSource].
 @riverpod
-JobRepository jobRepository(Ref ref) {
+JobRepository jobRepository(final Ref ref) {
   final jobRemoteDataSource = ref.watch(jobRemoteDataSourceProvider);
   return JobRepositoryImpl(jobRemoteDataSource);
 }
 
+/// Implementation of the [JobRepository] interface.
+///
+/// This class interacts with [JobRemoteDataSource] for network operations
+/// related to jobs.
 final class JobRepositoryImpl implements JobRepository {
+  /// Creates a [JobRepositoryImpl].
+  ///
+  /// Requires a [JobRemoteDataSource].
   const JobRepositoryImpl(this._jobRemoteDataSource);
 
   final JobRemoteDataSource _jobRemoteDataSource;
 
+  /// Fetches a job by its ID.
+  ///
+  /// Returns a [Job] entity wrapped in an [Either] type. If the job is not
+  /// found, a [ServerFailure] is returned.
   @override
-  Future<Either<Failure, Job>> getJobById(int id) async {
+  Future<Either<Failure, Job>> getJobById(final int id) async {
     try {
       final result = await _jobRemoteDataSource.getJobById(id);
       if (result == null) {
@@ -39,11 +56,20 @@ final class JobRepositoryImpl implements JobRepository {
     }
   }
 
+  /// Fetches a paginated list of jobs.
+  ///
+  /// Returns a list of [Job] entities wrapped in an [Either] type.
   @override
-  Future<Either<Failure, List<Job>>> getJobs({int page = 1, int limit = 10}) async {
+  Future<Either<Failure, List<Job>>> getJobs({
+    final int page = 1,
+    final int limit = 10,
+  }) async {
     try {
-      final result = await _jobRemoteDataSource.getJobs(page: page, limit: limit);
-      return Right([...result.contents.map((e) => e.toEntity())]);
+      final result = await _jobRemoteDataSource.getJobs(
+        page: page,
+        limit: limit,
+      );
+      return Right([...result.contents.map((final e) => e.toEntity())]);
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {
@@ -51,11 +77,14 @@ final class JobRepositoryImpl implements JobRepository {
     }
   }
 
+  /// Fetches a list of majors.
+  ///
+  /// Returns a list of [Major] entities wrapped in an [Either] type.
   @override
   Future<Either<Failure, List<Major>>> getMajors() async {
     try {
       final result = await _jobRemoteDataSource.getMajors();
-      return Right([...result.map((e) => e.toEntity())]);
+      return Right([...result.map((final e) => e.toEntity())]);
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {
@@ -63,11 +92,14 @@ final class JobRepositoryImpl implements JobRepository {
     }
   }
 
+  /// Fetches a list of positions.
+  ///
+  /// Returns a list of [Position] entities wrapped in an [Either] type.
   @override
   Future<Either<Failure, List<Position>>> getPositions() async {
     try {
       final result = await _jobRemoteDataSource.getPositions();
-      return Right([...result.map((e) => e.toEntity())]);
+      return Right([...result.map((final e) => e.toEntity())]);
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {
@@ -75,11 +107,14 @@ final class JobRepositoryImpl implements JobRepository {
     }
   }
 
+  /// Fetches a list of schedules.
+  ///
+  /// Returns a list of [Schedule] entities wrapped in an [Either] type.
   @override
   Future<Either<Failure, List<Schedule>>> getSchedules() async {
     try {
       final result = await _jobRemoteDataSource.getSchedules();
-      return Right([...result.map((e) => e.toEntity())]);
+      return Right([...result.map((final e) => e.toEntity())]);
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {
@@ -87,28 +122,35 @@ final class JobRepositoryImpl implements JobRepository {
     }
   }
 
+  /// Fetches a filtered list of jobs based on criteria.
+  ///
+  /// Returns a list of [Job] entities wrapped in an [Either] type.
   @override
   Future<Either<Failure, List<Job>>> getFilteredJobs({
-    int page = 1,
-    int limit = 10,
-    Position? position,
-    Schedule? schedule,
-    City? city,
-    Major? major,
-    String? title,
+    final int page = 1,
+    final int limit = 10,
+    final List<Position>? positions,
+    final List<Schedule>? schedules,
+    final City? city,
+    final List<Major>? majors,
+    final String? title,
   }) async {
     try {
       final formData = FormData();
-      if (position != null) {
-        formData.fields.add(MapEntry('jobPositionIds', position.id.toString()));
+      if (positions != null) {
+        final value = positions.map((final e) => e.id.toString());
+        formData.fields.add(MapEntry('jobPositionIds', value.join(',')));
       }
-      if (schedule != null) {
-        formData.fields.add(MapEntry('jobScheduleIds', schedule.id.toString()));
+      if (schedules != null) {
+        final value = schedules.map((final e) => e.id.toString());
+        formData.fields.add(MapEntry('jobScheduleIds', value.join(',')));
       }
-      if (major != null) {
-        formData.fields.add(MapEntry('jobMajorIds', major.id.toString()));
+      if (majors != null) {
+        final value = majors.map((final e) => e.id.toString());
+        formData.fields.add(MapEntry('jobMajorIds', value.join(',')));
       }
       if (city != null) {
+        // ignore: lines_longer_than_80_chars
         final name = city.name.replaceFirst('Thành phố', '').replaceFirst('Tỉnh', '').trim();
         formData.fields.add(MapEntry('address', name));
       }
@@ -117,8 +159,10 @@ final class JobRepositoryImpl implements JobRepository {
       }
       formData.fields.add(MapEntry('no', page.toString()));
       formData.fields.add(MapEntry('limit', limit.toString()));
-      final result = await _jobRemoteDataSource.getFilteredJobs(formData: formData);
-      return Right([...result.contents.map((e) => e.toEntity())]);
+      final result = await _jobRemoteDataSource.getFilteredJobs(
+        formData: formData,
+      );
+      return Right([...result.contents.map((final e) => e.toEntity())]);
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {
@@ -126,11 +170,22 @@ final class JobRepositoryImpl implements JobRepository {
     }
   }
 
+  /// Fetches jobs by a specific company.
+  ///
+  /// Returns a list of [Job] entities wrapped in an [Either] type.
   @override
-  Future<Either<Failure, List<Job>>> getJobsByCompany({int page = 1, int limit = 5, required Company company}) async {
+  Future<Either<Failure, List<Job>>> getJobsByCompany({
+    final int page = 1,
+    final int limit = 5,
+    required final Company company,
+  }) async {
     try {
-      final result = await _jobRemoteDataSource.getJobsByCompany(page: page, limit: limit, companyId: company.id);
-      return Right([...result.contents.map((e) => e.toEntity())]);
+      final result = await _jobRemoteDataSource.getJobsByCompany(
+        page: page,
+        limit: limit,
+        companyId: company.id,
+      );
+      return Right([...result.contents.map((final e) => e.toEntity())]);
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {
@@ -138,11 +193,20 @@ final class JobRepositoryImpl implements JobRepository {
     }
   }
 
+  /// Fetches saved jobs for the user.
+  ///
+  /// Returns a list of [Job] entities wrapped in an [Either] type.
   @override
-  Future<Either<Failure, List<Job>>> getSavedJobs({int page = 1, int limit = 10}) async {
+  Future<Either<Failure, List<Job>>> getSavedJobs({
+    final int page = 1,
+    final int limit = 10,
+  }) async {
     try {
-      final result = await _jobRemoteDataSource.getSavedJobs(page: page, limit: limit);
-      return Right([...result.contents.map((e) => e.job.toEntity())]);
+      final result = await _jobRemoteDataSource.getSavedJobs(
+        page: page,
+        limit: limit,
+      );
+      return Right([...result.contents.map((final e) => e.job.toEntity())]);
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {
@@ -150,8 +214,13 @@ final class JobRepositoryImpl implements JobRepository {
     }
   }
 
+  /// Adds a job to the user's saved jobs.
+  ///
+  /// Returns a [Success] entity wrapped in an [Either] type.
   @override
-  Future<Either<Failure, Success>> addSavedJob({required int jobId}) async {
+  Future<Either<Failure, Success>> addSavedJob({
+    required final int jobId,
+  }) async {
     try {
       await _jobRemoteDataSource.addSavedJob(jobId: jobId);
       return const Right(Success());
@@ -162,8 +231,13 @@ final class JobRepositoryImpl implements JobRepository {
     }
   }
 
+  /// Deletes a job from the user's saved jobs.
+  ///
+  /// Returns a [Success] entity wrapped in an [Either] type.
   @override
-  Future<Either<Failure, Success>> deleteSavedJob({required int jobId}) async {
+  Future<Either<Failure, Success>> deleteSavedJob({
+    required final int jobId,
+  }) async {
     try {
       await _jobRemoteDataSource.deleteSavedJob(jobId: jobId);
       return const Right(Success());
@@ -174,11 +248,20 @@ final class JobRepositoryImpl implements JobRepository {
     }
   }
 
+  /// Fetches jobs applied by the user.
+  ///
+  /// Returns a list of [Job] entities wrapped in an [Either] type.
   @override
-  Future<Either<Failure, List<Job>>> getAppliedJob({int page = 1, int limit = 10}) async {
+  Future<Either<Failure, List<Job>>> getAppliedJob({
+    final int page = 1,
+    final int limit = 10,
+  }) async {
     try {
-      final result = await _jobRemoteDataSource.getAppliedJob(page: page, limit: limit);
-      return Right([...result.contents.map((e) => e.job.toEntity())]);
+      final result = await _jobRemoteDataSource.getAppliedJob(
+        page: page,
+        limit: limit,
+      );
+      return Right([...result.contents.map((final e) => e.job.toEntity())]);
     } on DioException catch (e) {
       return Left(ServerFailure(e.message.toString()));
     } catch (e) {
@@ -186,15 +269,22 @@ final class JobRepositoryImpl implements JobRepository {
     }
   }
 
+  /// Applies for a job.
+  ///
+  /// Requires the job ID, a cover letter, and a CV file. Returns the applied
+  /// [Job] entity wrapped in an [Either] type.
   @override
   Future<Either<Failure, Job>> applyJob({
-    required int jobId,
-    required String coverLetter,
-    required FileRequest cv,
+    required final int jobId,
+    required final String coverLetter,
+    required final FileRequest cv,
   }) async {
     try {
       final formData = FormData.fromMap({
-        'candidateApplication': {'id': jobId, 'coverLetter': coverLetter},
+        'candidateApplication': jsonEncode({
+          'jobDTO': {'id': jobId},
+          'referenceLetter': coverLetter,
+        }),
         'fileCV': MultipartFile.fromBytes(cv.data, filename: cv.name),
       });
       final result = await _jobRemoteDataSource.applyJob(formData: formData);
