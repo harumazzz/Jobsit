@@ -32,7 +32,7 @@ AuthRepository authRepository(final Ref ref) {
 ///
 /// This class interacts with [AuthRemoteDataSource] for network operations
 /// and [IAuthStorageService] for local token and user ID storage.
-final class AuthRepositoryImpl implements AuthRepository {
+class AuthRepositoryImpl implements AuthRepository {
   /// Creates an [AuthRepositoryImpl].
   ///
   /// Requires an [AuthRemoteDataSource] and an [IAuthStorageService].

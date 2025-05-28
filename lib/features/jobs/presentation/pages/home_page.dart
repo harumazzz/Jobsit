@@ -121,7 +121,7 @@ class _JobPage extends HookConsumerWidget {
             );
         final controller = ref.read(searchJobsControllerProvider.notifier);
         // ignore: lines_longer_than_80_chars
-        if (searchText.isEmpty && ref.read(jobFilterControllerProvider.notifier).isEmpty) {
+        if (searchText.isEmpty && ref.read(jobFilterControllerProvider.notifier).isEmpty()) {
           await controller.searchJobs(page: 0, limit: 10);
         } else {
           // ignore: lines_longer_than_80_chars
@@ -428,7 +428,7 @@ class _CustomPagedList extends StatelessWidget {
         return;
       }
       final controller = ref.read(searchJobsControllerProvider.notifier);
-      if (ref.read(jobFilterControllerProvider.notifier).isEmpty) {
+      if (ref.read(jobFilterControllerProvider.notifier).isEmpty()) {
         await controller.searchJobs(page: page.value, limit: 10);
       } else {
         // ignore: lines_longer_than_80_chars

@@ -92,7 +92,7 @@ class AppliedJobsPage extends HookConsumerWidget {
                           searchJobsControllerProvider.notifier,
                         );
                         // ignore: lines_longer_than_80_chars
-                        if (ref.read(jobFilterControllerProvider.notifier).isEmpty) {
+                        if (ref.read(jobFilterControllerProvider.notifier).isEmpty()) {
                           await controller.searchJobs(
                             page: page.value,
                             limit: 10,

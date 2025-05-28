@@ -21,7 +21,7 @@ Future<void> main() async {
   final localeService = InjectionContainer.get<LocaleService>();
   final savedLocale = await localeService.getSavedLocale();
   await LocaleSettings.setLocale(savedLocale ?? AppLocale.en);
-  runApp(TranslationProvider(child: const ProviderScope(child: Main())));
+  runApp(ProviderScope(child: TranslationProvider(child: const Main())));
 }
 
 /// The root widget of the application.
