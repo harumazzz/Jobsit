@@ -36,7 +36,7 @@ sealed class LoginUserParams with _$LoginUserParams {
 /// Use case for logging in a user.
 ///
 /// Takes [LoginUserParams] and returns a [User] on success or [Failure].
-final class LoginUser implements UseCase<User, LoginUserParams> {
+class LoginUser implements UseCase<User, LoginUserParams> {
   /// Creates a [LoginUser] use case.
   const LoginUser(this._authRepository);
 
@@ -58,7 +58,7 @@ ForgotPassword forgotPassword(final Ref ref) {
 /// Use case for initiating the forgot password process.
 ///
 /// Takes the user's email as a [String] and returns [Success] or [Failure].
-final class ForgotPassword implements UseCase<Success, String> {
+class ForgotPassword implements UseCase<Success, String> {
   /// Creates a [ForgotPassword] use case.
   const ForgotPassword(this._authRepository);
 
@@ -81,7 +81,7 @@ VerifyOtp verifyOtp(final Ref ref) {
 /// Use case for verifying an OTP.
 ///
 /// Takes the OTP as a [String] and returns a message [String] or [Failure].
-final class VerifyOtp implements UseCase<String, String> {
+class VerifyOtp implements UseCase<String, String> {
   /// Creates a [VerifyOtp] use case.
   const VerifyOtp(this._authRepository);
 
@@ -119,7 +119,7 @@ ResetPassword resetPassword(final Ref ref) {
 /// Use case for resetting a user's password.
 ///
 /// Takes [ResetPasswordParams] and returns [Success] or [Failure].
-final class ResetPassword implements UseCase<Success, ResetPasswordParams> {
+class ResetPassword implements UseCase<Success, ResetPasswordParams> {
   /// Creates a [ResetPassword] use case.
   const ResetPassword(this._authRepository);
 
@@ -219,7 +219,7 @@ LogOutUseCase logOutUseCase(final Ref ref) {
 /// Use case for logging out a user.
 ///
 /// Takes [NoParams] and returns [Success] or [Failure].
-final class LogOutUseCase implements UseCase<Success, NoParams> {
+class LogOutUseCase implements UseCase<Success, NoParams> {
   /// Creates a [LogOutUseCase].
   const LogOutUseCase(this._authRepository);
 

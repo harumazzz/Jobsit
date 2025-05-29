@@ -193,6 +193,7 @@ class AuthController extends _$AuthController {
   ///
   /// Clears authentication state and any stored tokens.
   Future<void> logOut() async {
+    state = const AuthState.loading();
     try {
       final logOutUseCase = ref.read(logOutUseCaseProvider);
       final result = await logOutUseCase(const NoParams());

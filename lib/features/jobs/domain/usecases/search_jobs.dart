@@ -78,7 +78,7 @@ sealed class SearchJobsUseCaseParams with _$SearchJobsUseCaseParams {
 /// Takes [SearchJobsUseCaseParams] for pagination and returns a list of [Job]
 /// entities or a [Failure].
 // ignore: lines_longer_than_80_chars
-final class SearchJobsUseCase implements UseCase<List<Job>, SearchJobsUseCaseParams> {
+class SearchJobsUseCase implements UseCase<List<Job>, SearchJobsUseCaseParams> {
   /// Creates a [SearchJobsUseCase].
   const SearchJobsUseCase(this._jobRepository);
 
@@ -94,7 +94,7 @@ final class SearchJobsUseCase implements UseCase<List<Job>, SearchJobsUseCasePar
 /// Use case for fetching a list of all available job positions.
 ///
 /// Takes [NoParams] and returns a list of [Position] entities or a [Failure].
-final class GetPositionUseCase implements UseCase<List<Position>, NoParams> {
+class GetPositionUseCase implements UseCase<List<Position>, NoParams> {
   /// Creates a [GetPositionUseCase].
   const GetPositionUseCase(this._jobRepository);
 
@@ -110,7 +110,7 @@ final class GetPositionUseCase implements UseCase<List<Position>, NoParams> {
 /// Use case for fetching a list of all available academic majors.
 ///
 /// Takes [NoParams] and returns a list of [Major] entities or a [Failure].
-final class GetMajorUseCase implements UseCase<List<Major>, NoParams> {
+class GetMajorUseCase implements UseCase<List<Major>, NoParams> {
   /// Creates a [GetMajorUseCase].
   const GetMajorUseCase(this._jobRepository);
 
@@ -126,7 +126,7 @@ final class GetMajorUseCase implements UseCase<List<Major>, NoParams> {
 /// Use case for fetching a list of all available work schedules/types.
 ///
 /// Takes [NoParams] and returns a list of [Schedule] entities or a [Failure].
-final class GetScheduleUseCase implements UseCase<List<Schedule>, NoParams> {
+class GetScheduleUseCase implements UseCase<List<Schedule>, NoParams> {
   /// Creates a [GetScheduleUseCase].
   const GetScheduleUseCase(this._jobRepository);
 
@@ -164,7 +164,7 @@ sealed class GetJobDetailParams with _$GetJobDetailParams {
 ///
 /// Takes [GetJobDetailParams] containing the job ID and returns a [Job]
 /// entity or a [Failure].
-final class GetJobDetailUseCase implements UseCase<Job, GetJobDetailParams> {
+class GetJobDetailUseCase implements UseCase<Job, GetJobDetailParams> {
   /// Creates a [GetJobDetailUseCase].
   const GetJobDetailUseCase(this._jobRepository);
 
@@ -205,7 +205,7 @@ sealed class FilterJobUseCaseParams with _$FilterJobUseCaseParams {
 /// Takes [FilterJobUseCaseParams] and returns a list of [Job] entities
 /// or a [Failure].
 // ignore: lines_longer_than_80_chars
-final class FilterJobUseCase implements UseCase<List<Job>, FilterJobUseCaseParams> {
+class FilterJobUseCase implements UseCase<List<Job>, FilterJobUseCaseParams> {
   /// Creates a [FilterJobUseCase].
   const FilterJobUseCase(this._jobRepository);
 
@@ -256,7 +256,7 @@ sealed class GetJobByCompanyParams with _$GetJobByCompanyParams {
 /// Takes [GetJobByCompanyParams] and returns a list of [Job] entities
 /// or a [Failure].
 // ignore: lines_longer_than_80_chars
-final class GetJobByCompanyUseCase implements UseCase<List<Job>, GetJobByCompanyParams> {
+class GetJobByCompanyUseCase implements UseCase<List<Job>, GetJobByCompanyParams> {
   /// Creates a [GetJobByCompanyUseCase].
   const GetJobByCompanyUseCase(this._jobRepository);
 

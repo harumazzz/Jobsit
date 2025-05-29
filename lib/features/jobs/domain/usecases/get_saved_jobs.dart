@@ -80,7 +80,7 @@ DeleteSavedJobUseCase deleteSavedJobUseCase(final Ref ref) {
 ///
 /// Takes [SavedJobParams] for pagination and returns a list of [Job]
 /// entities or a [Failure].
-final class GetSavedJobsUseCase implements UseCase<List<Job>, SavedJobParams> {
+class GetSavedJobsUseCase implements UseCase<List<Job>, SavedJobParams> {
   /// Creates a [GetSavedJobsUseCase].
   const GetSavedJobsUseCase(this._jobRepository);
 
@@ -96,7 +96,7 @@ final class GetSavedJobsUseCase implements UseCase<List<Job>, SavedJobParams> {
 ///
 /// Takes [AddSavedJobParams] containing the job ID and returns [Success]
 /// or a [Failure].
-final class AddSavedJobUseCase implements UseCase<Success, AddSavedJobParams> {
+class AddSavedJobUseCase implements UseCase<Success, AddSavedJobParams> {
   /// Creates an [AddSavedJobUseCase].
   const AddSavedJobUseCase(this._jobRepository);
 
@@ -113,7 +113,7 @@ final class AddSavedJobUseCase implements UseCase<Success, AddSavedJobParams> {
 /// Takes [DeleteSavedJobParams] containing the job ID and returns [Success]
 /// or a [Failure].
 // ignore: lines_longer_than_80_chars
-final class DeleteSavedJobUseCase implements UseCase<Success, DeleteSavedJobParams> {
+class DeleteSavedJobUseCase implements UseCase<Success, DeleteSavedJobParams> {
   /// Creates a [DeleteSavedJobUseCase].
   const DeleteSavedJobUseCase(this._jobRepository);
 
