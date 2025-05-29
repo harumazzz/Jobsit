@@ -208,7 +208,8 @@ class AvatarSection extends StatelessWidget {
       color: Colors.transparent,
       shape: BoxShape.circle,
       border: Border.all(color: Theme.of(context).primaryColor, width: 2),
-    ),    child: ClipOval(
+    ),
+    child: ClipOval(
       child: CachedNetworkImage(
         imageUrl: queryImage(state.user.userInfo.avatar ?? ''),
         width: 86,

@@ -50,7 +50,7 @@ dev_dependencies:
   riverpod_generator: ^2.6.5
   build_runner: ^2.4.15
   custom_lint: ^0.7.5
-  dart_format: ^1.4.1
+  dart_format: ^0.0.4
   freezed: ^3.0.6
   riverpod_lint: ^2.6.5
   json_serializable: ^6.9.5
@@ -66,6 +66,7 @@ dev_dependencies:
   patrol: ^3.15.2
   integration_test:
     sdk: flutter
+  analyzer: 7.3.0
     
 flutter:
   uses-material-design: true
