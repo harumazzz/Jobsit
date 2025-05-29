@@ -170,7 +170,7 @@ void main() {
       ).called(1);
       verifyNoMoreInteractions(mockJobRepository);
     });
-    test('should return a success when applying for a job', () async {
+    test('should return a error when ffailed to apply for a job', () async {
       // Arrange
       final useCase = ApplyJobUseCase(mockJobRepository);
       const tJobId = 1;
