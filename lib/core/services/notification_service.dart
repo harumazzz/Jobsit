@@ -23,8 +23,10 @@ class NotificationService {
     required final Color backgroundColor,
     required final Color accentColor,
     required final IconData iconData,
+    final Key? key,
   }) async {
     ElegantNotification(
+      key: key,
       description: Text(
         message,
         style: TextStyle(color: accentColor, fontWeight: FontWeight.w500),
@@ -40,13 +42,12 @@ class NotificationService {
       borderRadius: BorderRadius.circular(16),
       toastDuration: const Duration(seconds: 5),
       border: Border.all(color: accentColor),
-      closeButton:
-          (final onDismiss) => IconButton(
-            padding: const EdgeInsets.only(right: 8),
-            constraints: const BoxConstraints(),
-            icon: Icon(Icons.close_outlined, color: accentColor, size: 20),
-            onPressed: onDismiss,
-          ),
+      closeButton: (final onDismiss) => IconButton(
+        padding: const EdgeInsets.only(right: 8),
+        constraints: const BoxConstraints(),
+        icon: Icon(Icons.close_outlined, color: accentColor, size: 20),
+        onPressed: onDismiss,
+      ),
       animation: AnimationType.fromTop,
       animationDuration: const Duration(milliseconds: 500),
     ).show(context);
@@ -85,6 +86,7 @@ class NotificationService {
       backgroundColor: const Color(0xFFFCE8DB),
       accentColor: const Color(0xFFEF665B),
       iconData: IconlyLight.infoSquare,
+      key: const Key('error_message'),
     );
   }
 

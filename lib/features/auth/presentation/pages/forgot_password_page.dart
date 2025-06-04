@@ -101,6 +101,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 ),
               ),
               FormBuilderTextField(
+                key: const Key('reset_email_field'),
                 name: 'email',
                 controller: _emailController,
                 focusNode: _emailFocusNode,
@@ -116,11 +117,10 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                     horizontal: 20,
                   ),
                 ),
-                validator:
-                    (final value) => InputConverter.validateEmail(
-                      value,
-                      context,
-                    ),
+                validator: (final value) => InputConverter.validateEmail(
+                  value,
+                  context,
+                ),
                 onSubmitted: (final value) {
                   if (_emailFocusNode.hasFocus) {
                     _emailFocusNode.unfocus();
@@ -133,6 +133,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 _ => SizedBox(
                   width: double.infinity,
                   child: CustomButton(
+                    key: const Key('send_reset_button'),
                     onPressed: () {
                       if (_formKey.currentState!.saveAndValidate()) {
                         final email = _emailController.text;
@@ -271,11 +272,10 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                 focusNode: _passwordFocusNode,
                 keyboardType: TextInputType.visiblePassword,
                 label: context.t.auth.password,
-                validator:
-                    (final value) => InputConverter.validatePassword(
-                      value,
-                      context,
-                    ),
+                validator: (final value) => InputConverter.validatePassword(
+                  value,
+                  context,
+                ),
                 onFieldSubmitted: (final value) async {
                   if (_passwordFocusNode.hasFocus) {
                     _passwordFocusNode.unfocus();
@@ -292,7 +292,9 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                 focusNode: _confirmPasswordFocusNode,
                 keyboardType: TextInputType.visiblePassword,
                 validator:
-                    (final value) => InputConverter.validateConfirmPassword(
+                    (
+                      final value,
+                    ) => InputConverter.validateConfirmPassword(
                       value,
                       context,
                       _passwordController.text,

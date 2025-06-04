@@ -42,6 +42,7 @@ class BottomNavBar extends HookWidget {
         label: context.t.common.saved,
       ),
       NavigationDestination(
+        key: const Key('profile_tab'),
         icon: const Icon(IconlyLight.profile),
         label: context.t.common.profile,
       ),

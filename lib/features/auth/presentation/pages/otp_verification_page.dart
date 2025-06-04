@@ -135,6 +135,7 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
                   SizedBox(
                     width: double.infinity,
                     child: CustomButton(
+                      key: const Key('verify_button'),
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           _otpFocusNode.unfocus();

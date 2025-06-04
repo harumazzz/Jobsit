@@ -67,6 +67,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   analyzer: 7.3.0
+  timezone: ^0.10.1
     
 flutter:
   uses-material-design: true
