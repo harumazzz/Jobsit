@@ -22,10 +22,9 @@ jobs:
         cache: true
 
     - name: Install dependencies
-      run: flutter pub get
-
+      run: flutter pub get    
     - name: Run code generation
-      run: flutter packages pub run build_runner build --delete-conflicting-outputs
+      run: dart run build_runner build --delete-conflicting-outputs
 
     - name: Run comprehensive tests
       run: |
@@ -63,10 +62,9 @@ jobs:
         cache: true
 
     - name: Install dependencies
-      run: flutter pub get
-
+      run: flutter pub get    
     - name: Run code generation
-      run: flutter packages pub run build_runner build --delete-conflicting-outputs
+      run: dart run build_runner build --delete-conflicting-outputs
 
     - name: Build web release
       run: flutter build web --release
@@ -127,10 +125,9 @@ jobs:
         cache: true
 
     - name: Install dependencies
-      run: flutter pub get
-
+      run: flutter pub get    
     - name: Run code generation
-      run: flutter packages pub run build_runner build --delete-conflicting-outputs
+      run: dart run build_runner build --delete-conflicting-outputs
 
     - name: Build web for performance testing
       run: flutter build web --release

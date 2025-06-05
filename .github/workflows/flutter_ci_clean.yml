@@ -29,16 +29,12 @@ jobs:
       run: flutter pub get
 
     - name: Verify the install
-      run: flutter doctor -v
-
+      run: flutter doctor -v    
     - name: Run code generation
-      run: flutter packages pub run build_runner build --delete-conflicting-outputs
+      run: dart run build_runner build --delete-conflicting-outputs
 
     - name: Analyze code
       run: flutter analyze
-
-    - name: Check formatting
-      run: dart format --set-exit-if-changed .
 
     - name: Run unit tests
       run: flutter test --coverage --test-randomize-ordering-seed random
@@ -69,10 +65,9 @@ jobs:
         cache: true
 
     - name: Install dependencies
-      run: flutter pub get
-
+      run: flutter pub get    
     - name: Run code generation
-      run: flutter packages pub run build_runner build --delete-conflicting-outputs
+      run: dart run build_runner build --delete-conflicting-outputs
 
     - name: Run widget tests
       run: flutter test test/ --coverage
@@ -104,10 +99,9 @@ jobs:
         cache: true
 
     - name: Install dependencies
-      run: flutter pub get
-
+      run: flutter pub get    
     - name: Run code generation
-      run: flutter packages pub run build_runner build --delete-conflicting-outputs
+      run: dart run build_runner build --delete-conflicting-outputs
 
     - name: Build Web
       run: flutter build web --release

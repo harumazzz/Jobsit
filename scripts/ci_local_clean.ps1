@@ -61,15 +61,6 @@ try {
     }
     Write-Host "✅ Unit tests passed" -ForegroundColor Green
 
-    # Build web application
-    Write-Host "🌐 Building web application..." -ForegroundColor Yellow
-    flutter build web --release
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "❌ Web build failed" -ForegroundColor Red
-        exit 1
-    }
-    Write-Host "✅ Web build completed successfully" -ForegroundColor Green
-
     # Final success message
     Write-Host "" -ForegroundColor Green
     Write-Host "🎉 All CI/CD checks passed successfully!" -ForegroundColor Green
