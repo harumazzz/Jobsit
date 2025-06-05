@@ -181,8 +181,7 @@ linter:
     - await_only_futures
     - camel_case_types
     - curly_braces_in_flow_control_structures
-    - file_names    
-    - lines_longer_than_80_chars
+    - file_names
     - only_throw_errors
     - package_api_docs
     - prefer_conditional_assignment
