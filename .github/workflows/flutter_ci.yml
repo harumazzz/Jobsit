@@ -72,7 +72,7 @@ jobs:
       run: flutter config --enable-web
       
     - name: Build web app
-      run: flutter build web --release --web-renderer html
+      run: flutter build web --release --wasm html
       
     - name: Archive web build
       uses: actions/upload-artifact@v4
