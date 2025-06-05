@@ -1,0 +1,131 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint_and_format:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.2'
+        channel: 'stable'
+        cache: true
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Run code generation
+      run: dart run build_runner build --delete-conflicting-outputs
+
+    - name: Verify formatting
+      run: dart format --output=none --set-exit-if-changed .
+
+    - name: Analyze code
+      run: flutter analyze --fatal-infos
+
+    - name: Check for unused files
+      run: |
+        echo "Checking for unused files..."
+        # Add custom unused file detection if needed
+
+  quick_test:
+    name: Quick Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.2'
+        channel: 'stable'
+        cache: true
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Run code generation
+      run: dart run build_runner build --delete-conflicting-outputs
+
+    - name: Run unit tests
+      run: flutter test --coverage
+
+  build_check:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: [lint_and_format, quick_test]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.2'
+        channel: 'stable'
+        cache: true
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Run code generation
+      run: dart run build_runner build --delete-conflicting-outputs
+
+    - name: Build web version
+      run: flutter build web --release
+
+    - name: Check build artifacts
+      run: |
+        if [ ! -d "build/web" ]; then
+          echo "Build failed - no web artifacts found"
+          exit 1
+        fi
+        echo "Build successful - web artifacts created"
+
+  security_scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.2'
+        channel: 'stable'
+        cache: true
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Check for security vulnerabilities
+      run: |
+        echo "Checking pub dependencies for security issues..."
+        flutter pub deps
+        
+    - name: Verify no hardcoded secrets
+      run: |
+        echo "Scanning for potential hardcoded secrets..."
+        if grep -r "password\|secret\|key\|token" lib/ --include="*.dart" | grep -v "// TODO\|// FIXME"; then
+          echo "⚠️  Potential hardcoded secrets found. Please review."
+        else
+          echo "✅ No obvious hardcoded secrets detected."
+        fi

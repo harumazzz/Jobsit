@@ -28,10 +28,12 @@ jobs:
         flutter pub deps
         flutter pub upgrade --dry-run > upgrade-preview.txt
         cat upgrade-preview.txt
-        
-    - name: Update dependencies
+          - name: Update dependencies
       run: |
         flutter pub upgrade
+        
+    - name: Run code generation
+      run: dart run build_runner build --delete-conflicting-outputs
         
     - name: Run tests after update
       run: |

@@ -31,10 +31,8 @@ jobs:
     - name: Update dependencies
       run: |
         echo "Updating dependencies..."
-        flutter pub upgrade
-
-    - name: Run code generation
-      run: flutter packages pub run build_runner build --delete-conflicting-outputs
+        flutter pub upgrade    - name: Run code generation
+      run: dart run build_runner build --delete-conflicting-outputs
 
     - name: Run tests to verify updates
       run: |
