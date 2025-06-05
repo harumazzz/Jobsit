@@ -1,0 +1,41 @@
+# GitHub Actions workflow configuration
+# This file contains reusable configurations for all workflows
+
+name: Workflow Configuration
+
+env:
+  FLUTTER_VERSION: "3.32.2"
+  JAVA_VERSION: "17"
+  JAVA_DISTRIBUTION: "temurin"
+  NODE_VERSION: "18"
+  
+# Reusable workflow inputs
+on:
+  workflow_call:
+    inputs:
+      flutter_version:
+        description: 'Flutter version to use'
+        default: '3.32.2'
+        required: false
+        type: string
+      
+      run_integration_tests:
+        description: 'Whether to run integration tests'
+        default: true
+        required: false
+        type: boolean
+        
+      upload_coverage:
+        description: 'Whether to upload coverage reports'
+        default: true
+        required: false
+        type: boolean
+
+jobs:
+  # This is a placeholder job for workflow configuration
+  # The actual jobs are defined in the specific workflow files
+  config:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Configuration loaded
+      run: echo "Workflow configuration loaded successfully"

@@ -1,0 +1,71 @@
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Run at 2 AM UTC daily
+  workflow_dispatch:
+
+jobs:
+  nightly-build:
+    name: Nightly Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.2'
+        channel: 'stable'
+        cache: true
+        
+    - name: Get dependencies
+      run: flutter pub get
+      
+    - name: Run comprehensive tests
+      run: |
+        flutter test --coverage test/
+        flutter analyze --fatal-infos
+        dart format --set-exit-if-changed lib/ test/
+        
+    - name: Build web release
+      run: |
+        flutter config --enable-web
+        flutter build web --release --web-renderer html
+        
+    - name: Archive nightly build
+      uses: actions/upload-artifact@v4
+      with:
+        name: nightly-web-build-${{ github.run_number }}
+        path: build/web/
+        retention-days: 7
+        
+    - name: Upload coverage
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage/lcov.info
+        flags: nightly
+        name: codecov-nightly
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+        
+    - name: Create nightly report
+      run: |
+        echo "# Nightly Build Report" > nightly-report.md
+        echo "**Date**: $(date)" >> nightly-report.md
+        echo "**Commit**: ${{ github.sha }}" >> nightly-report.md
+        echo "**Flutter Version**: 3.32.2" >> nightly-report.md
+        echo "" >> nightly-report.md
+        echo "## Build Status" >> nightly-report.md
+        echo "✅ Web build completed successfully" >> nightly-report.md
+        echo "✅ All tests passed" >> nightly-report.md
+        echo "✅ Code analysis passed" >> nightly-report.md
+        
+    - name: Upload nightly report
+      uses: actions/upload-artifact@v4
+      with:
+        name: nightly-report-${{ github.run_number }}
+        path: nightly-report.md
+        retention-days: 30

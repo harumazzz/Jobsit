@@ -165,6 +165,7 @@ class ProfilePage extends HookConsumerWidget {
                   ),
                 ),
                 IconButton(
+                  key: const Key('edit_profile_button'),
                   tooltip: context.t.common.edit,
                   onPressed: () async {
                     if (isSelectedProfileEdit.value) {
@@ -218,6 +219,7 @@ class ProfilePage extends HookConsumerWidget {
                   ),
                 ),
                 IconButton(
+                  key: const Key('edit_job_button'),
                   tooltip: context.t.common.edit,
                   onPressed: () async {
                     if (isSelectedJobEdit.value) {
@@ -367,9 +369,9 @@ class _EmailSwitcher extends StatelessWidget {
 
   /// A [WidgetRef] to interact with Riverpod providers.
   final WidgetRef ref;
-
   @override
   Widget build(final BuildContext context) => SwitchListTile.adaptive(
+    key: const Key('email_notification_switch'),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     contentPadding: EdgeInsets.zero,
     controlAffinity: ListTileControlAffinity.leading,
@@ -539,12 +541,12 @@ class _JobModifier extends StatelessWidget {
 
   /// A [WidgetRef] to interact with Riverpod providers.
   final WidgetRef ref;
-
   @override
   Widget build(final BuildContext context) => SliverPadding(
     padding: const EdgeInsets.symmetric(horizontal: 24),
     sliver: SliverToBoxAdapter(
       child: SwitchListTile.adaptive(
+        key: const Key('job_searchable_switch'),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         contentPadding: EdgeInsets.zero,
         controlAffinity: ListTileControlAffinity.leading,

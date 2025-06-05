@@ -201,9 +201,9 @@ class AvatarSection extends StatelessWidget {
 
   /// The current authenticated user state, containing user include the avatar.
   final AuthAuthorized state;
-
   @override
   Widget build(final BuildContext context) => DecoratedBox(
+    key: const Key('avatar_section'),
     decoration: BoxDecoration(
       color: Colors.transparent,
       shape: BoxShape.circle,

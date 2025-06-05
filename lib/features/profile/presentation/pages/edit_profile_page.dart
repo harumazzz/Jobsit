@@ -51,13 +51,22 @@ class PersonalInfoEditPage extends HookConsumerWidget {
     final addressController = useTextEditingController(
       text: currentState.user.userInfo.address,
     );
+
+    // Safely get selected university with proper error handling
+    final universityState = ref.read(universityControllerProvider);
     final selectedUniversity = useState<University?>(
-      currentState.user.jobInfo.university != null
-          // ignore: lines_longer_than_80_chars
-          ? (ref.read(universityControllerProvider) as UniversityLoaded).universities.firstWhere(
-            // ignore: lines_longer_than_80_chars
-            (final university) => university.id == currentState.user.jobInfo.university!.id,
-          )
+      currentState.user.jobInfo.university != null && universityState is UniversityLoaded
+          ? (() {
+              try {
+                return universityState.universities.firstWhere(
+                  // ignore: lines_longer_than_80_chars
+                  (final university) => university.id == currentState.user.jobInfo.university!.id,
+                );
+              } catch (e) {
+                debugPrint('University not found: ${currentState.user.jobInfo.university!.id}');
+                return null;
+              }
+            })()
           : null,
     );
     final firstNameFocusNode = useFocusNode();
@@ -71,20 +80,30 @@ class PersonalInfoEditPage extends HookConsumerWidget {
     final addressFocusNode = useFocusNode();
     final universityFocusNode = useFocusNode();
     final genderOptions = [context.t.profile.male, context.t.profile.female];
-    // ignore: lines_longer_than_80_chars
-    final cityOptions = (ref.read(citiesControllerProvider) as CitiesLoaded).cities;
+
+    // Safely get city options with proper error handling
+    final citiesState = ref.read(citiesControllerProvider);
+    final cityOptions = citiesState is CitiesLoaded ? citiesState.cities : <City>[];
+
     final selectedGender = useState(
       // ignore: lines_longer_than_80_chars
       currentState.user.userInfo.gender ? context.t.profile.male : context.t.profile.female,
     );
+
     final selectedCity = useState<City?>(
-      currentState.user.userInfo.city != null
-          // ignore: lines_longer_than_80_chars
-          ? (ref.read(citiesControllerProvider) as CitiesLoaded).cities.firstWhere(
-            (final city) => city.name.contains(
-              currentState.user.userInfo.city!,
-            ),
-          )
+      currentState.user.userInfo.city != null && citiesState is CitiesLoaded
+          ? (() {
+              try {
+                return citiesState.cities.firstWhere(
+                  (final city) => city.name.contains(
+                    currentState.user.userInfo.city!,
+                  ),
+                );
+              } catch (e) {
+                debugPrint('City not found: ${currentState.user.userInfo.city}');
+                return null;
+              }
+            })()
           : null,
     );
     final selectedDistrict = useState<District?>(null);
@@ -130,8 +149,8 @@ class PersonalInfoEditPage extends HookConsumerWidget {
     final selectedDate = useState<DateTime?>(
       currentState.user.userInfo.birthDate != null
           ? DateFormat('dd-MM-yyyy').parse(
-            currentState.user.userInfo.birthDate!,
-          )
+              currentState.user.userInfo.birthDate!,
+            )
           : DateTime.now(),
     );
     return Scaffold(
@@ -183,6 +202,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 FormBuilderTextField(
+                  key: const Key('first_name_field'),
                   name: 'first_name',
                   controller: firstNameController,
                   focusNode: firstNameFocusNode,
@@ -196,11 +216,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                       horizontal: 20,
                     ),
                   ),
-                  validator:
-                      (final value) => InputConverter.validateFirstName(
-                        value,
-                        context,
-                      ),
+                  validator: (final value) => InputConverter.validateFirstName(
+                    value,
+                    context,
+                  ),
                   onSubmitted: (_) async {
                     firstNameFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(lastNameFocusNode);
@@ -215,6 +234,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 FormBuilderTextField(
+                  key: const Key('last_name_field'),
                   name: 'last_name',
                   controller: lastNameController,
                   focusNode: lastNameFocusNode,
@@ -228,11 +248,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                       horizontal: 20,
                     ),
                   ),
-                  validator:
-                      (final value) => InputConverter.validateLastName(
-                        value,
-                        context,
-                      ),
+                  validator: (final value) => InputConverter.validateLastName(
+                    value,
+                    context,
+                  ),
                   onSubmitted: (_) async {
                     lastNameFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(emailFocusNode);
@@ -247,6 +266,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 FormBuilderTextField(
+                  key: const Key('email_field'),
                   name: 'email',
                   controller: emailController,
                   focusNode: emailFocusNode,
@@ -261,11 +281,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                       horizontal: 20,
                     ),
                   ),
-                  validator:
-                      (final value) => InputConverter.validateEmail(
-                        value,
-                        context,
-                      ),
+                  validator: (final value) => InputConverter.validateEmail(
+                    value,
+                    context,
+                  ),
                   onSubmitted: (_) async {
                     emailFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(dateFocusNode);
@@ -280,6 +299,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 FormBuilderDateTimePicker(
+                  key: const Key('date_of_birth_field'),
                   name: 'date_of_birth',
                   focusNode: dateFocusNode,
                   initialValue: selectedDate.value,
@@ -322,6 +342,7 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 FormBuilderTextField(
+                  key: const Key('phone_field'),
                   name: 'phone',
                   controller: phoneController,
                   focusNode: phoneFocusNode,
@@ -335,11 +356,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                       horizontal: 20,
                     ),
                   ),
-                  validator:
-                      (final value) => InputConverter.validatePhone(
-                        value,
-                        context,
-                      ),
+                  validator: (final value) => InputConverter.validatePhone(
+                    value,
+                    context,
+                  ),
                   onSubmitted: (_) async {
                     phoneFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(genderFocusNode);
@@ -411,11 +431,10 @@ class PersonalInfoEditPage extends HookConsumerWidget {
                       horizontal: 20,
                     ),
                   ),
-                  validator:
-                      (final value) => InputConverter.validateAddress(
-                        value,
-                        context,
-                      ),
+                  validator: (final value) => InputConverter.validateAddress(
+                    value,
+                    context,
+                  ),
                   onSubmitted: (_) async {
                     addressFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(universityFocusNode);
@@ -533,51 +552,47 @@ class _UniversitiesDropdown extends StatelessWidget {
             ),
           ),
         ],
-        builder:
-            (final context, final controller, final child) => FormBuilderField(
-              name: 'university',
-              focusNode: universityFocusNode,
-              validator: (final value) => null,
-              builder:
-                  (final FormFieldState<dynamic> field) => InputDecorator(
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 15,
-                        horizontal: 20,
-                      ),
-                      suffixIcon: Tooltip(
-                        message: context.t.profile.selectUniversity,
-                        child: IconButton(
-                          icon: const Icon(IconlyLight.arrowDown2),
-                          onPressed: () async {
-                            if (controller.isOpen) {
-                              controller.close();
-                            } else {
-                              controller.open();
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                    child: GestureDetector(
-                      onTap: () async {
-                        if (controller.isOpen) {
-                          controller.close();
-                        } else {
-                          controller.open();
-                        }
-                      },
-                      child: Text(
-                        selectedUniversity.value != null
-                            ? selectedUniversity.value!.name
-                            : context.t.auth.selectUniversity,
-                      ),
-                    ),
-                  ),
+        builder: (final context, final controller, final child) => FormBuilderField(
+          name: 'university',
+          focusNode: universityFocusNode,
+          validator: (final value) => null,
+          builder: (final FormFieldState<dynamic> field) => InputDecorator(
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 15,
+                horizontal: 20,
+              ),
+              suffixIcon: Tooltip(
+                message: context.t.profile.selectUniversity,
+                child: IconButton(
+                  icon: const Icon(IconlyLight.arrowDown2),
+                  onPressed: () async {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                ),
+              ),
             ),
+            child: GestureDetector(
+              onTap: () async {
+                if (controller.isOpen) {
+                  controller.close();
+                } else {
+                  controller.open();
+                }
+              },
+              child: Text(
+                selectedUniversity.value != null ? selectedUniversity.value!.name : context.t.auth.selectUniversity,
+              ),
+            ),
+          ),
+        ),
       );
     },
   );
@@ -644,72 +659,70 @@ class _DistrictsDropdown extends StatelessWidget {
         ),
         crossAxisUnconstrained: false,
         alignmentOffset: const Offset(0, 8),
-        builder:
-            (final context, final controller, final child) => FormBuilderField(
-              name: 'district',
-              focusNode: districtFocusNode,
-              validator: (final value) => null,
-              builder: (final FormFieldState<dynamic> field) {
-                final String displayText;
-                var isEnabled = true;
-                if (selectedCity.value == null) {
-                  displayText = context.t.auth.selectCity;
-                  isEnabled = false;
-                } else if (state is! DistrictsLoaded) {
-                  displayText = context.t.auth.loadingDistrict;
-                  isEnabled = false;
-                } else if (selectedDistrict.value != null) {
-                  displayText = selectedDistrict.value!.name;
-                } else {
-                  displayText = context.t.auth.selectDistrict;
-                }
-                return InputDecorator(
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: 20,
-                    ),
-                    enabled: isEnabled,
-                    suffixIcon: Tooltip(
-                      message: context.t.profile.selectDistrict,
-                      child: IconButton(
-                        icon: const Icon(IconlyLight.arrowDown2),
-                        onPressed: () async {
-                          if (controller.isOpen) {
-                            controller.close();
-                          } else {
-                            controller.open();
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                  child: GestureDetector(
-                    onTap: () async {
-                      if (isEnabled) {
-                        if (controller.isOpen) {
-                          controller.close();
-                        } else {
-                          controller.open();
-                        }
+        builder: (final context, final controller, final child) => FormBuilderField(
+          name: 'district',
+          focusNode: districtFocusNode,
+          validator: (final value) => null,
+          builder: (final FormFieldState<dynamic> field) {
+            final String displayText;
+            var isEnabled = true;
+            if (selectedCity.value == null) {
+              displayText = context.t.auth.selectCity;
+              isEnabled = false;
+            } else if (state is! DistrictsLoaded) {
+              displayText = context.t.auth.loadingDistrict;
+              isEnabled = false;
+            } else if (selectedDistrict.value != null) {
+              displayText = selectedDistrict.value!.name;
+            } else {
+              displayText = context.t.auth.selectDistrict;
+            }
+            return InputDecorator(
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 15,
+                  horizontal: 20,
+                ),
+                enabled: isEnabled,
+                suffixIcon: Tooltip(
+                  message: context.t.profile.selectDistrict,
+                  child: IconButton(
+                    icon: const Icon(IconlyLight.arrowDown2),
+                    onPressed: () async {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
                       }
                     },
-                    child: Text(
-                      displayText,
-                      style:
-                          isEnabled
-                              ? null
-                              : const TextStyle(
-                                color: Colors.grey,
-                              ),
-                    ),
                   ),
-                );
-              },
-            ),
+                ),
+              ),
+              child: GestureDetector(
+                onTap: () async {
+                  if (isEnabled) {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  }
+                },
+                child: Text(
+                  displayText,
+                  style: isEnabled
+                      ? null
+                      : const TextStyle(
+                          color: Colors.grey,
+                        ),
+                ),
+              ),
+            );
+          },
+        ),
         menuChildren: [
           ...(state is DistrictsLoaded ? state.districts : <District>[]).map(
             (final District district) => MenuItemButton(
@@ -781,87 +794,85 @@ class _CitiesDropdown extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) => LayoutBuilder(
-    builder:
-        (final context, final constraints) => MenuAnchor(
-          style: MenuStyle(
-            minimumSize: WidgetStatePropertyAll(
-              Size(constraints.maxWidth + 8, 0),
-            ),
-            maximumSize: WidgetStatePropertyAll(
-              Size(constraints.maxWidth + 8, double.infinity),
-            ),
-            elevation: WidgetStateProperty.all(4),
-          ),
-          crossAxisUnconstrained: false,
-          alignmentOffset: const Offset(0, 8),
-          builder:
-              // ignore: lines_longer_than_80_chars
-              (final context, final controller, final child) => FormBuilderField(
-                name: 'city',
-                focusNode: cityFocusNode,
-                validator: (final value) => null,
-                builder:
-                    (final FormFieldState<dynamic> field) => InputDecorator(
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(12)),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 15,
-                          horizontal: 20,
-                        ),
-                        suffixIcon: Tooltip(
-                          message: context.t.profile.selectCity,
-                          child: IconButton(
-                            icon: const Icon(IconlyLight.arrowDown2),
-                            onPressed: () async {
-                              if (controller.isOpen) {
-                                controller.close();
-                              } else {
-                                controller.open();
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                      child: GestureDetector(
-                        onTap: () async {
-                          if (controller.isOpen) {
-                            controller.close();
-                          } else {
-                            controller.open();
-                          }
-                        },
-                        child: Text(
-                          // ignore: lines_longer_than_80_chars
-                          selectedCity.value != null ? selectedCity.value!.name : context.t.auth.selectCity,
-                        ),
-                      ),
-                    ),
+    builder: (final context, final constraints) => MenuAnchor(
+      style: MenuStyle(
+        minimumSize: WidgetStatePropertyAll(
+          Size(constraints.maxWidth + 8, 0),
+        ),
+        maximumSize: WidgetStatePropertyAll(
+          Size(constraints.maxWidth + 8, double.infinity),
+        ),
+        elevation: WidgetStateProperty.all(4),
+      ),
+      crossAxisUnconstrained: false,
+      alignmentOffset: const Offset(0, 8),
+      builder:
+          // ignore: lines_longer_than_80_chars
+          (final context, final controller, final child) => FormBuilderField(
+            name: 'city',
+            focusNode: cityFocusNode,
+            validator: (final value) => null,
+            builder: (final FormFieldState<dynamic> field) => InputDecorator(
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 15,
+                  horizontal: 20,
+                ),
+                suffixIcon: Tooltip(
+                  message: context.t.profile.selectCity,
+                  child: IconButton(
+                    icon: const Icon(IconlyLight.arrowDown2),
+                    onPressed: () async {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                  ),
+                ),
               ),
-          menuChildren: [
-            ...cityOptions.map(
-              (final city) => MenuItemButton(
-                onPressed: () async {
-                  selectedDistrict.value = null;
-                  await ref.read(districtsControllerProvider.notifier).reset();
-                  selectedCity.value = city;
-                  await ref
-                      .read(districtsControllerProvider.notifier)
-                      .getDistricts(
-                        code: selectedCity.value!.code,
-                      );
-
-                  cityFocusNode.unfocus();
-                  if (context.mounted) {
-                    FocusScope.of(context).requestFocus(districtFocusNode);
+              child: GestureDetector(
+                onTap: () async {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
                   }
                 },
-                child: Text(city.name),
+                child: Text(
+                  // ignore: lines_longer_than_80_chars
+                  selectedCity.value != null ? selectedCity.value!.name : context.t.auth.selectCity,
+                ),
               ),
             ),
-          ],
+          ),
+      menuChildren: [
+        ...cityOptions.map(
+          (final city) => MenuItemButton(
+            onPressed: () async {
+              selectedDistrict.value = null;
+              await ref.read(districtsControllerProvider.notifier).reset();
+              selectedCity.value = city;
+              await ref
+                  .read(districtsControllerProvider.notifier)
+                  .getDistricts(
+                    code: selectedCity.value!.code,
+                  );
+
+              cityFocusNode.unfocus();
+              if (context.mounted) {
+                FocusScope.of(context).requestFocus(districtFocusNode);
+              }
+            },
+            child: Text(city.name),
+          ),
         ),
+      ],
+    ),
   );
 
   @override
@@ -916,74 +927,72 @@ class _GenderDropdown extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) => LayoutBuilder(
-    builder:
-        (final context, final constraints) => MenuAnchor(
-          style: MenuStyle(
-            minimumSize: WidgetStatePropertyAll(
-              Size(constraints.maxWidth + 8, 0),
-            ),
-            maximumSize: WidgetStatePropertyAll(
-              Size(constraints.maxWidth + 8, double.infinity),
-            ),
-            elevation: WidgetStateProperty.all(4),
-          ),
-          crossAxisUnconstrained: false,
-          alignmentOffset: const Offset(0, 8),
-          builder:
-              // ignore: lines_longer_than_80_chars
-              (final context, final controller, final child) => FormBuilderField(
-                name: 'gender',
-                focusNode: genderFocusNode,
-                validator: (final value) => null,
-                builder:
-                    (final FormFieldState<dynamic> field) => InputDecorator(
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(12)),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 15,
-                          horizontal: 20,
-                        ),
-                        suffixIcon: Tooltip(
-                          message: context.t.profile.selectGender,
-                          child: IconButton(
-                            icon: const Icon(IconlyLight.arrowDown2),
-                            onPressed: () async {
-                              if (controller.isOpen) {
-                                controller.close();
-                              } else {
-                                controller.open();
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                      child: GestureDetector(
-                        onTap: () async {
-                          if (controller.isOpen) {
-                            controller.close();
-                          } else {
-                            controller.open();
-                          }
-                        },
-                        child: Text(selectedGender.value),
-                      ),
-                    ),
-              ),
-          menuChildren: [
-            ...genderOptions.map(
-              (final gender) => MenuItemButton(
-                onPressed: () async {
-                  selectedGender.value = gender;
-                  genderFocusNode.unfocus();
-                  FocusScope.of(context).requestFocus(cityFocusNode);
-                },
-                child: Text(gender),
-              ),
-            ),
-          ],
+    builder: (final context, final constraints) => MenuAnchor(
+      style: MenuStyle(
+        minimumSize: WidgetStatePropertyAll(
+          Size(constraints.maxWidth + 8, 0),
         ),
+        maximumSize: WidgetStatePropertyAll(
+          Size(constraints.maxWidth + 8, double.infinity),
+        ),
+        elevation: WidgetStateProperty.all(4),
+      ),
+      crossAxisUnconstrained: false,
+      alignmentOffset: const Offset(0, 8),
+      builder:
+          // ignore: lines_longer_than_80_chars
+          (final context, final controller, final child) => FormBuilderField(
+            name: 'gender',
+            focusNode: genderFocusNode,
+            validator: (final value) => null,
+            builder: (final FormFieldState<dynamic> field) => InputDecorator(
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 15,
+                  horizontal: 20,
+                ),
+                suffixIcon: Tooltip(
+                  message: context.t.profile.selectGender,
+                  child: IconButton(
+                    icon: const Icon(IconlyLight.arrowDown2),
+                    onPressed: () async {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                  ),
+                ),
+              ),
+              child: GestureDetector(
+                onTap: () async {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+                child: Text(selectedGender.value),
+              ),
+            ),
+          ),
+      menuChildren: [
+        ...genderOptions.map(
+          (final gender) => MenuItemButton(
+            onPressed: () async {
+              selectedGender.value = gender;
+              genderFocusNode.unfocus();
+              FocusScope.of(context).requestFocus(cityFocusNode);
+            },
+            child: Text(gender),
+          ),
+        ),
+      ],
+    ),
   );
 
   @override
@@ -1023,6 +1032,7 @@ class _CustomUploadImage extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       child: IconButton(
+        key: const Key('change_avatar_button'),
         icon: Icon(
           IconlyLight.edit,
           color: Theme.of(context).colorScheme.onPrimary,
@@ -1081,26 +1091,25 @@ class _ProfileImage extends StatelessWidget {
   final AuthAuthorized currentState;
 
   @override
-  Widget build(final BuildContext context) =>
-      image.value != null
-          ? ClipOval(
-            child: Image.memory(
-              image.value!.data,
-              fit: BoxFit.cover,
-              width: 86,
-              height: 86,
-            ),
-          )
-          : currentState.user.userInfo.avatar != null
-          ? ClipOval(
-            child: CachedNetworkImage(
-              imageUrl: queryImage(currentState.user.userInfo.avatar!),
-              fit: BoxFit.cover,
-              width: 86,
-              height: 86,
-            ),
-          )
-          : const Icon(IconlyLight.profile, size: 48, color: Colors.grey);
+  Widget build(final BuildContext context) => image.value != null
+      ? ClipOval(
+          child: Image.memory(
+            image.value!.data,
+            fit: BoxFit.cover,
+            width: 86,
+            height: 86,
+          ),
+        )
+      : currentState.user.userInfo.avatar != null
+      ? ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: queryImage(currentState.user.userInfo.avatar!),
+            fit: BoxFit.cover,
+            width: 86,
+            height: 86,
+          ),
+        )
+      : const Icon(IconlyLight.profile, size: 48, color: Colors.grey);
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
@@ -1163,12 +1172,21 @@ class JobInfoEditPage extends HookConsumerWidget {
       // ignore: lines_longer_than_80_chars
       jobInfo.schedules.map((final s) => Schedule(id: s.id, name: s.name)).toSet(),
     );
+
+    // Safely get selected city with proper error handling
+    final jobCitiesState = ref.read(citiesControllerProvider);
     final selectedCity = useState<City?>(
-      jobInfo.desiredWorkingProvince != null
-          // ignore: lines_longer_than_80_chars
-          ? (ref.read(citiesControllerProvider) as CitiesLoaded).cities.firstWhere(
-            (final city) => city.name.contains(jobInfo.desiredWorkingProvince!),
-          )
+      jobInfo.desiredWorkingProvince != null && jobCitiesState is CitiesLoaded
+          ? (() {
+              try {
+                return jobCitiesState.cities.firstWhere(
+                  (final city) => city.name.contains(jobInfo.desiredWorkingProvince!),
+                );
+              } catch (e) {
+                debugPrint('City not found: ${jobInfo.desiredWorkingProvince}');
+                return null;
+              }
+            })()
           : null,
     );
 
@@ -1332,36 +1350,35 @@ class JobInfoEditPage extends HookConsumerWidget {
                     name: 'position',
                     focusNode: positionFocusNode,
                     validator: (final value) => null,
-                    builder:
-                        (final FormFieldState<dynamic> field) => InputDecorator(
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(12),
-                              ),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 15,
-                              horizontal: 20,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _PositionDropdown(
-                                selectedPositions: selectedPositions,
-                                positionKey: positionKey,
-                                positions: positions,
-                                onTap: hideAllDropdowns,
-                                positionOverlayEntry: positionOverlayEntry,
-                              ),
-                              if (selectedPositions.value.isNotEmpty)
-                                _PositionSelector(
-                                  selectedPositions: selectedPositions,
-                                ),
-                            ],
+                    builder: (final FormFieldState<dynamic> field) => InputDecorator(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(12),
                           ),
                         ),
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 20,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _PositionDropdown(
+                            selectedPositions: selectedPositions,
+                            positionKey: positionKey,
+                            positions: positions,
+                            onTap: hideAllDropdowns,
+                            positionOverlayEntry: positionOverlayEntry,
+                          ),
+                          if (selectedPositions.value.isNotEmpty)
+                            _PositionSelector(
+                              selectedPositions: selectedPositions,
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -1376,36 +1393,35 @@ class JobInfoEditPage extends HookConsumerWidget {
                     name: 'major',
                     focusNode: majorFocusNode,
                     validator: (final value) => null,
-                    builder:
-                        (final FormFieldState<dynamic> field) => InputDecorator(
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(12),
-                              ),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 15,
-                              horizontal: 20,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _MajorSelector(
-                                selectedMajors: selectedMajors,
-                                majorKey: majorKey,
-                                majors: majors,
-                                onTap: hideAllDropdowns,
-                                majorOverlayEntry: majorOverlayEntry,
-                              ),
-                              if (selectedMajors.value.isNotEmpty)
-                                _MajorList(
-                                  selectedMajors: selectedMajors,
-                                ),
-                            ],
+                    builder: (final FormFieldState<dynamic> field) => InputDecorator(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(12),
                           ),
                         ),
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 20,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _MajorSelector(
+                            selectedMajors: selectedMajors,
+                            majorKey: majorKey,
+                            majors: majors,
+                            onTap: hideAllDropdowns,
+                            majorOverlayEntry: majorOverlayEntry,
+                          ),
+                          if (selectedMajors.value.isNotEmpty)
+                            _MajorList(
+                              selectedMajors: selectedMajors,
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -1420,36 +1436,35 @@ class JobInfoEditPage extends HookConsumerWidget {
                     name: 'job_type',
                     focusNode: jobTypeFocusNode,
                     validator: (final value) => null,
-                    builder:
-                        (final FormFieldState<dynamic> field) => InputDecorator(
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(12),
-                              ),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 15,
-                              horizontal: 20,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _JobTypeList(
-                                selectedJobTypes: selectedJobTypes,
-                                jobTypeKey: jobTypeKey,
-                                jobTypes: jobTypes,
-                                onTap: hideAllDropdowns,
-                                jobTypeOverlayEntry: jobTypeOverlayEntry,
-                              ),
-                              if (selectedJobTypes.value.isNotEmpty)
-                                _ScheduleList(
-                                  selectedJobTypes: selectedJobTypes,
-                                ),
-                            ],
+                    builder: (final FormFieldState<dynamic> field) => InputDecorator(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(12),
                           ),
                         ),
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 20,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _JobTypeList(
+                            selectedJobTypes: selectedJobTypes,
+                            jobTypeKey: jobTypeKey,
+                            jobTypes: jobTypes,
+                            onTap: hideAllDropdowns,
+                            jobTypeOverlayEntry: jobTypeOverlayEntry,
+                          ),
+                          if (selectedJobTypes.value.isNotEmpty)
+                            _ScheduleList(
+                              selectedJobTypes: selectedJobTypes,
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -1464,29 +1479,28 @@ class JobInfoEditPage extends HookConsumerWidget {
                     name: 'location',
                     focusNode: locationFocusNode,
                     validator: (final value) => null,
-                    builder:
-                        (final FormFieldState<dynamic> field) => InputDecorator(
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(12),
-                              ),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 15,
-                              horizontal: 20,
-                            ),
-                          ),
-                          child: _CitiesJobDropdown(
-                            selectedCity: selectedCity,
-                            locationFocusNode: locationFocusNode,
-                            cvFocusNode: cvFocusNode,
-                            locationOverlayEntry: locationOverlayEntry,
-                            cities: cities,
-                            locationKey: locationKey,
-                            hideAllDropdowns: hideAllDropdowns,
+                    builder: (final FormFieldState<dynamic> field) => InputDecorator(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(12),
                           ),
                         ),
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 20,
+                        ),
+                      ),
+                      child: _CitiesJobDropdown(
+                        selectedCity: selectedCity,
+                        locationFocusNode: locationFocusNode,
+                        cvFocusNode: cvFocusNode,
+                        locationOverlayEntry: locationOverlayEntry,
+                        cities: cities,
+                        locationKey: locationKey,
+                        hideAllDropdowns: hideAllDropdowns,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -1704,42 +1718,41 @@ class _CitiesJobDropdown extends StatelessWidget {
       final Size size = renderBox.size;
       final Offset position = renderBox.localToGlobal(Offset.zero);
       locationOverlayEntry.value = OverlayEntry(
-        builder:
-            (final context) => Positioned(
-              top: position.dy + size.height,
-              left: position.dx,
-              width: size.width,
-              child: Card(
-                elevation: 8,
-                margin: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 300),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: cities.length,
-                    itemBuilder: (final context, final index) {
-                      final city = cities[index];
-                      return ListTile(
-                        title: Text(city.name),
-                        onTap: () async {
-                          selectedCity.value = city;
-                          await hideAllDropdowns();
-                          locationFocusNode.unfocus();
-                          if (context.mounted) {
-                            FocusScope.of(context).requestFocus(cvFocusNode);
-                          }
-                        },
-                        dense: true,
-                      );
+        builder: (final context) => Positioned(
+          top: position.dy + size.height,
+          left: position.dx,
+          width: size.width,
+          child: Card(
+            elevation: 8,
+            margin: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Container(
+              constraints: const BoxConstraints(maxHeight: 300),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: cities.length,
+                itemBuilder: (final context, final index) {
+                  final city = cities[index];
+                  return ListTile(
+                    title: Text(city.name),
+                    onTap: () async {
+                      selectedCity.value = city;
+                      await hideAllDropdowns();
+                      locationFocusNode.unfocus();
+                      if (context.mounted) {
+                        FocusScope.of(context).requestFocus(cvFocusNode);
+                      }
                     },
-                  ),
-                ),
+                    dense: true,
+                  );
+                },
               ),
             ),
+          ),
+        ),
       );
       if (context.mounted) {
         Overlay.of(context).insert(locationOverlayEntry.value!);
@@ -1886,40 +1899,39 @@ class _JobTypeList extends StatelessWidget {
       final Size size = renderBox.size;
       final Offset position = renderBox.localToGlobal(Offset.zero);
       jobTypeOverlayEntry.value = OverlayEntry(
-        builder:
-            (final context) => Positioned(
-              top: position.dy + size.height,
-              left: position.dx,
-              width: size.width,
-              child: Card(
-                elevation: 8,
-                margin: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 300),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: jobTypes.length,
-                    itemBuilder: (final context, final index) {
-                      final jobType = jobTypes[index];
-                      return ListTile(
-                        title: Text(jobType.name),
-                        onTap: () async {
-                          // ignore: lines_longer_than_80_chars
-                          final newSelection = Set<Schedule>.from(selectedJobTypes.value)..add(jobType);
-                          selectedJobTypes.value = newSelection;
-                          await onTap();
-                        },
-                        dense: true,
-                      );
+        builder: (final context) => Positioned(
+          top: position.dy + size.height,
+          left: position.dx,
+          width: size.width,
+          child: Card(
+            elevation: 8,
+            margin: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Container(
+              constraints: const BoxConstraints(maxHeight: 300),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: jobTypes.length,
+                itemBuilder: (final context, final index) {
+                  final jobType = jobTypes[index];
+                  return ListTile(
+                    title: Text(jobType.name),
+                    onTap: () async {
+                      // ignore: lines_longer_than_80_chars
+                      final newSelection = Set<Schedule>.from(selectedJobTypes.value)..add(jobType);
+                      selectedJobTypes.value = newSelection;
+                      await onTap();
                     },
-                  ),
-                ),
+                    dense: true,
+                  );
+                },
               ),
             ),
+          ),
+        ),
       );
       if (context.mounted) {
         Overlay.of(context).insert(jobTypeOverlayEntry.value!);
@@ -2049,40 +2061,39 @@ class _MajorSelector extends StatelessWidget {
       final Size size = renderBox.size;
       final Offset position = renderBox.localToGlobal(Offset.zero);
       majorOverlayEntry.value = OverlayEntry(
-        builder:
-            (final context) => Positioned(
-              top: position.dy + size.height,
-              left: position.dx,
-              width: size.width,
-              child: Card(
-                elevation: 8,
-                margin: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 300),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: majors.length,
-                    itemBuilder: (final context, final index) {
-                      final major = majors[index];
-                      return ListTile(
-                        title: Text(major.name),
-                        onTap: () async {
-                          // ignore: lines_longer_than_80_chars
-                          final newSelection = Set<Major>.from(selectedMajors.value)..add(major);
-                          selectedMajors.value = newSelection;
-                          await onTap();
-                        },
-                        dense: true,
-                      );
+        builder: (final context) => Positioned(
+          top: position.dy + size.height,
+          left: position.dx,
+          width: size.width,
+          child: Card(
+            elevation: 8,
+            margin: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Container(
+              constraints: const BoxConstraints(maxHeight: 300),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: majors.length,
+                itemBuilder: (final context, final index) {
+                  final major = majors[index];
+                  return ListTile(
+                    title: Text(major.name),
+                    onTap: () async {
+                      // ignore: lines_longer_than_80_chars
+                      final newSelection = Set<Major>.from(selectedMajors.value)..add(major);
+                      selectedMajors.value = newSelection;
+                      await onTap();
                     },
-                  ),
-                ),
+                    dense: true,
+                  );
+                },
               ),
             ),
+          ),
+        ),
       );
       if (context.mounted) {
         Overlay.of(context).insert(majorOverlayEntry.value!);
@@ -2212,40 +2223,39 @@ class _PositionDropdown extends StatelessWidget {
       final Size size = renderBox.size;
       final Offset position = renderBox.localToGlobal(Offset.zero);
       positionOverlayEntry.value = OverlayEntry(
-        builder:
-            (final context) => Positioned(
-              top: position.dy + size.height,
-              left: position.dx,
-              width: size.width,
-              child: Card(
-                elevation: 8,
-                margin: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 300),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: positions.length,
-                    itemBuilder: (final context, final index) {
-                      final position = positions[index];
-                      return ListTile(
-                        title: Text(position.name),
-                        onTap: () async {
-                          // ignore: lines_longer_than_80_chars
-                          final newSelection = Set<Position>.from(selectedPositions.value)..add(position);
-                          selectedPositions.value = newSelection;
-                          await onTap();
-                        },
-                        dense: true,
-                      );
+        builder: (final context) => Positioned(
+          top: position.dy + size.height,
+          left: position.dx,
+          width: size.width,
+          child: Card(
+            elevation: 8,
+            margin: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Container(
+              constraints: const BoxConstraints(maxHeight: 300),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: positions.length,
+                itemBuilder: (final context, final index) {
+                  final position = positions[index];
+                  return ListTile(
+                    title: Text(position.name),
+                    onTap: () async {
+                      // ignore: lines_longer_than_80_chars
+                      final newSelection = Set<Position>.from(selectedPositions.value)..add(position);
+                      selectedPositions.value = newSelection;
+                      await onTap();
                     },
-                  ),
-                ),
+                    dense: true,
+                  );
+                },
               ),
             ),
+          ),
+        ),
       );
       if (context.mounted) {
         Overlay.of(context).insert(positionOverlayEntry.value!);
@@ -2300,6 +2310,7 @@ class _CustomNavbar extends StatelessWidget {
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
     ),
     child: CustomButton(
+      key: const Key('save_profile_button'),
       onPressed: onPressed,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),

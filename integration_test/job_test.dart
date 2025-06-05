@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -232,7 +234,10 @@ void main() {
 
         // Check that job results might have changed (filtered)
         final filteredJobCards = find.byType(Card);
-        debugPrint('Initial jobs: $initialCount, Filtered jobs: ${tester.widgetList(filteredJobCards).length}');
+        debugPrint(
+          // ignore: lines_longer_than_80_chars
+          'Initial jobs: $initialCount, Filtered jobs: ${tester.widgetList(filteredJobCards).length}',
+        );
       }
 
       debugPrint('✅ Job filter application test completed successfully');
@@ -300,10 +305,15 @@ void main() {
         if (tester.widgetList(jobDetailElements).isEmpty) {
           // Try alternative ways to verify we're on detail page
           final applyButtons = find.byKey(const Key('job_apply_button'));
-          final bookmarkButtons = find.byKey(const Key('job_detail_bookmark_button'));
-
-          // If we find either apply or bookmark button, we're likely on detail page
-          if (tester.widgetList(applyButtons).isNotEmpty || tester.widgetList(bookmarkButtons).isNotEmpty) {
+          final bookmarkButtons = find.byKey(
+            const Key('job_detail_bookmark_button'),
+          );
+          if (tester.widgetList(applyButtons).isNotEmpty ||
+              tester
+                  .widgetList(
+                    bookmarkButtons,
+                  )
+                  .isNotEmpty) {
             debugPrint('Successfully navigated to job detail page');
           }
         } // Go back to job list
@@ -355,7 +365,9 @@ void main() {
 
         // Check if results are shown (cards should exist)
         final jobCards = find.byType(Card);
-        debugPrint('Search for "$query": Found ${tester.widgetList(jobCards).length} results');
+        debugPrint(
+          'Search: "$query": Got ${tester.widgetList(jobCards).length} result',
+        );
 
         // Small delay between searches
         await tester.pump(const Duration(milliseconds: 500));
@@ -450,12 +462,17 @@ void main() {
       // Check if profile elements are visible
       final profileElements = find.byType(SwitchListTile);
       if (tester.widgetList(profileElements).isNotEmpty) {
-        debugPrint('Profile page loaded with ${tester.widgetList(profileElements).length} settings');
+        debugPrint(
+          // ignore: lines_longer_than_80_chars
+          'Profile page load with ${tester.widgetList(profileElements).length} settings',
+        );
       }
 
       // Look for edit buttons
       final editButtons = find.byType(IconButton);
-      debugPrint('Found ${tester.widgetList(editButtons).length} buttons on profile page');
+      debugPrint(
+        'Found ${tester.widgetList(editButtons).length} buttons on profile',
+      );
 
       // Go back to home
       final homeTab = find.byKey(const Key('home_tab'));
@@ -483,7 +500,9 @@ void main() {
         // Look for language options
         final languageOptions = find.byType(PopupMenuItem);
         if (tester.widgetList(languageOptions).isNotEmpty) {
-          debugPrint('Language selector opened with ${tester.widgetList(languageOptions).length} options');
+          debugPrint(
+            'Language selector opened with ${tester.widgetList(languageOptions).length} options',
+          );
 
           // Close the popup by tapping outside
           await tester.tapAt(const Offset(50, 50));
@@ -733,7 +752,9 @@ void main() {
 
       for (final indicator in loadingIndicators) {
         if (tester.widgetList(indicator).isNotEmpty) {
-          debugPrint('Found loading indicator: ${indicator.toString()}');
+          debugPrint(
+            'Found loading indicator: $indicator',
+          );
         }
       }
 
@@ -826,7 +847,7 @@ void main() {
 
       for (final element in profileElements) {
         if (tester.widgetList(element).isNotEmpty) {
-          debugPrint('Found profile element: ${element.toString()}');
+          debugPrint('Found profile element: $element');
         }
       }
 
@@ -1080,7 +1101,7 @@ void main() {
 
       for (final element in accessibilityElements) {
         if (tester.widgetList(element).isNotEmpty) {
-          debugPrint('Found accessible element: ${element.toString()}');
+          debugPrint('Found accessible element: $element');
         }
       }
 
@@ -1125,7 +1146,7 @@ void main() {
 
       // Test invalid input handling
       if (tester.widgetList(searchField).isNotEmpty) {
-        await tester.enterText(searchField, '!@#\$%^&*()');
+        await tester.enterText(searchField, r'!@#$%^&*()');
         await tester.testTextInput.receiveAction(TextInputAction.search);
         await tester.pumpAndSettle(const Duration(seconds: 2));
       }
@@ -1233,8 +1254,9 @@ void main() {
 
       // Measure scroll performance over multiple scrolls
       for (int i = 0; i < 10; i++) {
-        performanceStopwatch.reset();
-        performanceStopwatch.start();
+        performanceStopwatch
+          ..reset()
+          ..start();
 
         // Scroll down
         await tester.fling(scrollView.first, const Offset(0, -500), 1000);
@@ -1248,9 +1270,9 @@ void main() {
       }
 
       // Calculate performance metrics
-      final averageFrameTime = frameTimings.reduce((a, b) => a + b) / frameTimings.length;
-      final maxFrameTime = frameTimings.reduce((a, b) => a > b ? a : b);
-      final minFrameTime = frameTimings.reduce((a, b) => a < b ? a : b);
+      final averageFrameTime = frameTimings.reduce((final a, final b) => a + b) / frameTimings.length;
+      final maxFrameTime = frameTimings.reduce((final a, final b) => a > b ? a : b);
+      final minFrameTime = frameTimings.reduce((final a, final b) => a < b ? a : b);
 
       debugPrint('⚡ Scroll Performance Metrics:');
       debugPrint('   Average frame time: ${averageFrameTime.toStringAsFixed(2)}ms');
@@ -1306,7 +1328,7 @@ void main() {
       }
 
       // Calculate average search time
-      final averageSearchTime = searchTimings.values.reduce((a, b) => a + b) / searchTimings.length;
+      final averageSearchTime = searchTimings.values.reduce((final a, final b) => a + b) / searchTimings.length;
       debugPrint('⚡ Average search time: ${averageSearchTime.toStringAsFixed(2)}ms');
 
       // Performance assertion
@@ -1342,7 +1364,8 @@ void main() {
 
       // Calculate average navigation time
       if (navigationTimings.isNotEmpty) {
-        final averageNavigationTime = navigationTimings.values.reduce((a, b) => a + b) / navigationTimings.length;
+        final averageNavigationTime =
+            navigationTimings.values.reduce((final a, final b) => a + b) / navigationTimings.length;
         debugPrint('⚡ Average navigation time: ${averageNavigationTime.toStringAsFixed(2)}ms');
 
         // Performance assertion
@@ -1473,7 +1496,8 @@ void main() {
       }
 
       if (detailLoadingTimes.isNotEmpty) {
-        final averageDetailLoadingTime = detailLoadingTimes.reduce((a, b) => a + b) / detailLoadingTimes.length;
+        final averageDetailLoadingTime =
+            detailLoadingTimes.reduce((final a, final b) => a + b) / detailLoadingTimes.length;
         debugPrint('⚡ Average job detail loading time: ${averageDetailLoadingTime.toStringAsFixed(2)}ms');
 
         // Performance assertion
@@ -1500,8 +1524,9 @@ void main() {
       final loginNetworkTime = networkStopwatch.elapsedMilliseconds;
       debugPrint('⚡ Login network time: ${loginNetworkTime}ms');
 
-      networkStopwatch.reset();
-      networkStopwatch.start();
+      networkStopwatch
+        ..reset()
+        ..start();
 
       // Measure job list loading network performance
       await tester.pumpAndSettle(const Duration(seconds: 5));
@@ -1512,8 +1537,9 @@ void main() {
       final searchNetworkTimes = <int>[];
 
       for (int i = 0; i < 3; i++) {
-        networkStopwatch.reset();
-        networkStopwatch.start();
+        networkStopwatch
+          ..reset()
+          ..start();
 
         final searchBar = find.byKey(const Key('job_search_bar'));
         await tester.tap(searchBar);
@@ -1526,7 +1552,8 @@ void main() {
         debugPrint('⚡ Search network time ${i + 1}: ${networkStopwatch.elapsedMilliseconds}ms');
       }
 
-      final averageSearchNetworkTime = searchNetworkTimes.reduce((a, b) => a + b) / searchNetworkTimes.length;
+      final averageSearchNetworkTime =
+          searchNetworkTimes.reduce((final a, final b) => a + b) / searchNetworkTimes.length;
       debugPrint('⚡ Average search network time: ${averageSearchNetworkTime.toStringAsFixed(2)}ms');
 
       // Performance assertions
