@@ -193,6 +193,7 @@ class _JobPage extends HookConsumerWidget {
                 children: [
                   Expanded(
                     child: SearchBar(
+                      key: const Key('job_search_bar'),
                       leading: Icon(
                         IconlyLight.search,
                         color: Theme.of(context).colorScheme.primaryContainer,
@@ -237,6 +238,7 @@ class _JobPage extends HookConsumerWidget {
                     ),
                   ),
                   _CustomFilter(
+                    key: const Key('job_filter_button'),
                     controller: controller,
                     isLoading: isLoading,
                     ref: ref,
@@ -309,6 +311,7 @@ class _CustomFilter extends StatelessWidget {
   /// [controller] The [TextEditingController] for the search bar.
   /// [node] The [FocusNode] for the search bar.
   const _CustomFilter({
+    super.key,
     required this.isLoading,
     required this.ref,
     required this.controller,
@@ -360,15 +363,14 @@ class _CustomFilter extends StatelessWidget {
           await showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            builder:
-                (final context) => _FilterModal(
-                  jobTypes: jobFilterState.schedules,
-                  jobPositions: jobFilterState.positions,
-                  jobMajors: jobFilterState.majors,
-                  jobCity: jobFilterState.city,
-                  searchController: controller,
-                  searchNode: node,
-                ),
+            builder: (final context) => _FilterModal(
+              jobTypes: jobFilterState.schedules,
+              jobPositions: jobFilterState.positions,
+              jobMajors: jobFilterState.majors,
+              jobCity: jobFilterState.city,
+              searchController: controller,
+              searchNode: node,
+            ),
           );
         }
       } finally {
@@ -446,18 +448,17 @@ class _CustomPagedList extends StatelessWidget {
       page.value++;
     },
     builderDelegate: PagedChildBuilderDelegate<Job>(
-      itemBuilder:
-          (final context, final item, final index) => JobCard(
-            job: item,
-            onPressed: () async {
-              // ignore: lines_longer_than_80_chars
-              final jobDetailState = ref.read(jobDetailControllerProvider.notifier);
-              await jobDetailState.getJobDetail(jobId: item.id);
-              if (context.mounted) {
-                await JobDetailRoute(id: item.id).push(context);
-              }
-            },
-          ),
+      itemBuilder: (final context, final item, final index) => JobCard(
+        job: item,
+        onPressed: () async {
+          // ignore: lines_longer_than_80_chars
+          final jobDetailState = ref.read(jobDetailControllerProvider.notifier);
+          await jobDetailState.getJobDetail(jobId: item.id);
+          if (context.mounted) {
+            await JobDetailRoute(id: item.id).push(context);
+          }
+        },
+      ),
     ),
   );
 
@@ -481,8 +482,7 @@ class _FilterModal extends HookWidget {
   /// [searchNode] The focus node for the main search bar.
   /// [jobTypes] The currently selected set of job type IDs.
   /// [jobPositions] The currently selected set of job position IDs.
-  /// [jobMajors] The currently selected set of job major IDs.
-  /// [jobCity] The currently selected city for filtering.
+  /// [jobMajors] The currently selected set of job major IDs.  /// [jobCity] The currently selected city for filtering.
   const _FilterModal({
     required this.searchController,
     required this.searchNode,
@@ -517,6 +517,7 @@ class _FilterModal extends HookWidget {
     final majorSelection = useState<Set<int>>(jobMajors);
     final citySelection = useState<City?>(jobCity);
     return Container(
+      key: const Key('filter_modal_container'),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       height: MediaQuery.of(context).size.height * 0.75,
       child: Column(
@@ -608,12 +609,11 @@ class _FilterModal extends HookWidget {
                   height: 42,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    itemBuilder:
-                        (_, final index) => _SelectedOption(
-                          label: schedules[index].name,
-                          index: index,
-                          selection: jobTypeSelection,
-                        ),
+                    itemBuilder: (_, final index) => _SelectedOption(
+                      label: schedules[index].name,
+                      index: index,
+                      selection: jobTypeSelection,
+                    ),
                     separatorBuilder: (_, _) => const SizedBox(width: 12),
                     itemCount: schedules.length,
                   ),
@@ -648,12 +648,11 @@ class _FilterModal extends HookWidget {
                   height: 42,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    itemBuilder:
-                        (_, final index) => _SelectedOption(
-                          label: positions[index].name,
-                          index: index,
-                          selection: jobPositionSelection,
-                        ),
+                    itemBuilder: (_, final index) => _SelectedOption(
+                      label: positions[index].name,
+                      index: index,
+                      selection: jobPositionSelection,
+                    ),
                     separatorBuilder: (_, _) => const SizedBox(width: 12),
                     itemCount: positions.length,
                   ),
@@ -688,12 +687,11 @@ class _FilterModal extends HookWidget {
                   height: 42,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    itemBuilder:
-                        (_, final index) => _SelectedOption(
-                          label: majors[index].name,
-                          index: index,
-                          selection: majorSelection,
-                        ),
+                    itemBuilder: (_, final index) => _SelectedOption(
+                      label: majors[index].name,
+                      index: index,
+                      selection: majorSelection,
+                    ),
                     separatorBuilder: (_, _) => const SizedBox(width: 12),
                     itemCount: majors.length,
                   ),
@@ -703,16 +701,15 @@ class _FilterModal extends HookWidget {
           ),
           const SizedBox(height: 50),
           Consumer(
-            builder:
-                (final context, final ref, final child) => _FilterButton(
-                  ref: ref,
-                  searchController: searchController,
-                  searchNode: searchNode,
-                  jobTypeSelection: jobTypeSelection,
-                  jobPositionSelection: jobPositionSelection,
-                  majorSelection: majorSelection,
-                  citySelection: citySelection,
-                ),
+            builder: (final context, final ref, final child) => _FilterButton(
+              ref: ref,
+              searchController: searchController,
+              searchNode: searchNode,
+              jobTypeSelection: jobTypeSelection,
+              jobPositionSelection: jobPositionSelection,
+              majorSelection: majorSelection,
+              citySelection: citySelection,
+            ),
           ),
         ],
       ),
@@ -775,9 +772,9 @@ class _FilterButton extends StatelessWidget {
 
   /// Notifier holding the selected city from the modal.
   final ValueNotifier<City?> citySelection;
-
   @override
   Widget build(final BuildContext context) => CustomButton(
+    key: const Key('apply_filter_button'),
     onPressed: () async {
       final majorState = ref.read(majorControllerProvider);
       final positionState = ref.read(positionControllerProvider);
@@ -785,16 +782,14 @@ class _FilterButton extends StatelessWidget {
       final List<Major>? major =
           // ignore: lines_longer_than_80_chars
           majorState is MajorLoaded ? majorSelection.value.map((final e) => majorState.majors[e]).toList() : null;
-      final List<Position>? position =
-          positionState is PositionLoaded
-              // ignore: lines_longer_than_80_chars
-              ? [...jobPositionSelection.value.map((final e) => positionState.positions[e])]
-              : null;
-      final List<Schedule>? schedule =
-          scheduleState is ScheduleLoaded
-              // ignore: lines_longer_than_80_chars
-              ? jobTypeSelection.value.map((final e) => scheduleState.schedules[e]).toList()
-              : null;
+      final List<Position>? position = positionState is PositionLoaded
+          // ignore: lines_longer_than_80_chars
+          ? [...jobPositionSelection.value.map((final e) => positionState.positions[e])]
+          : null;
+      final List<Schedule>? schedule = scheduleState is ScheduleLoaded
+          // ignore: lines_longer_than_80_chars
+          ? jobTypeSelection.value.map((final e) => scheduleState.schedules[e]).toList()
+          : null;
       Navigator.of(context).pop();
       await ref
           .read(jobFilterControllerProvider.notifier)
@@ -877,11 +872,11 @@ class _SelectedOption extends StatelessWidget {
 
   /// Notifier holding the set of currently selected option indices.
   final ValueNotifier<Set<int>> selection;
-
   @override
   Widget build(final BuildContext context) {
     final isSelected = selection.value.contains(index);
     return FilledButton(
+      key: Key('filter_option_${label}_$index'),
       onPressed: () async {
         if (isSelected) {
           // ignore: lines_longer_than_80_chars
@@ -947,10 +942,9 @@ class _LanguageSelector extends HookWidget {
               }
             },
             icon: CircleAvatar(
-              backgroundImage:
-                  isVietnamese.value
-                      ? const AssetImage('assets/images/vn.png')
-                      : const AssetImage('assets/images/en.png'),
+              backgroundImage: isVietnamese.value
+                  ? const AssetImage('assets/images/vn.png')
+                  : const AssetImage('assets/images/en.png'),
             ),
           ),
       menuChildren: [

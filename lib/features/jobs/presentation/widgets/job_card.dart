@@ -39,9 +39,10 @@ class JobCard extends HookConsumerWidget {
           job.id,
         );
     final isBookmarkProcessing = useState(false);
-
     return Card(
+      key: Key('job_card_${job.id}'),
       child: InkWell(
+        key: Key('job_card_tap_${job.id}'),
         borderRadius: BorderRadius.circular(12),
         onTap: onPressed,
         child: Padding(
@@ -68,6 +69,7 @@ class JobCard extends HookConsumerWidget {
                     ),
                   ),
                   _BookmarkButton(
+                    key: Key('bookmark_button_${job.id}'),
                     job: job,
                     isBookmarkProcessing: isBookmarkProcessing,
                     ref: ref,
@@ -80,25 +82,27 @@ class JobCard extends HookConsumerWidget {
                   height: 32,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    itemBuilder:
-                        (final context, final index) => Chip(
-                          label: Text(
-                            job.positions[index].name,
-                            // ignore: lines_longer_than_80_chars
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          // ignore: lines_longer_than_80_chars
-                          backgroundColor: Theme.of(context).colorScheme.primary.withValues(
-                            alpha: 0.9,
-                          ),
-                          side: BorderSide.none,
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                    itemBuilder: (final context, final index) => Chip(
+                      label: Text(
+                        job.positions[index].name,
+                        // ignore: lines_longer_than_80_chars
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          fontWeight: FontWeight.w600,
                         ),
+                      ),
+                      // ignore: lines_longer_than_80_chars
+                      backgroundColor: Theme.of(context).colorScheme.primary.withValues(
+                        alpha: 0.9,
+                      ),
+                      side: BorderSide.none,
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                    ),
                     separatorBuilder:
-                        (final context, final index) => const SizedBox(
+                        (
+                          final context,
+                          final index,
+                        ) => const SizedBox(
                           width: 8,
                         ),
                     itemCount: job.positions.length,
@@ -475,12 +479,13 @@ class JobIntroduce extends StatelessWidget {
       ),
       Text(
         content,
-        style: Theme.of(
-          context,
-        ).textTheme.labelLarge?.copyWith(
-          color: Theme.of(context).colorScheme.onSecondary,
-          fontWeight: FontWeight.w500,
-        ),
+        style:
+            Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSecondary,
+              fontWeight: FontWeight.w500,
+            ),
         softWrap: true,
       ),
     ],
@@ -513,25 +518,23 @@ class _JobImage extends StatelessWidget {
     width: 48,
     height: 48,
     fit: BoxFit.cover,
-    placeholder:
-        (final context, final url) => Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
-          child: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
+    placeholder: (final context, final url) => Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
         ),
-    errorWidget:
-        (final context, final url, final error) => Icon(
-          IconlyLight.image,
-          size: 48,
-          color: Theme.of(context).colorScheme.primary,
-        ),
+      ),
+    ),
+    errorWidget: (final context, final url, final error) => Icon(
+      IconlyLight.image,
+      size: 48,
+      color: Theme.of(context).colorScheme.primary,
+    ),
   );
 
   @override
@@ -557,10 +560,11 @@ class AppliedJobCard extends StatelessWidget {
 
   /// Callback function invoked when the card is tapped.
   final Future<void> Function() onPressed;
-
   @override
   Widget build(final BuildContext context) => Card(
+    key: Key('applied_job_card_${job.id}'),
     child: InkWell(
+      key: Key('applied_job_card_tap_${job.id}'),
       borderRadius: BorderRadius.circular(12),
       onTap: onPressed,
       child: Padding(
@@ -593,25 +597,27 @@ class AppliedJobCard extends StatelessWidget {
                 height: 32,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  itemBuilder:
-                      (final context, final index) => Chip(
-                        label: Text(
-                          job.positions[index].name,
-                          // ignore: lines_longer_than_80_chars
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        // ignore: lines_longer_than_80_chars
-                        backgroundColor: Theme.of(context).colorScheme.primary.withValues(
-                          alpha: 0.9,
-                        ),
-                        side: BorderSide.none,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                  itemBuilder: (final context, final index) => Chip(
+                    label: Text(
+                      job.positions[index].name,
+                      // ignore: lines_longer_than_80_chars
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.w600,
                       ),
+                    ),
+                    // ignore: lines_longer_than_80_chars
+                    backgroundColor: Theme.of(context).colorScheme.primary.withValues(
+                      alpha: 0.9,
+                    ),
+                    side: BorderSide.none,
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                  ),
                   separatorBuilder:
-                      (final context, final index) => const SizedBox(
+                      (
+                        final context,
+                        final index,
+                      ) => const SizedBox(
                         width: 8,
                       ),
                   itemCount: job.positions.length,
