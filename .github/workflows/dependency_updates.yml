@@ -28,7 +28,7 @@ jobs:
         flutter pub deps
         flutter pub upgrade --dry-run > upgrade-preview.txt
         cat upgrade-preview.txt
-          - name: Update dependencies
+    - name: Update dependencies
       run: |
         flutter pub upgrade
         
