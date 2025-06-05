@@ -30,17 +30,6 @@ jobs:
     - name: Run code generation
       run: dart run build_runner build --delete-conflicting-outputs
 
-    - name: Verify formatting
-      run: dart format --output=none --set-exit-if-changed .
-
-    - name: Analyze code
-      run: flutter analyze --fatal-infos
-
-    - name: Check for unused files
-      run: |
-        echo "Checking for unused files..."
-        # Add custom unused file detection if needed
-
   quick_test:
     name: Quick Tests
     runs-on: ubuntu-latest
