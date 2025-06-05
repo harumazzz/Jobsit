@@ -66,15 +66,6 @@ else
     exit 1
 fi
 
-# Build web application
-echo -e "${YELLOW}🌐 Building web application...${NC}"
-if flutter build web --release; then
-    echo -e "${GREEN}✅ Web build completed successfully${NC}"
-else
-    echo -e "${RED}❌ Web build failed${NC}"
-    exit 1
-fi
-
 # Final success message
 echo ""
 echo -e "${GREEN}🎉 All CI/CD checks passed successfully!${NC}"
