@@ -30,18 +30,22 @@ class BottomNavBar extends HookWidget {
     selectedIndex: index,
     destinations: <Widget>[
       NavigationDestination(
+        key: const Key('home_tab'),
         icon: const Icon(IconlyLight.home),
         label: context.t.common.home,
       ),
       NavigationDestination(
+        key: const Key('applied_jobs_tab'),
         icon: const Icon(IconlyLight.work),
         label: context.t.common.applied,
       ),
       NavigationDestination(
+        key: const Key('saved_jobs_tab'),
         icon: const Icon(IconlyLight.bookmark),
         label: context.t.common.saved,
       ),
       NavigationDestination(
+        key: const Key('profile_tab'),
         icon: const Icon(IconlyLight.profile),
         label: context.t.common.profile,
       ),

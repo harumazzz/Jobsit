@@ -43,7 +43,7 @@ sealed class RegisterUserParams with _$RegisterUserParams {
 /// Takes [RegisterUserParams] and returns a [RegisteredUser] on success
 /// or [Failure].
 // ignore: lines_longer_than_80_chars
-final class RegisterUser implements UseCase<RegisteredUser, RegisterUserParams> {
+class RegisterUser implements UseCase<RegisteredUser, RegisterUserParams> {
   /// Creates a [RegisterUser] use case.
   const RegisterUser(this._authRepository);
 
@@ -75,7 +75,7 @@ SendMail sendMail(final Ref ref) {
 /// Use case for sending a verification or activation email.
 ///
 /// Takes the user's email as a [String] and returns [Success] or [Failure].
-final class SendMail implements UseCase<Success, String> {
+class SendMail implements UseCase<Success, String> {
   /// Creates a [SendMail] use case.
   const SendMail(this._authRepository);
 
@@ -99,7 +99,7 @@ VerifyEmail verifyEmail(final Ref ref) {
 /// Use case for verifying a user's email with an OTP.
 ///
 /// Takes the OTP as a [String] and returns [Success] or [Failure].
-final class VerifyEmail implements UseCase<Success, String> {
+class VerifyEmail implements UseCase<Success, String> {
   /// Creates a [VerifyEmail] use case.
   const VerifyEmail(this._authRepository);
 
@@ -123,7 +123,7 @@ CheckEmail checkEmail(final Ref ref) {
 /// Use case for checking if an email is already registered.
 ///
 /// Takes the email as a [String] and returns a message [String] or [Failure].
-final class CheckEmail implements UseCase<String, String> {
+class CheckEmail implements UseCase<String, String> {
   /// Creates a [CheckEmail] use case.
   const CheckEmail(this._authRepository);
 

@@ -63,16 +63,16 @@ class ProfilePage extends HookConsumerWidget {
                           state.user.userInfo.avatar != null
                               ? AvatarSection(state: state)
                               : DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Theme.of(context).primaryColor,
-                                    width: 2,
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Theme.of(context).primaryColor,
+                                      width: 2,
+                                    ),
                                   ),
+                                  child: const _NoAvatar(),
                                 ),
-                                child: const _NoAvatar(),
-                              ),
                         _ => const CircularProgressIndicator.adaptive(),
                       },
                 ),
@@ -165,6 +165,7 @@ class ProfilePage extends HookConsumerWidget {
                   ),
                 ),
                 IconButton(
+                  key: const Key('edit_profile_button'),
                   tooltip: context.t.common.edit,
                   onPressed: () async {
                     if (isSelectedProfileEdit.value) {
@@ -218,6 +219,7 @@ class ProfilePage extends HookConsumerWidget {
                   ),
                 ),
                 IconButton(
+                  key: const Key('edit_job_button'),
                   tooltip: context.t.common.edit,
                   onPressed: () async {
                     if (isSelectedJobEdit.value) {
@@ -275,6 +277,7 @@ class ProfilePage extends HookConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           sliver: SliverToBoxAdapter(
             child: CustomButton(
+              key: const Key('logout_button'),
               onPressed: () async {
                 await ref.read(authControllerProvider.notifier).logOut();
                 ref
@@ -366,9 +369,9 @@ class _EmailSwitcher extends StatelessWidget {
 
   /// A [WidgetRef] to interact with Riverpod providers.
   final WidgetRef ref;
-
   @override
   Widget build(final BuildContext context) => SwitchListTile.adaptive(
+    key: const Key('email_notification_switch'),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     contentPadding: EdgeInsets.zero,
     controlAffinity: ListTileControlAffinity.leading,
@@ -459,28 +462,25 @@ class _JobCard extends StatelessWidget {
           title: context.t.job.position,
           count: state.user.jobInfo.positions.length,
           emptyBuilder: (_) => Text(context.t.profile.noPosition),
-          builder:
-              (final context, final index) => DisabledButton(
-                title: state.user.jobInfo.positions[index].name,
-              ),
+          builder: (final context, final index) => DisabledButton(
+            title: state.user.jobInfo.positions[index].name,
+          ),
         ),
         CarouselJobTile(
           title: context.t.job.major,
           count: state.user.jobInfo.majors.length,
           emptyBuilder: (_) => Text(context.t.profile.noMajor),
-          builder:
-              (final context, final index) => DisabledButton(
-                title: state.user.jobInfo.majors[index].name,
-              ),
+          builder: (final context, final index) => DisabledButton(
+            title: state.user.jobInfo.majors[index].name,
+          ),
         ),
         CarouselJobTile(
           title: context.t.job.type,
           count: state.user.jobInfo.schedules.length,
           emptyBuilder: (_) => Text(context.t.profile.noType),
-          builder:
-              (final context, final index) => DisabledButton(
-                title: state.user.jobInfo.schedules[index].name,
-              ),
+          builder: (final context, final index) => DisabledButton(
+            title: state.user.jobInfo.schedules[index].name,
+          ),
         ),
         JobTile(
           title: context.t.auth.location,
@@ -541,12 +541,12 @@ class _JobModifier extends StatelessWidget {
 
   /// A [WidgetRef] to interact with Riverpod providers.
   final WidgetRef ref;
-
   @override
   Widget build(final BuildContext context) => SliverPadding(
     padding: const EdgeInsets.symmetric(horizontal: 24),
     sliver: SliverToBoxAdapter(
       child: SwitchListTile.adaptive(
+        key: const Key('job_searchable_switch'),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         contentPadding: EdgeInsets.zero,
         controlAffinity: ListTileControlAffinity.leading,
@@ -554,8 +554,8 @@ class _JobModifier extends StatelessWidget {
           allowSearch.value
               ? Theme.of(context).colorScheme.primary
               : Theme.of(context).colorScheme.onSecondary.withValues(
-                alpha: 0.24,
-              ),
+                  alpha: 0.24,
+                ),
         ),
         thumbColor: WidgetStatePropertyAll(
           Theme.of(context).colorScheme.onPrimary,

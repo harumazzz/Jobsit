@@ -101,10 +101,9 @@ class JobTile extends StatelessWidget {
               alpha: 0.64,
             ),
             fontWeight: FontWeight.w700,
-            fontFamily:
-                GoogleFonts.workSans(
-                  fontWeight: FontWeight.w800,
-                ).fontFamily,
+            fontFamily: GoogleFonts.workSans(
+              fontWeight: FontWeight.w800,
+            ).fontFamily,
           ),
         ),
         child,
@@ -149,21 +148,19 @@ class CarouselJobTile extends StatelessWidget {
   @override
   Widget build(final BuildContext context) => JobTile(
     title: title,
-    child:
-        count == 0
-            ? emptyBuilder(context)
-            : SizedBox(
-              height: 32,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemBuilder: builder,
-                itemCount: count,
-                separatorBuilder:
-                    (final context, final index) => const SizedBox(
-                      width: 4,
-                    ),
+    child: count == 0
+        ? emptyBuilder(context)
+        : SizedBox(
+            height: 32,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemBuilder: builder,
+              itemCount: count,
+              separatorBuilder: (final context, final index) => const SizedBox(
+                width: 4,
               ),
             ),
+          ),
   );
 
   @override
@@ -204,9 +201,9 @@ class AvatarSection extends StatelessWidget {
 
   /// The current authenticated user state, containing user include the avatar.
   final AuthAuthorized state;
-
   @override
   Widget build(final BuildContext context) => DecoratedBox(
+    key: const Key('avatar_section'),
     decoration: BoxDecoration(
       color: Colors.transparent,
       shape: BoxShape.circle,
@@ -214,35 +211,33 @@ class AvatarSection extends StatelessWidget {
     ),
     child: ClipOval(
       child: CachedNetworkImage(
-        imageUrl: queryImage(state.user.userInfo.avatar!),
+        imageUrl: queryImage(state.user.userInfo.avatar ?? ''),
         width: 86,
         height: 86,
         fit: BoxFit.cover,
-        placeholder:
-            (final context, final url) => Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
+        placeholder: (final context, final url) => Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
             ),
-        errorWidget:
-            (final context, final url, final error) => DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Theme.of(context).primaryColor,
-                  width: 2,
-                ),
-              ),
-              child: const _NoAvatar(),
+          ),
+        ),
+        errorWidget: (final context, final url, final error) => DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Theme.of(context).primaryColor,
+              width: 2,
             ),
+          ),
+          child: const _NoAvatar(),
+        ),
       ),
     ),
   );

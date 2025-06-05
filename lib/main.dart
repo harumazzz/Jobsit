@@ -21,7 +21,7 @@ Future<void> main() async {
   final localeService = InjectionContainer.get<LocaleService>();
   final savedLocale = await localeService.getSavedLocale();
   await LocaleSettings.setLocale(savedLocale ?? AppLocale.en);
-  runApp(TranslationProvider(child: const ProviderScope(child: Main())));
+  runApp(const ProviderScope(child: Main()));
 }
 
 /// The root widget of the application.
@@ -33,14 +33,16 @@ class Main extends StatelessWidget {
   const Main({super.key});
 
   @override
-  Widget build(final BuildContext context) => MaterialApp.router(
-    debugShowCheckedModeBanner: false,
-    title: 'Jobsit IT',
-    theme: AppTheme.theme,
-    scrollBehavior: const MaterialScrollBehavior().copyWith(
-      multitouchDragStrategy: MultitouchDragStrategy.sumAllPointers,
-      scrollbars: false,
+  Widget build(final BuildContext context) => TranslationProvider(
+    child: MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      title: 'Jobsit IT',
+      theme: AppTheme.theme,
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        multitouchDragStrategy: MultitouchDragStrategy.sumAllPointers,
+        scrollbars: false,
+      ),
+      routerConfig: AppRouter.router,
     ),
-    routerConfig: AppRouter.router,
   );
 }

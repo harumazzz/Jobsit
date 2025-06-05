@@ -1,0 +1,84 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    - cron: '0 10 * * MON'  # Run every Monday at 10 AM UTC
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.2'
+        channel: 'stable'
+        cache: true
+        
+    - name: Check for dependency updates
+      run: |
+        flutter pub deps
+        flutter pub upgrade --dry-run > upgrade-preview.txt
+        cat upgrade-preview.txt
+        
+    - name: Update dependencies
+      run: |
+        flutter pub upgrade
+        
+    - name: Run tests after update
+      run: |
+        flutter test test/
+        flutter analyze --fatal-infos
+        
+    - name: Build to verify compatibility
+      run: |
+        flutter config --enable-web
+        flutter build web --release --web-renderer html
+        
+    - name: Check for changes
+      id: changes
+      run: |
+        if [[ -n $(git status --porcelain) ]]; then
+          echo "changes=true" >> $GITHUB_OUTPUT
+        else
+          echo "changes=false" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Create Pull Request
+      if: steps.changes.outputs.changes == 'true'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'chore: update Flutter dependencies'
+        title: 'chore: Automated dependency updates'
+        body: |
+          ## Automated Dependency Updates 🤖
+          
+          This PR contains automated dependency updates.
+          
+          ### Changes Made:
+          - Updated Flutter dependencies to latest compatible versions
+          - Verified all tests pass
+          - Confirmed web build works correctly
+          
+          ### Testing:
+          - ✅ Widget tests pass
+          - ✅ Code analysis passes
+          - ✅ Web build successful
+          
+          Please review the changes and merge if everything looks good.
+        branch: automated-dependency-updates
+        delete-branch: true
+        
+    - name: Notify if no updates
+      if: steps.changes.outputs.changes == 'false'
+      run: |
+        echo "No dependency updates available"

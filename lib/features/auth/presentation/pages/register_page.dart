@@ -123,6 +123,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               children: [
                 const SizedBox(height: 20),
                 FormBuilderTextField(
+                  key: const Key('first_name_field'),
                   name: 'first_name',
                   keyboardType: TextInputType.name,
                   controller: _firstNameController,
@@ -136,11 +137,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       horizontal: 20,
                     ),
                   ),
-                  validator:
-                      (final value) => InputConverter.validateFirstName(
-                        value,
-                        context,
-                      ),
+                  validator: (final value) => InputConverter.validateFirstName(
+                    value,
+                    context,
+                  ),
                   focusNode: _firstNameFocusNode,
                   onSubmitted: (_) async {
                     if (_firstNameFocusNode.hasFocus) {
@@ -151,6 +151,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 ),
                 const SizedBox(height: 20),
                 FormBuilderTextField(
+                  key: const Key('last_name_field'),
                   name: 'last_name',
                   keyboardType: TextInputType.name,
                   controller: _lastNameController,
@@ -164,11 +165,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       horizontal: 20,
                     ),
                   ),
-                  validator:
-                      (final value) => InputConverter.validateLastName(
-                        value,
-                        context,
-                      ),
+                  validator: (final value) => InputConverter.validateLastName(
+                    value,
+                    context,
+                  ),
                   focusNode: _lastNameFocusNode,
                   onSubmitted: (_) async {
                     if (_lastNameFocusNode.hasFocus) {
@@ -179,6 +179,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 ),
                 const SizedBox(height: 20),
                 RegisterEmailTextField(
+                  key: const Key('email_field'),
                   controller: _emailController,
                   focusNode: _emailFocusNode,
                   onFieldSubmitted: (final value) {
@@ -190,16 +191,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 ),
                 const SizedBox(height: 20),
                 AuthTextField(
+                  key: const Key('password_field'),
                   name: 'password',
                   keyboardType: TextInputType.visiblePassword,
                   focusNode: _passwordFocusNode,
                   controller: _passwordController,
                   label: context.t.auth.password,
-                  validator:
-                      (final value) => InputConverter.validatePassword(
-                        value,
-                        context,
-                      ),
+                  validator: (final value) => InputConverter.validatePassword(
+                    value,
+                    context,
+                  ),
                   onFieldSubmitted: (final value) {
                     if (_passwordFocusNode.hasFocus) {
                       _passwordFocusNode.unfocus();
@@ -211,10 +212,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 ),
                 const SizedBox(height: 20),
                 AuthTextField(
+                  key: const Key('confirm_password_field'),
                   name: 'confirm_password',
                   controller: _confirmPasswordController,
                   validator:
-                      (final value) => InputConverter.validateConfirmPassword(
+                      (
+                        final value,
+                      ) => InputConverter.validateConfirmPassword(
                         value,
                         context,
                         _passwordController.text,
@@ -231,6 +235,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 ),
                 const SizedBox(height: 20),
                 FormBuilderTextField(
+                  key: const Key('phone_field'),
                   name: 'phone',
                   controller: _phoneController,
                   focusNode: _phoneFocusNode,
@@ -245,11 +250,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       horizontal: 20,
                     ),
                   ),
-                  validator:
-                      (final value) => InputConverter.validatePhone(
-                        value,
-                        context,
-                      ),
+                  validator: (final value) => InputConverter.validatePhone(
+                    value,
+                    context,
+                  ),
                   onSubmitted: (_) async {
                     if (_phoneFocusNode.hasFocus) {
                       _phoneFocusNode.unfocus();
@@ -281,6 +285,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   _ => SizedBox(
                     width: double.infinity,
                     child: CustomButton(
+                      key: const Key('register_button'),
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           await ref
@@ -349,6 +354,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             children: [
               Text(context.t.auth.alreadyHaveAccount),
               InkWell(
+                key: const Key('signin_link'),
                 splashColor: Colors.transparent,
                 highlightColor: Colors.transparent,
                 hoverColor: Colors.transparent,

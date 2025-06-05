@@ -98,6 +98,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 const SizedBox(height: 50),
                 FormBuilderTextField(
+                  key: const Key('email_field'),
                   name: 'email',
                   focusNode: _emailFocusNode,
                   keyboardType: TextInputType.emailAddress,
@@ -113,11 +114,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                   ),
                   controller: _emailController,
-                  validator:
-                      (final value) => InputConverter.validateEmail(
-                        value,
-                        context,
-                      ),
+                  validator: (final value) => InputConverter.validateEmail(
+                    value,
+                    context,
+                  ),
                   onSubmitted: (_) async {
                     if (_emailFocusNode.hasFocus) {
                       _emailFocusNode.unfocus();
@@ -127,16 +127,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 const SizedBox(height: 20),
                 AuthTextField(
+                  key: const Key('password_field'),
                   name: 'password',
                   label: context.t.auth.password,
                   controller: _passwordController,
                   focusNode: _passwordFocusNode,
                   keyboardType: TextInputType.visiblePassword,
-                  validator:
-                      (final value) => InputConverter.validatePassword(
-                        value,
-                        context,
-                      ),
+                  validator: (final value) => InputConverter.validatePassword(
+                    value,
+                    context,
+                  ),
                   onFieldSubmitted: (final value) async {
                     if (_passwordFocusNode.hasFocus) {
                       _passwordFocusNode.unfocus();
@@ -176,11 +176,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         Text(context.t.auth.savePassword),
                       ],
                     ),
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      onTap: () async {
+                    TextButton(
+                      key: const Key('forgot_password_button'),
+                      onPressed: () async {
                         const ForgotPasswordRoute().go(context);
                       },
                       child: Text(context.t.auth.forgotPassword),
@@ -193,6 +191,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   _ => SizedBox(
                     width: double.infinity,
                     child: CustomButton(
+                      key: const Key('login_button'),
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           await ref
@@ -266,11 +265,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   color: Colors.black,
                 ),
               ),
-              InkWell(
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                onTap: () async {
+              TextButton(
+                key: const Key('signup_link'),
+                onPressed: () async {
                   const RegisterRoute().go(context);
                 },
                 child: Text(

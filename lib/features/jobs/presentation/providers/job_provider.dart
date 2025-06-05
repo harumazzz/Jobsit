@@ -692,7 +692,7 @@ class JobFilterController extends _$JobFilterController {
   );
 
   /// Returns true if the current filter state is initial (no filters applied).
-  bool get isEmpty => state is JobFilterInitial;
+  bool isEmpty() => state is JobFilterInitial;
 
   /// Resets all filters to their initial empty state.
   Future<void> resetFilter() async {

@@ -75,6 +75,7 @@ class JobDetailPage extends HookConsumerWidget {
             ),
             actions: [
               _BookmarkButton(
+                key: const Key('job_detail_bookmark_button'),
                 jobId: jobId,
                 isSelected: isSelected,
                 isBookmarkProcessing: isBookmarkProcessing,
@@ -146,12 +147,13 @@ class JobDetailPage extends HookConsumerWidget {
                             const SizedBox(width: 4),
                             Text(
                               job.company.location ?? '',
-                              style: Theme.of(
-                                context,
-                              ).textTheme.titleMedium?.copyWith(
-                                // ignore: lines_longer_than_80_chars
-                                color: Theme.of(context).colorScheme.onSecondary,
-                              ),
+                              style:
+                                  Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium?.copyWith(
+                                    // ignore: lines_longer_than_80_chars
+                                    color: Theme.of(context).colorScheme.onSecondary,
+                                  ),
                               textAlign: TextAlign.center,
                               maxLines: 1,
                             ),
@@ -176,12 +178,13 @@ class JobDetailPage extends HookConsumerWidget {
                                 ),
                                 child: Text(
                                   major.name,
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.labelLarge?.copyWith(
-                                    // ignore: lines_longer_than_80_chars
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
+                                  style:
+                                      Theme.of(
+                                        context,
+                                      ).textTheme.labelLarge?.copyWith(
+                                        // ignore: lines_longer_than_80_chars
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
                                 ),
                               ),
                             ),
@@ -191,6 +194,7 @@ class JobDetailPage extends HookConsumerWidget {
                         _JobDisplay(job: job),
                         const SizedBox(height: 24),
                         _JobTabs(
+                          key: const Key('job_detail_tabs'),
                           pageController: pageController,
                           selectedTabIndex: selectedTabIndex,
                         ),
@@ -226,7 +230,10 @@ class JobDetailPage extends HookConsumerWidget {
           ),
         ],
       ),
-      bottomNavigationBar: _ApplyNavBar(jobId: jobId),
+      bottomNavigationBar: _ApplyNavBar(
+        key: const Key('job_apply_nav_bar'),
+        jobId: jobId,
+      ),
     );
   }
 
@@ -395,9 +402,9 @@ class _JobTabs extends StatelessWidget {
   /// Creates a [_JobTabs] widget.
   ///
   /// [selectedTabIndex] A [ValueNotifier] holding the index of the currently
-  /// selected tab.
-  /// [pageController] The [PageController] used to switch between tab content.
+  /// selected tab.  /// [pageController] The [PageController] used to switch between tab content.
   const _JobTabs({
+    super.key,
     required this.selectedTabIndex,
     required this.pageController,
   });
@@ -413,6 +420,7 @@ class _JobTabs extends StatelessWidget {
     children: [
       Expanded(
         child: GestureDetector(
+          key: const Key('job_detail_description_tab'),
           onTap: () async {
             selectedTabIndex.value = _JobTabType.description.index;
             pageController.jumpToPage(_JobTabType.description.index);
@@ -437,10 +445,9 @@ class _JobTabs extends StatelessWidget {
                 fontWeight:
                     // ignore: lines_longer_than_80_chars
                     selectedTabIndex.value == _JobTabType.description.index ? FontWeight.bold : FontWeight.normal,
-                color:
-                    selectedTabIndex.value == _JobTabType.description.index
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSecondary,
+                color: selectedTabIndex.value == _JobTabType.description.index
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSecondary,
               ),
             ),
           ),
@@ -448,6 +455,7 @@ class _JobTabs extends StatelessWidget {
       ),
       Expanded(
         child: GestureDetector(
+          key: const Key('job_detail_company_tab'),
           onTap: () async {
             selectedTabIndex.value = _JobTabType.company.index;
             pageController.jumpToPage(_JobTabType.company.index);
@@ -471,10 +479,9 @@ class _JobTabs extends StatelessWidget {
               style: TextStyle(
                 // ignore: lines_longer_than_80_chars
                 fontWeight: selectedTabIndex.value == _JobTabType.company.index ? FontWeight.bold : FontWeight.normal,
-                color:
-                    selectedTabIndex.value == _JobTabType.company.index
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSecondary,
+                color: selectedTabIndex.value == _JobTabType.company.index
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSecondary,
               ),
             ),
           ),
@@ -591,25 +598,23 @@ class _JobImage extends StatelessWidget {
     child: CachedNetworkImage(
       imageUrl: queryImage(job.company.logo!),
       fit: BoxFit.contain,
-      placeholder:
-          (final context, final url) => Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
+      placeholder: (final context, final url) => Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
           ),
-      errorWidget:
-          (final context, final url, final error) => Icon(
-            IconlyLight.image,
-            size: 48,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+        ),
+      ),
+      errorWidget: (final context, final url, final error) => Icon(
+        IconlyLight.image,
+        size: 48,
+        color: Theme.of(context).colorScheme.primary,
+      ),
     ),
   );
 
@@ -633,6 +638,7 @@ class _BookmarkButton extends StatelessWidget {
   /// [isBookmarkProcessing] A [ValueNotifier] to track if a bookmark operation
   /// is in progress to prevent multiple rapid clicks.
   const _BookmarkButton({
+    super.key,
     required this.jobId,
     required this.isSelected,
     required this.isBookmarkProcessing,
@@ -728,7 +734,7 @@ class _ApplyNavBar extends StatelessWidget {
   /// Creates an [_ApplyNavBar].
   ///
   /// [jobId] The ID of the job for which the apply action is relevant.
-  const _ApplyNavBar({required this.jobId});
+  const _ApplyNavBar({super.key, required this.jobId});
 
   /// The ID of the job to apply for.
   final int jobId;
@@ -748,19 +754,19 @@ class _ApplyNavBar extends StatelessWidget {
             JobDetailError() => const SizedBox.shrink(),
             JobDetailInitial() => const SizedBox.shrink(),
             JobDetailLoaded() => ElevatedButton(
+              key: const Key('job_apply_button'),
               onPressed: () async {
                 await showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
                   useSafeArea: true,
-                  builder:
-                      (final context) => Padding(
-                        padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewInsets.bottom,
-                        ),
-                        child: _ApplyModal(jobId: jobId),
-                      ),
+                  builder: (final context) => Padding(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: _ApplyModal(jobId: jobId),
+                  ),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -837,56 +843,56 @@ class _ApplyModal extends HookWidget {
               ),
               const SizedBox(height: 16),
               Consumer(
-                builder:
-                    (final context, final ref, final child) => TextButton(
-                      style: TextButton.styleFrom(
-                        // ignore: lines_longer_than_80_chars
-                        backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 24,
-                          horizontal: 32,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(12),
-                          ),
-                          side: BorderSide(
-                            color: Theme.of(context).colorScheme.primary,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          text.value,
-                          // ignore: lines_longer_than_80_chars
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSecondary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      onPressed: () async {
-                        // ignore: lines_longer_than_80_chars
-                        final result = await ref.read(fileServiceProvider).uploadFile([
-                          const FileSelector(label: 'CV', extensions: ['pdf']),
-                        ]);
-                        result.fold(
-                          ifLeft: (_) => null,
-                          ifRight: (final e) {
-                            if (e.data.length > 512 * 1024) {
-                              NotificationService.error(
-                                context: context,
-                                message: context.t.validation.file.cvFormat,
-                              );
-                              return;
-                            }
-                            text.value = e.name;
-                            file.value = e;
-                          },
-                        );
-                      },
+                builder: (final context, final ref, final child) => TextButton(
+                  key: const Key('cv_upload_button'),
+                  style: TextButton.styleFrom(
+                    // ignore: lines_longer_than_80_chars
+                    backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 24,
+                      horizontal: 32,
                     ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(12),
+                      ),
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      text.value,
+                      // ignore: lines_longer_than_80_chars
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  onPressed: () async {
+                    // ignore: lines_longer_than_80_chars
+                    final result = await ref.read(fileServiceProvider).uploadFile([
+                      const FileSelector(label: 'CV', extensions: ['pdf']),
+                    ]);
+                    result.fold(
+                      ifLeft: (_) => null,
+                      ifRight: (final e) {
+                        if (e.data.length > 512 * 1024) {
+                          NotificationService.error(
+                            context: context,
+                            message: context.t.validation.file.cvFormat,
+                          );
+                          return;
+                        }
+                        text.value = e.name;
+                        file.value = e;
+                      },
+                    );
+                  },
+                ),
               ),
               if (file.value != null) PreviewButton(file: file),
               const SizedBox(height: 16),
@@ -899,6 +905,7 @@ class _ApplyModal extends HookWidget {
               ),
               const SizedBox(height: 12),
               TextField(
+                key: const Key('cover_letter_field'),
                 controller: controller,
                 minLines: 5,
                 maxLines: 5,
@@ -971,58 +978,58 @@ class _ApplyButton extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) => Consumer(
-    builder:
-        (final context, final ref, final child) => CustomButton(
-          onPressed: () async {
-            if (file.value == null) {
-              NotificationService.error(
-                context: context,
-                message: context.t.validation.required.cv,
-              );
-              return;
-            }
-            if (controller.text.trim().isEmpty) {
-              NotificationService.error(
-                context: context,
-                message: context.t.job.noReferenceLetter,
-              );
-              return;
-            }
-            await ref
-                .read(applyJobControllerProvider.notifier)
-                .applyJob(
-                  jobId: jobId,
-                  referenceLetter: controller.text,
-                  cv: file.value!,
-                );
-            final state = ref.read(applyJobControllerProvider);
-            if (state is ApplyJobError) {
-              if (context.mounted) {
-                NotificationService.error(
-                  context: context,
-                  message: context.t.job.appliedJob,
-                );
-              }
-            } else if (state is ApplyJobLoaded) {
-              if (context.mounted) {
-                NotificationService.success(
-                  context: context,
-                  message: context.t.job.applicationSuccess,
-                );
-                Navigator.pop(context);
-              }
-            }
-          },
-          child: Center(
-            child: Text(
-              context.t.common.apply,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
+    builder: (final context, final ref, final child) => CustomButton(
+      key: const Key('submit_application_button'),
+      onPressed: () async {
+        if (file.value == null) {
+          NotificationService.error(
+            context: context,
+            message: context.t.validation.required.cv,
+          );
+          return;
+        }
+        if (controller.text.trim().isEmpty) {
+          NotificationService.error(
+            context: context,
+            message: context.t.job.noReferenceLetter,
+          );
+          return;
+        }
+        await ref
+            .read(applyJobControllerProvider.notifier)
+            .applyJob(
+              jobId: jobId,
+              referenceLetter: controller.text,
+              cv: file.value!,
+            );
+        final state = ref.read(applyJobControllerProvider);
+        if (state is ApplyJobError) {
+          if (context.mounted) {
+            NotificationService.error(
+              context: context,
+              message: context.t.job.appliedJob,
+            );
+          }
+        } else if (state is ApplyJobLoaded) {
+          if (context.mounted) {
+            NotificationService.success(
+              context: context,
+              message: context.t.job.applicationSuccess,
+            );
+            Navigator.pop(context);
+          }
+        }
+      },
+      child: Center(
+        child: Text(
+          context.t.common.apply,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onPrimary,
           ),
         ),
+      ),
+    ),
   );
 
   @override

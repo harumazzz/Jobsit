@@ -41,7 +41,7 @@ sealed class AppliedJobParams with _$AppliedJobParams {
 /// Takes [AppliedJobParams] for pagination and returns a list of [Job]
 /// entities or a [Failure].
 // ignore: lines_longer_than_80_chars
-final class GetAppliedJobsUseCase implements UseCase<List<Job>, AppliedJobParams> {
+class GetAppliedJobsUseCase implements UseCase<List<Job>, AppliedJobParams> {
   /// Creates a [GetAppliedJobsUseCase].
   const GetAppliedJobsUseCase(this._jobRepository);
 
@@ -85,7 +85,7 @@ sealed class ApplyJobParams with _$ApplyJobParams {
 ///
 /// Takes [ApplyJobParams] containing job ID, cover letter, and CV,
 /// and returns the [Job] entity of the applied job or a [Failure].
-final class ApplyJobUseCase implements UseCase<Job, ApplyJobParams> {
+class ApplyJobUseCase implements UseCase<Job, ApplyJobParams> {
   /// Creates an [ApplyJobUseCase].
   const ApplyJobUseCase(this._jobRepository);
 

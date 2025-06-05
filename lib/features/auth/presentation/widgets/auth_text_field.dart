@@ -233,6 +233,7 @@ class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField>
 
   @override
   Widget build(final BuildContext context) => FormBuilderTextField(
+    key: widget.key,
     name: 'email',
     controller: widget.controller,
     keyboardType: TextInputType.emailAddress,
@@ -243,22 +244,21 @@ class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField>
       labelText: context.t.auth.email,
       contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
       errorText: _emailErrorText,
-      suffixIcon:
-          _isCheckingEmail
-              ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              )
-              : _isEmailAvailable &&
-                  widget.controller.text.isNotEmpty &&
-                  // ignore: lines_longer_than_80_chars
-                  InputConverter.validateEmail(widget.controller.text, context) == null
-              ? const Icon(Icons.check_circle_outline, color: Colors.green)
-              : null,
+      suffixIcon: _isCheckingEmail
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          : _isEmailAvailable &&
+                widget.controller.text.isNotEmpty &&
+                // ignore: lines_longer_than_80_chars
+                InputConverter.validateEmail(widget.controller.text, context) == null
+          ? const Icon(Icons.check_circle_outline, color: Colors.green)
+          : null,
     ),
     validator: (final value) {
       final basicValidation = InputConverter.validateEmail(value, context);
