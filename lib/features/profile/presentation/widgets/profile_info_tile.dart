@@ -216,7 +216,7 @@ class AvatarSection extends StatelessWidget {
         height: 86,
         fit: BoxFit.cover,
         placeholder: (final context, final url) => Shimmer(
-          interval: const Duration(seconds: 5),
+          interval: const Duration(seconds: 1),
           child: Container(
             width: 48,
             height: 48,
