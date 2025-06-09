@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../core/utils/input_converter.dart';
@@ -120,7 +120,7 @@ class AuthTextField extends StatelessWidget {
 /// It includes real-time email availability checking with a debounce mechanism
 /// to avoid excessive API calls. It displays a loading indicator during checks
 /// and a success icon if the email is valid and available.
-class RegisterEmailTextField extends ConsumerStatefulWidget {
+class RegisterEmailTextField extends HookConsumerWidget {
   /// Creates a [RegisterEmailTextField].
   ///
   /// [controller] Manages the text being edited.
@@ -144,8 +144,93 @@ class RegisterEmailTextField extends ConsumerStatefulWidget {
   final void Function(String? value)? onFieldSubmitted;
 
   @override
-  // ignore: lines_longer_than_80_chars
-  ConsumerState<RegisterEmailTextField> createState() => _RegisterEmailTextFieldState();
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final emailSubject = useMemoized(PublishSubject<String>.new);
+    final isCheckingEmail = useState(false);
+    final isEmailAvailable = useState(true);
+    final emailErrorText = useState<String?>(null);
+
+    Future<void> checkEmailAvailability(final String email) async {
+      try {
+        final result = await ref.read(authControllerProvider.notifier).checkEmailExists(email);
+        isCheckingEmail.value = false;
+        isEmailAvailable.value = !result.toLowerCase().contains('đã sử dụng');
+        if (context.mounted) {
+          emailErrorText.value = isEmailAvailable.value ? null : context.t.registration.emailExists;
+        }
+      } catch (e) {
+        isCheckingEmail.value = false;
+        emailErrorText.value = null;
+      }
+    }
+
+    Future<void> onEmailChanged() async {
+      final email = controller.text;
+      if (email.isEmpty || InputConverter.validateEmail(email, context) != null) {
+        isCheckingEmail.value = false;
+        isEmailAvailable.value = true;
+        emailErrorText.value = null;
+        return;
+      }
+      isCheckingEmail.value = true;
+      emailErrorText.value = null;
+      emailSubject.add(email);
+    }
+
+    useEffect(() {
+      final subscription = emailSubject.debounceTime(const Duration(milliseconds: 800)).listen(checkEmailAvailability);
+
+      controller.addListener(onEmailChanged);
+
+      return () {
+        subscription.cancel();
+        emailSubject.close();
+        controller.removeListener(onEmailChanged);
+      };
+    }, []);
+
+    return FormBuilderTextField(
+      key: key,
+      name: 'email',
+      controller: controller,
+      keyboardType: TextInputType.emailAddress,
+      decoration: InputDecoration(
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+        labelText: context.t.auth.email,
+        contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        errorText: emailErrorText.value,
+        suffixIcon: isCheckingEmail.value
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: Padding(
+                  padding: EdgeInsets.all(10),
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
+            : isEmailAvailable.value &&
+                  controller.text.isNotEmpty &&
+                  InputConverter.validateEmail(controller.text, context) == null
+            ? const Icon(Icons.check_circle_outline, color: Colors.green)
+            : null,
+      ),
+      validator: (final value) {
+        final basicValidation = InputConverter.validateEmail(value, context);
+        if (basicValidation != null) {
+          return basicValidation;
+        }
+        if (!isEmailAvailable.value) {
+          return context.t.registration.emailExists;
+        }
+        return null;
+      },
+      focusNode: focusNode,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      onSubmitted: onFieldSubmitted,
+    );
+  }
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
@@ -165,113 +250,4 @@ class RegisterEmailTextField extends ConsumerStatefulWidget {
         ),
       );
   }
-}
-
-// ignore: lines_longer_than_80_chars
-class _RegisterEmailTextFieldState extends ConsumerState<RegisterEmailTextField> {
-  late PublishSubject<String> _emailSubject;
-  bool _isCheckingEmail = false;
-  bool _isEmailAvailable = true;
-  String? _emailErrorText;
-
-  @override
-  void initState() {
-    super.initState();
-    _emailSubject = PublishSubject<String>();
-    _emailSubject
-        .debounceTime(
-          const Duration(milliseconds: 800),
-        )
-        .listen(_checkEmailAvailability);
-    widget.controller.addListener(_onEmailChanged);
-  }
-
-  Future<void> _onEmailChanged() async {
-    final email = widget.controller.text;
-    if (email.isEmpty || InputConverter.validateEmail(email, context) != null) {
-      setState(() {
-        _isCheckingEmail = false;
-        _isEmailAvailable = true;
-        _emailErrorText = null;
-      });
-      return;
-    }
-    setState(() {
-      _isCheckingEmail = true;
-      _emailErrorText = null;
-    });
-    _emailSubject.add(email);
-  }
-
-  Future<void> _checkEmailAvailability(final String email) async {
-    try {
-      final result = await ref
-          .read(authControllerProvider.notifier)
-          .checkEmailExists(
-            email,
-          );
-      setState(() {
-        _isCheckingEmail = false;
-        _isEmailAvailable = !result.toLowerCase().contains('đã sử dụng');
-        // ignore: lines_longer_than_80_chars
-        _emailErrorText = _isEmailAvailable ? null : context.t.registration.emailExists;
-      });
-    } catch (e) {
-      setState(() {
-        _isCheckingEmail = false;
-        _emailErrorText = null;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _emailSubject.close();
-    widget.controller.removeListener(_onEmailChanged);
-    super.dispose();
-  }
-
-  @override
-  Widget build(final BuildContext context) => FormBuilderTextField(
-    key: widget.key,
-    name: 'email',
-    controller: widget.controller,
-    keyboardType: TextInputType.emailAddress,
-    decoration: InputDecoration(
-      border: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-      ),
-      labelText: context.t.auth.email,
-      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-      errorText: _emailErrorText,
-      suffixIcon: _isCheckingEmail
-          ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: Padding(
-                padding: EdgeInsets.all(10),
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            )
-          : _isEmailAvailable &&
-                widget.controller.text.isNotEmpty &&
-                // ignore: lines_longer_than_80_chars
-                InputConverter.validateEmail(widget.controller.text, context) == null
-          ? const Icon(Icons.check_circle_outline, color: Colors.green)
-          : null,
-    ),
-    validator: (final value) {
-      final basicValidation = InputConverter.validateEmail(value, context);
-      if (basicValidation != null) {
-        return basicValidation;
-      }
-      if (!_isEmailAvailable) {
-        return context.t.registration.emailExists;
-      }
-      return null;
-    },
-    focusNode: widget.focusNode,
-    autovalidateMode: AutovalidateMode.onUserInteraction,
-    onSubmitted: widget.onFieldSubmitted,
-  );
 }

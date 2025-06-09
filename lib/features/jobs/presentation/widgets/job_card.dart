@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 import '../../../../core/network/api_constant.dart';
 import '../../../../core/services/notification_service.dart';
@@ -275,14 +275,12 @@ class ShimmerCard extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDarkMode ? Colors.grey[700]! : Colors.grey[300]!;
-    final highlightColor = isDarkMode ? Colors.grey[600]! : Colors.grey[100]!;
+    final shimmerColor = isDarkMode ? Colors.grey[600]! : Colors.grey[300]!;
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Shimmer.fromColors(
-        baseColor: baseColor,
-        highlightColor: highlightColor,
+      child: Shimmer(
+        interval: const Duration(seconds: 5),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -296,7 +294,7 @@ class ShimmerCard extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
@@ -309,7 +307,7 @@ class ShimmerCard extends StatelessWidget {
                           width: 200,
                           height: 16,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: shimmerColor,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -317,7 +315,7 @@ class ShimmerCard extends StatelessWidget {
                           width: 150,
                           height: 16,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: shimmerColor,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -328,7 +326,7 @@ class ShimmerCard extends StatelessWidget {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
@@ -341,7 +339,7 @@ class ShimmerCard extends StatelessWidget {
                     width: 60,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
@@ -350,7 +348,7 @@ class ShimmerCard extends StatelessWidget {
                     width: 70,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
@@ -359,7 +357,7 @@ class ShimmerCard extends StatelessWidget {
                     width: 50,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
@@ -372,8 +370,8 @@ class ShimmerCard extends StatelessWidget {
                   Container(
                     width: 24,
                     height: 16,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: shimmerColor,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -381,7 +379,7 @@ class ShimmerCard extends StatelessWidget {
                     width: 200,
                     height: 16,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -395,7 +393,7 @@ class ShimmerCard extends StatelessWidget {
                     width: 80,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
@@ -405,8 +403,8 @@ class ShimmerCard extends StatelessWidget {
                       Container(
                         width: 24,
                         height: 20,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: shimmerColor,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -414,7 +412,7 @@ class ShimmerCard extends StatelessWidget {
                         width: 80,
                         height: 16,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: shimmerColor,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -518,14 +516,13 @@ class _JobImage extends StatelessWidget {
     width: 48,
     height: 48,
     fit: BoxFit.cover,
-    placeholder: (final context, final url) => Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+    placeholder: (final context, final url) => Shimmer(
+      interval: const Duration(seconds: 5),
       child: Container(
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.grey[300],
           borderRadius: BorderRadius.circular(8),
         ),
       ),
@@ -699,14 +696,12 @@ class AppliedJobShimmerCard extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDarkMode ? Colors.grey[700]! : Colors.grey[300]!;
-    final highlightColor = isDarkMode ? Colors.grey[600]! : Colors.grey[100]!;
+    final shimmerColor = isDarkMode ? Colors.grey[600]! : Colors.grey[300]!;
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Shimmer.fromColors(
-        baseColor: baseColor,
-        highlightColor: highlightColor,
+      child: Shimmer(
+        interval: const Duration(seconds: 5),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -720,7 +715,7 @@ class AppliedJobShimmerCard extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
@@ -733,7 +728,7 @@ class AppliedJobShimmerCard extends StatelessWidget {
                           width: 200,
                           height: 16,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: shimmerColor,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -741,7 +736,7 @@ class AppliedJobShimmerCard extends StatelessWidget {
                           width: 150,
                           height: 16,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: shimmerColor,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -757,7 +752,7 @@ class AppliedJobShimmerCard extends StatelessWidget {
                     width: 60,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
@@ -766,7 +761,7 @@ class AppliedJobShimmerCard extends StatelessWidget {
                     width: 70,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
@@ -775,7 +770,7 @@ class AppliedJobShimmerCard extends StatelessWidget {
                     width: 50,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
@@ -788,8 +783,8 @@ class AppliedJobShimmerCard extends StatelessWidget {
                   Container(
                     width: 24,
                     height: 16,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: shimmerColor,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -797,7 +792,7 @@ class AppliedJobShimmerCard extends StatelessWidget {
                     width: 200,
                     height: 16,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -811,7 +806,7 @@ class AppliedJobShimmerCard extends StatelessWidget {
                     width: 80,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
@@ -821,8 +816,8 @@ class AppliedJobShimmerCard extends StatelessWidget {
                       Container(
                         width: 24,
                         height: 20,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: shimmerColor,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -830,7 +825,7 @@ class AppliedJobShimmerCard extends StatelessWidget {
                         width: 80,
                         height: 16,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: shimmerColor,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),

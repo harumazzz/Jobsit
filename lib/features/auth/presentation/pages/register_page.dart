@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
@@ -17,68 +18,26 @@ import '../widgets/auth_text_field.dart';
 /// last name, email, password, and phone number. It includes form validation
 /// and navigation to OTP verification upon successful registration.
 /// Also provides options for social registration.
-class RegisterPage extends ConsumerStatefulWidget {
+class RegisterPage extends HookConsumerWidget {
   /// Creates a [RegisterPage].
   const RegisterPage({super.key});
 
   @override
-  ConsumerState<RegisterPage> createState() => _RegisterPageState();
-}
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final firstNameController = useTextEditingController();
+    final lastNameController = useTextEditingController();
+    final emailController = useTextEditingController();
+    final passwordController = useTextEditingController();
+    final confirmPasswordController = useTextEditingController();
+    final phoneController = useTextEditingController();
+    final firstNameFocusNode = useFocusNode();
+    final lastNameFocusNode = useFocusNode();
+    final emailFocusNode = useFocusNode();
+    final passwordFocusNode = useFocusNode();
+    final confirmPasswordFocusNode = useFocusNode();
+    final phoneFocusNode = useFocusNode();
+    final formKey = useMemoized(GlobalKey<FormBuilderState>.new);
 
-class _RegisterPageState extends ConsumerState<RegisterPage> {
-  late TextEditingController _firstNameController;
-  late TextEditingController _lastNameController;
-  late TextEditingController _emailController;
-  late TextEditingController _passwordController;
-  late TextEditingController _confirmPasswordController;
-  late TextEditingController _phoneController;
-  late FocusNode _firstNameFocusNode;
-  late FocusNode _lastNameFocusNode;
-  late FocusNode _emailFocusNode;
-  late FocusNode _passwordFocusNode;
-  late FocusNode _confirmPasswordFocusNode;
-  late FocusNode _phoneFocusNode;
-
-  late GlobalKey<FormBuilderState> _formKey;
-
-  @override
-  void initState() {
-    _firstNameController = TextEditingController();
-    _lastNameController = TextEditingController();
-    _emailController = TextEditingController();
-    _passwordController = TextEditingController();
-    _confirmPasswordController = TextEditingController();
-    _phoneController = TextEditingController();
-    _formKey = GlobalKey<FormBuilderState>();
-    _firstNameFocusNode = FocusNode();
-    _lastNameFocusNode = FocusNode();
-    _emailFocusNode = FocusNode();
-    _passwordFocusNode = FocusNode();
-    _confirmPasswordFocusNode = FocusNode();
-    _phoneFocusNode = FocusNode();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    _phoneController.dispose();
-    _firstNameFocusNode.dispose();
-    _lastNameFocusNode.dispose();
-    _emailFocusNode.dispose();
-    _passwordFocusNode.dispose();
-    _confirmPasswordFocusNode.dispose();
-    _phoneFocusNode.dispose();
-    _formKey.currentState?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(final BuildContext context) {
     final state = ref.watch(authControllerProvider);
     ref.listen<AuthState>(authControllerProvider, (
       final previous,
@@ -96,7 +55,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             context: context,
             message: context.t.registration.success,
           );
-          OtpVerificationRoute(email: _emailController.text).go(context);
+          OtpVerificationRoute(email: emailController.text).go(context);
           break;
         default:
           break;
@@ -114,7 +73,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         backgroundColor: const Color(0xFFefeff0),
       ),
       body: FormBuilder(
-        key: _formKey,
+        key: formKey,
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: SingleChildScrollView(
@@ -126,7 +85,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   key: const Key('first_name_field'),
                   name: 'first_name',
                   keyboardType: TextInputType.name,
-                  controller: _firstNameController,
+                  controller: firstNameController,
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -141,12 +100,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     value,
                     context,
                   ),
-                  focusNode: _firstNameFocusNode,
+                  focusNode: firstNameFocusNode,
                   onSubmitted: (_) async {
-                    if (_firstNameFocusNode.hasFocus) {
-                      _firstNameFocusNode.unfocus();
+                    if (firstNameFocusNode.hasFocus) {
+                      firstNameFocusNode.unfocus();
                     }
-                    FocusScope.of(context).requestFocus(_lastNameFocusNode);
+                    FocusScope.of(context).requestFocus(lastNameFocusNode);
                   },
                 ),
                 const SizedBox(height: 20),
@@ -154,7 +113,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   key: const Key('last_name_field'),
                   name: 'last_name',
                   keyboardType: TextInputType.name,
-                  controller: _lastNameController,
+                  controller: lastNameController,
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -169,24 +128,24 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     value,
                     context,
                   ),
-                  focusNode: _lastNameFocusNode,
+                  focusNode: lastNameFocusNode,
                   onSubmitted: (_) async {
-                    if (_lastNameFocusNode.hasFocus) {
-                      _lastNameFocusNode.unfocus();
+                    if (lastNameFocusNode.hasFocus) {
+                      lastNameFocusNode.unfocus();
                     }
-                    FocusScope.of(context).requestFocus(_emailFocusNode);
+                    FocusScope.of(context).requestFocus(emailFocusNode);
                   },
                 ),
                 const SizedBox(height: 20),
                 RegisterEmailTextField(
                   key: const Key('email_field'),
-                  controller: _emailController,
-                  focusNode: _emailFocusNode,
+                  controller: emailController,
+                  focusNode: emailFocusNode,
                   onFieldSubmitted: (final value) {
-                    if (_emailFocusNode.hasFocus) {
-                      _emailFocusNode.unfocus();
+                    if (emailFocusNode.hasFocus) {
+                      emailFocusNode.unfocus();
                     }
-                    FocusScope.of(context).requestFocus(_passwordFocusNode);
+                    FocusScope.of(context).requestFocus(passwordFocusNode);
                   },
                 ),
                 const SizedBox(height: 20),
@@ -194,19 +153,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   key: const Key('password_field'),
                   name: 'password',
                   keyboardType: TextInputType.visiblePassword,
-                  focusNode: _passwordFocusNode,
-                  controller: _passwordController,
+                  focusNode: passwordFocusNode,
+                  controller: passwordController,
                   label: context.t.auth.password,
                   validator: (final value) => InputConverter.validatePassword(
                     value,
                     context,
                   ),
                   onFieldSubmitted: (final value) {
-                    if (_passwordFocusNode.hasFocus) {
-                      _passwordFocusNode.unfocus();
+                    if (passwordFocusNode.hasFocus) {
+                      passwordFocusNode.unfocus();
                     }
                     FocusScope.of(context).requestFocus(
-                      _confirmPasswordFocusNode,
+                      confirmPasswordFocusNode,
                     );
                   },
                 ),
@@ -214,31 +173,31 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 AuthTextField(
                   key: const Key('confirm_password_field'),
                   name: 'confirm_password',
-                  controller: _confirmPasswordController,
+                  controller: confirmPasswordController,
                   validator:
                       (
                         final value,
                       ) => InputConverter.validateConfirmPassword(
                         value,
                         context,
-                        _passwordController.text,
+                        passwordController.text,
                       ),
                   label: context.t.auth.confirmPassword,
-                  focusNode: _confirmPasswordFocusNode,
+                  focusNode: confirmPasswordFocusNode,
                   keyboardType: TextInputType.visiblePassword,
                   onFieldSubmitted: (final value) {
-                    if (_confirmPasswordFocusNode.hasFocus) {
-                      _confirmPasswordFocusNode.unfocus();
+                    if (confirmPasswordFocusNode.hasFocus) {
+                      confirmPasswordFocusNode.unfocus();
                     }
-                    FocusScope.of(context).requestFocus(_phoneFocusNode);
+                    FocusScope.of(context).requestFocus(phoneFocusNode);
                   },
                 ),
                 const SizedBox(height: 20),
                 FormBuilderTextField(
                   key: const Key('phone_field'),
                   name: 'phone',
-                  controller: _phoneController,
-                  focusNode: _phoneFocusNode,
+                  controller: phoneController,
+                  focusNode: phoneFocusNode,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(
@@ -255,8 +214,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     context,
                   ),
                   onSubmitted: (_) async {
-                    if (_phoneFocusNode.hasFocus) {
-                      _phoneFocusNode.unfocus();
+                    if (phoneFocusNode.hasFocus) {
+                      phoneFocusNode.unfocus();
                     }
                   },
                 ),
@@ -287,15 +246,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     child: CustomButton(
                       key: const Key('register_button'),
                       onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
+                        if (formKey.currentState!.validate()) {
                           await ref
                               .read(authControllerProvider.notifier)
                               .register(
-                                firstName: _firstNameController.text,
-                                lastName: _lastNameController.text,
-                                email: _emailController.text,
-                                password: _passwordController.text,
-                                phone: _phoneController.text,
+                                firstName: firstNameController.text,
+                                lastName: lastNameController.text,
+                                email: emailController.text,
+                                password: passwordController.text,
+                                phone: phoneController.text,
                               );
                         }
                       },

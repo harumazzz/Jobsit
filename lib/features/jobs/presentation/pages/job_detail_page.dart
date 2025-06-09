@@ -6,7 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 import '../../../../core/network/api_constant.dart';
 import '../../../../core/services/file_service.dart';
@@ -598,14 +598,13 @@ class _JobImage extends StatelessWidget {
     child: CachedNetworkImage(
       imageUrl: queryImage(job.company.logo!),
       fit: BoxFit.contain,
-      placeholder: (final context, final url) => Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+      placeholder: (final context, final url) => Shimmer(
+        interval: const Duration(seconds: 5),
         child: Container(
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.grey[300],
             borderRadius: BorderRadius.circular(8),
           ),
         ),
@@ -1056,8 +1055,7 @@ class JobDetailShimmerCard extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDarkMode ? Colors.grey[700]! : Colors.grey[300]!;
-    final highlightColor = isDarkMode ? Colors.grey[600]! : Colors.grey[100]!;
+    final shimmerColor = isDarkMode ? Colors.grey[600]! : Colors.grey[300]!;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -1065,50 +1063,46 @@ class JobDetailShimmerCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Company Logo
-          Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
+          Shimmer(
+            interval: const Duration(seconds: 5),
             child: Container(
               alignment: Alignment.center,
               width: 86,
               height: 86,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: shimmerColor,
                 border: Border.all(color: Colors.grey[400]!, width: 2),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
           ),
           const SizedBox(height: 16),
-          Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
+          Shimmer(
+            interval: const Duration(seconds: 5),
             child: Container(
               width: 200,
               height: 24,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: shimmerColor,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
           ),
           const SizedBox(height: 12),
-          Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
+          Shimmer(
+            interval: const Duration(seconds: 5),
             child: Container(
               width: 150,
               height: 18,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: shimmerColor,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
           ),
           const SizedBox(height: 12),
-          Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
+          Shimmer(
+            interval: const Duration(seconds: 5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -1116,8 +1110,8 @@ class JobDetailShimmerCard extends StatelessWidget {
                 Container(
                   width: 24,
                   height: 24,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: shimmerColor,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -1126,7 +1120,7 @@ class JobDetailShimmerCard extends StatelessWidget {
                   width: 120,
                   height: 16,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: shimmerColor,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -1134,9 +1128,8 @@ class JobDetailShimmerCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
+          Shimmer(
+            interval: const Duration(seconds: 5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
@@ -1147,7 +1140,7 @@ class JobDetailShimmerCard extends StatelessWidget {
                   width: 80,
                   height: 30,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: shimmerColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -1157,23 +1150,21 @@ class JobDetailShimmerCard extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Job Display Cards (Salary, Exp, etc.)
-          Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
+          Shimmer(
+            interval: const Duration(seconds: 5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: List.generate(
                 3,
-                (final index) => const _ShimmerLoader(),
+                (final index) => _ShimmerLoader(shimmerColor: shimmerColor),
               ),
             ),
           ),
           const SizedBox(height: 24),
 
           // Tab Indicators
-          Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
+          Shimmer(
+            interval: const Duration(seconds: 5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -1181,7 +1172,7 @@ class JobDetailShimmerCard extends StatelessWidget {
                   width: 100,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: shimmerColor,
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
@@ -1189,7 +1180,7 @@ class JobDetailShimmerCard extends StatelessWidget {
                   width: 100,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: shimmerColor,
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
@@ -1199,9 +1190,8 @@ class JobDetailShimmerCard extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Content Area
-          Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
+          Shimmer(
+            interval: const Duration(seconds: 5),
             child: Column(
               children: List.generate(
                 5,
@@ -1211,7 +1201,7 @@ class JobDetailShimmerCard extends StatelessWidget {
                     width: double.infinity,
                     height: 16,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: shimmerColor,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -1226,7 +1216,12 @@ class JobDetailShimmerCard extends StatelessWidget {
 }
 
 class _ShimmerLoader extends StatelessWidget {
-  const _ShimmerLoader({super.key});
+  const _ShimmerLoader({
+    super.key,
+    required this.shimmerColor,
+  });
+
+  final Color shimmerColor;
 
   @override
   Widget build(final BuildContext context) => Column(
@@ -1234,8 +1229,8 @@ class _ShimmerLoader extends StatelessWidget {
       Container(
         width: 50,
         height: 50,
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: shimmerColor,
           shape: BoxShape.circle,
         ),
       ),
@@ -1244,7 +1239,7 @@ class _ShimmerLoader extends StatelessWidget {
         width: 60,
         height: 12,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: shimmerColor,
           borderRadius: BorderRadius.circular(4),
         ),
       ),
@@ -1253,12 +1248,18 @@ class _ShimmerLoader extends StatelessWidget {
         width: 80,
         height: 16,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: shimmerColor,
           borderRadius: BorderRadius.circular(4),
         ),
       ),
     ],
   );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ColorProperty('shimmerColor', shimmerColor));
+  }
 }
 
 /// A shimmer loading placeholder widget for the bottom navigation bar
@@ -1270,8 +1271,7 @@ class JobDetailNavBarShimmer extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDarkMode ? Colors.grey[700]! : Colors.grey[300]!;
-    final highlightColor = isDarkMode ? Colors.grey[600]! : Colors.grey[100]!;
+    final shimmerColor = isDarkMode ? Colors.grey[600]! : Colors.grey[300]!;
 
     return SafeArea(
       child: Container(
@@ -1279,14 +1279,13 @@ class JobDetailNavBarShimmer extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
         ),
-        child: Shimmer.fromColors(
-          baseColor: baseColor,
-          highlightColor: highlightColor,
+        child: Shimmer(
+          interval: const Duration(seconds: 5),
           child: Container(
             width: double.infinity,
             height: 56,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: shimmerColor,
               borderRadius: BorderRadius.circular(12),
             ),
           ),

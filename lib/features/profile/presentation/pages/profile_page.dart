@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 import '../../../../core/services/notification_service.dart';
 import '../../../../i18n/strings.g.dart';
@@ -719,21 +719,19 @@ class _ProfileShimmer extends StatelessWidget {
                     width: 2,
                   ),
                 ),
-                child: Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
+                child: Shimmer(
+                  interval: const Duration(seconds: 5),
                   child: const _NoAvatar(),
                 ),
               ),
               const SizedBox(height: 8),
-              Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
+              Shimmer(
+                interval: const Duration(seconds: 5),
                 child: Container(
                   width: 120,
                   height: 16,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -750,9 +748,8 @@ class _ProfileShimmer extends StatelessWidget {
             alignment: WrapAlignment.center,
             spacing: 16,
             children: [
-              Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
+              Shimmer(
+                interval: const Duration(seconds: 5),
                 child: _CustomIcon(
                   title: context.t.job.applied,
                   subtitle: '0',
@@ -763,9 +760,8 @@ class _ProfileShimmer extends StatelessWidget {
                   ),
                 ),
               ),
-              Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
+              Shimmer(
+                interval: const Duration(seconds: 5),
                 child: _CustomIcon(
                   title: context.t.job.saved,
                   subtitle: '0',
@@ -784,13 +780,12 @@ class _ProfileShimmer extends StatelessWidget {
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         sliver: SliverToBoxAdapter(
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+          child: Shimmer(
+            interval: const Duration(seconds: 5),
             child: Container(
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
@@ -801,13 +796,12 @@ class _ProfileShimmer extends StatelessWidget {
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         sliver: SliverToBoxAdapter(
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+          child: Shimmer(
+            interval: const Duration(seconds: 5),
             child: Container(
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
@@ -822,26 +816,24 @@ class _ProfileShimmer extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
+              Shimmer(
+                interval: const Duration(seconds: 5),
                 child: Container(
                   width: 180,
                   height: 20,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
-              Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
+              Shimmer(
+                interval: const Duration(seconds: 5),
                 child: Container(
                   width: 24,
                   height: 24,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -854,13 +846,12 @@ class _ProfileShimmer extends StatelessWidget {
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         sliver: SliverToBoxAdapter(
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+          child: Shimmer(
+            interval: const Duration(seconds: 5),
             child: Container(
               height: 220,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
@@ -874,26 +865,24 @@ class _ProfileShimmer extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
+              Shimmer(
+                interval: const Duration(seconds: 5),
                 child: Container(
                   width: 150,
                   height: 20,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
-              Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
+              Shimmer(
+                interval: const Duration(seconds: 5),
                 child: Container(
                   width: 24,
                   height: 24,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -906,13 +895,12 @@ class _ProfileShimmer extends StatelessWidget {
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         sliver: SliverToBoxAdapter(
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+          child: Shimmer(
+            interval: const Duration(seconds: 5),
             child: Container(
               height: 280,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
@@ -923,13 +911,12 @@ class _ProfileShimmer extends StatelessWidget {
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         sliver: SliverToBoxAdapter(
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+          child: Shimmer(
+            interval: const Duration(seconds: 5),
             child: Container(
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
@@ -940,13 +927,12 @@ class _ProfileShimmer extends StatelessWidget {
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         sliver: SliverToBoxAdapter(
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+          child: Shimmer(
+            interval: const Duration(seconds: 5),
             child: Container(
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
