@@ -235,6 +235,9 @@ void main() {
 
       debugPrint('App startup time: ${startupTime}ms');
 
+      // The startup time threshold was reduced from 15000ms to 5000ms to reflect
+      // recent performance optimizations and align with updated performance requirements.
+      // This ensures the app meets modern user expectations for responsiveness.
       expect(
         startupTime,
         lessThan(5000),
