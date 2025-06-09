@@ -194,9 +194,11 @@ flutter build ios --release
 ### Web
 
 ```bash
-# Web build
+# Web build (Development only - not included in CI/CD)
 flutter build web --release
 ```
+
+**Note**: The CI/CD pipeline focuses on Android APK builds. Web builds are available for local development but not automated in the deployment pipeline.
 
 ## Testing
 
@@ -242,23 +244,49 @@ The project uses **GitHub Actions** for continuous integration and deployment:
 
 ### Workflows
 
-- **Main CI/CD Pipeline** (`.github/workflows/main.yml`)
+- **Main CI/CD Pipeline** (`.github/workflows/flutter_ci.yml`)
   - Automated testing on push and PR
-  - Web deployment to GitHub Pages
+  - Android APK build and deployment
   - Multi-platform testing
 
-- **Pull Request Checks** (`.github/workflows/pr-check.yml`)
+- **Pull Request Checks** (`.github/workflows/pr_checks.yml`)
   - Code quality checks
   - Test execution
-  - Build verification
+  - Android APK build verification
 
 - **Nightly Builds** (`.github/workflows/nightly.yml`)
-  - Daily automated builds
+  - Daily automated Android APK builds
   - Dependency updates check
+  - Comprehensive testing
 
-- **Dependency Updates** (`.github/workflows/update-deps.yml`)
-  - Automated dependency updates
-  - Security vulnerability checks
+- **Dependency Updates** (`.github/workflows/dependency_updates.yml`)
+  - Weekly automated dependency updates (Mondays at 6 AM UTC)
+  - Android build compatibility verification
+  - Automatic PR creation for dependency updates
+
+### Build Artifacts
+
+The CI/CD pipeline produces the following artifacts:
+
+- **Android APK**: Released APK files for distribution and testing
+- **Test Coverage Reports**: Code coverage analysis uploaded to Codecov
+- **Nightly Reports**: Daily build status and performance metrics
+
+### Deployment Strategy
+
+- **Staging**: APK builds from `develop` branch are deployed to staging environment
+- **Production**: APK builds from `main` branch create GitHub releases with attached APK files
+- **Testing**: All PR builds generate APK artifacts for testing (retained for 30 days)
+- **Nightly**: Daily builds create APK artifacts (retained for 7 days)
+
+### Platform Focus
+
+This project is **Android-focused** with the following considerations:
+
+- ✅ **Android APK**: Full CI/CD pipeline with automated builds and releases
+- ⚠️ **Web**: Available for local development only (`flutter build web`)
+- ⚠️ **iOS**: Manual builds only (`flutter build ios` on macOS)
+- ⚠️ **Desktop**: Manual builds only (Windows/Linux/macOS)
 
 ### Local CI Scripts
 
