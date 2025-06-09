@@ -68,6 +68,8 @@ dev_dependencies:
     sdk: flutter
   analyzer: ^7.4.5
   timezone: ^0.10.1
+dependency_overrides:
+  analyzer_plugin: ^0.13.1
     
 flutter:
   uses-material-design: true

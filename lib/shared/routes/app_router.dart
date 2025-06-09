@@ -124,7 +124,7 @@ class AppRouter extends Equatable {
 
 /// Route data for the login page.
 @TypedGoRoute<LoginRoute>(path: AppRouter.loginRoute, name: AppRouter.loginName)
-final class LoginRoute extends GoRouteData {
+final class LoginRoute extends GoRouteData with _$LoginRoute {
   /// Creates a [LoginRoute].
   const LoginRoute();
 
@@ -134,7 +134,7 @@ final class LoginRoute extends GoRouteData {
 
 /// Route data for the registration page.
 @TypedGoRoute<RegisterRoute>(path: AppRouter.registerRoute, name: AppRouter.registerName)
-final class RegisterRoute extends GoRouteData {
+final class RegisterRoute extends GoRouteData with _$RegisterRoute {
   /// Creates a [RegisterRoute].
   const RegisterRoute();
 
@@ -144,7 +144,7 @@ final class RegisterRoute extends GoRouteData {
 
 /// Route data for the forgot password page.
 @TypedGoRoute<ForgotPasswordRoute>(path: AppRouter.forgotPasswordRoute, name: AppRouter.forgotPasswordName)
-final class ForgotPasswordRoute extends GoRouteData {
+final class ForgotPasswordRoute extends GoRouteData with _$ForgotPasswordRoute {
   /// Creates a [ForgotPasswordRoute].
   const ForgotPasswordRoute();
 
@@ -154,7 +154,7 @@ final class ForgotPasswordRoute extends GoRouteData {
 
 /// Route data for the reset password page.
 @TypedGoRoute<ResetPasswordRoute>(path: AppRouter.resetPasswordRoute, name: AppRouter.resetPasswordName)
-final class ResetPasswordRoute extends GoRouteData {
+final class ResetPasswordRoute extends GoRouteData with _$ResetPasswordRoute {
   /// Creates a [ResetPasswordRoute].
   /// Requires a [resetToken] for password reset.
   const ResetPasswordRoute({required this.resetToken});
@@ -171,7 +171,7 @@ final class ResetPasswordRoute extends GoRouteData {
 
 /// Route data for the OTP verification page.
 @TypedGoRoute<OtpVerificationRoute>(path: AppRouter.otpVerificationRoute, name: AppRouter.otpVerificationName)
-final class OtpVerificationRoute extends GoRouteData {
+final class OtpVerificationRoute extends GoRouteData with _$OtpVerificationRoute {
   /// Creates an [OtpVerificationRoute].
   /// Requires the [email] for which OTP is being verified.
   const OtpVerificationRoute({required this.email});
@@ -188,7 +188,7 @@ final class OtpVerificationRoute extends GoRouteData {
 
 /// Route data for the page shown after successful OTP verification.
 @TypedGoRoute<OtpVerifiedRoute>(path: AppRouter.otpVerifiedRoute, name: AppRouter.otpVerifiedName)
-final class OtpVerifiedRoute extends GoRouteData {
+final class OtpVerifiedRoute extends GoRouteData with _$OtpVerifiedRoute {
   /// Creates an [OtpVerifiedRoute].
   const OtpVerifiedRoute();
 
@@ -198,7 +198,7 @@ final class OtpVerifiedRoute extends GoRouteData {
 
 /// Route data for the home page.
 @TypedGoRoute<HomeRoute>(path: AppRouter.homeRoute, name: AppRouter.homeName)
-final class HomeRoute extends GoRouteData {
+final class HomeRoute extends GoRouteData with _$HomeRoute {
   /// Creates a [HomeRoute].
   const HomeRoute();
 
@@ -208,7 +208,7 @@ final class HomeRoute extends GoRouteData {
 
 /// Route data for the job detail page.
 @TypedGoRoute<JobDetailRoute>(path: AppRouter.jobDetailRoute, name: AppRouter.jobDetailName)
-final class JobDetailRoute extends GoRouteData {
+final class JobDetailRoute extends GoRouteData with _$JobDetailRoute {
   /// Creates a [JobDetailRoute].
   /// Requires the [id] of the job to display.
   const JobDetailRoute({required this.id});
@@ -222,7 +222,7 @@ final class JobDetailRoute extends GoRouteData {
 
 /// Route data for the change password page.
 @TypedGoRoute<ChangePasswordRoute>(path: AppRouter.changePasswordRoute, name: AppRouter.changePasswordName)
-final class ChangePasswordRoute extends GoRouteData {
+final class ChangePasswordRoute extends GoRouteData with _$ChangePasswordRoute {
   /// Creates a [ChangePasswordRoute].
   const ChangePasswordRoute();
 
@@ -232,7 +232,7 @@ final class ChangePasswordRoute extends GoRouteData {
 
 /// Route data for the edit personal information page.
 @TypedGoRoute<EditProfileRoute>(path: AppRouter.editProfileRoute, name: AppRouter.editProfileName)
-final class EditProfileRoute extends GoRouteData {
+final class EditProfileRoute extends GoRouteData with _$EditProfileRoute {
   /// Creates an [EditProfileRoute].
   const EditProfileRoute();
 
@@ -242,7 +242,7 @@ final class EditProfileRoute extends GoRouteData {
 
 /// Route data for the edit job information page.
 @TypedGoRoute<EditJobRoute>(path: AppRouter.editJobRoute, name: AppRouter.editJobName)
-final class EditJobRoute extends GoRouteData {
+final class EditJobRoute extends GoRouteData with _$EditJobRoute {
   /// Creates an [EditJobRoute].
   const EditJobRoute();
 
@@ -255,7 +255,7 @@ final class EditJobRoute extends GoRouteData {
   path: AppRouter.forgotPasswordOtpRoute,
   name: AppRouter.forgotPasswordOtpName,
 )
-final class VerifyForgotPasswordOTPRoute extends GoRouteData {
+final class VerifyForgotPasswordOTPRoute extends GoRouteData with _$VerifyForgotPasswordOTPRoute {
   /// Creates a [VerifyForgotPasswordOTPRoute].
   /// Requires the [email] for which the OTP is being verified.
   const VerifyForgotPasswordOTPRoute({required this.email});
