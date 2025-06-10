@@ -56,7 +56,7 @@ A comprehensive job search Flutter application that enables users to search, bro
 
 ## Screenshots
 
-[Figma](https://www.figma.com/design/a00WRcFWV0wn3hzz0lBdmp/JobsIT---Project?node-id=3590-4485&t=CxefdFnxR1uHhDc0-0)
+*Screenshots will be added here or link to Figma/mockups*
 
 ## Getting Started
 
@@ -73,7 +73,7 @@ A comprehensive job search Flutter application that enables users to search, bro
 
 ```bash
 # Clone the repository
-git clone https://github.com/harumazzz/Jobsit
+git clone <repository-url>
 cd Jobsit
 
 # Install dependencies
