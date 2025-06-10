@@ -280,7 +280,7 @@ class ShimmerCard extends StatelessWidget {
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Shimmer(
-        interval: const Duration(seconds: 5),
+        interval: shimmerInterval,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
