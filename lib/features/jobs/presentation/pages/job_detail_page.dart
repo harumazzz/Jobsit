@@ -604,7 +604,7 @@ class _JobImage extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.shimmerColor,
+            color: Colors.grey[300],
             borderRadius: BorderRadius.circular(8),
           ),
         ),
