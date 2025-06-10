@@ -217,18 +217,11 @@ void main() {
     });
 
     tearDown(() async {
-      // Clear any stored authentication data
       final authService = InjectionContainer.get<IAuthStorageService>();
       await authService.deleteToken();
-
-      // Clear secure storage completely for tests
       final secureStorage = InjectionContainer.get<ISecureStorageService>();
       await secureStorage.deleteAll();
-
-      // Reset the dependency injection container
       await InjectionContainer.reset();
-
-      // Clear any remaining timers/animations and allow garbage collection
       await Future.delayed(const Duration(milliseconds: 200));
     });
 
@@ -242,13 +235,14 @@ void main() {
 
       debugPrint('App startup time: ${startupTime}ms');
 
+      // The startup time threshold was reduced from 15000ms to 5000ms to reflect
+      // recent performance optimizations and align with updated performance requirements.
+      // This ensures the app meets modern user expectations for responsiveness.
       expect(
         startupTime,
-        lessThan(15000),
+        lessThan(5000),
         reason: 'App startup should complete within 5 seconds',
       );
-
-      // Verify app is fully loaded
       expect(find.byType(MaterialApp), findsOneWidget);
       await tester.pumpAndSettle(const Duration(seconds: 2));
       await tester.pump(const Duration(milliseconds: 500));
@@ -257,8 +251,6 @@ void main() {
       await setupApp(tester);
 
       final List<int> navigationTimes = [];
-
-      // Test navigation to registration page
       final stopwatch1 = Stopwatch()..start();
       await tester.tap(find.byKey(const Key('signup_link')));
       await tester.pumpAndSettle();
@@ -266,7 +258,6 @@ void main() {
       navigationTimes.add(stopwatch1.elapsedMilliseconds);
 
       expect(find.byType(FormBuilder), findsOneWidget);
-
       expect(
         stopwatch1.elapsedMilliseconds,
         lessThan(2500),
@@ -276,11 +267,8 @@ void main() {
 
     testWidgets('form input performance test', (final tester) async {
       await setupApp(tester);
-
-      // Navigate to registration form
       await tester.tap(find.byKey(const Key('signup_link')));
       await tester.pumpAndSettle();
-
       final List<int> inputTimes = [];
       final formFields = [
         'first_name_field',
@@ -322,8 +310,6 @@ void main() {
       debugPrint(
         'Average input time: ${averageInputTime.toStringAsFixed(1)}ms',
       );
-
-      // Assert input performance
       for (final time in inputTimes) {
         expect(
           time,
@@ -341,25 +327,16 @@ void main() {
 
     testWidgets('scroll performance test', (final tester) async {
       await setupApp(tester);
-
-      // Navigate to registration page which has scrollable content
       await tester.tap(find.byKey(const Key('signup_link')));
       await tester.pumpAndSettle();
-
       final scrollView = find.byType(SingleChildScrollView).first;
-
-      // Measure scroll performance
       final stopwatch = Stopwatch()..start();
-
-      // Perform multiple scroll operations
       for (int i = 0; i < 5; i++) {
         await tester.drag(scrollView, const Offset(0, -200));
         await tester.pump();
-        await Future.delayed(const Duration(milliseconds: 16)); // One frame
+        await Future.delayed(const Duration(milliseconds: 16));
       }
-
-      // Scroll back to top
-      for (int i = 0; i < 5; i++) {
+      for (var i = 0; i < 5; i++) {
         await tester.drag(scrollView, const Offset(0, 200));
         await tester.pump();
         await Future.delayed(const Duration(milliseconds: 16));
@@ -380,24 +357,15 @@ void main() {
       await setupApp(tester);
 
       final stopwatch = Stopwatch()..start();
-
-      // Perform operations that involve animations
       await tester.tap(find.byKey(const Key('signup_link')));
-
-      // Let animations complete
       await tester.pumpAndSettle(const Duration(seconds: 2));
-
-      // Navigate back to login page - use app reset for reliable navigation
       await setupApp(tester);
-
-      // Verify login page is loaded before proceeding
       if (find
           .byKey(
             const Key('forgot_password_button'),
           )
           .evaluate()
           .isNotEmpty) {
-        // Test page transitions to forgot password
         await tester.tap(find.byKey(const Key('forgot_password_button')));
         await tester.pumpAndSettle(const Duration(seconds: 2));
       }
@@ -412,15 +380,11 @@ void main() {
         lessThan(10000),
         reason: 'Animation transitions should complete within 10 seconds',
       );
-
-      // Verify app is still responsive
       expect(find.byType(MaterialApp), findsOneWidget);
     });
 
     testWidgets('network request performance test', (final tester) async {
       await setupApp(tester);
-
-      // Navigate to forgot password to test network request
       await tester.tap(find.byKey(const Key('forgot_password_button')));
       await tester.pumpAndSettle();
 
@@ -428,13 +392,9 @@ void main() {
         find.byKey(const Key('reset_email_field')),
         'performance.test@example.com',
       );
-
-      // Measure time for network request
       final stopwatch = Stopwatch()..start();
 
       await tester.tap(find.byKey(const Key('send_reset_button')));
-
-      // Wait for network request to complete
       await tester.pump(const Duration(milliseconds: 100));
       await tester.pumpAndSettle(const Duration(seconds: 5));
 
@@ -445,16 +405,14 @@ void main() {
 
       expect(
         networkTime,
-        lessThan(60000),
-        reason: 'Network request should complete within 10 seconds',
+        lessThan(15000),
+        reason: 'Network request should complete within 15 seconds',
       );
       await tester.pumpAndSettle();
     });
 
     testWidgets('widget rebuild performance test', (final tester) async {
       await setupApp(tester);
-
-      // Navigate to registration form
       await tester.tap(find.byKey(const Key('signup_link')));
       await tester.pumpAndSettle();
 

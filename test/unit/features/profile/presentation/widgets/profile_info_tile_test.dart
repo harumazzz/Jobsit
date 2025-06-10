@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jobsit/features/auth/domain/entities/user.dart';
 import 'package:jobsit/features/auth/presentation/providers/auth_provider.dart';
 import 'package:jobsit/features/profile/presentation/widgets/profile_info_tile.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 void main() {
   group('SimpleTile Widget Tests', () {

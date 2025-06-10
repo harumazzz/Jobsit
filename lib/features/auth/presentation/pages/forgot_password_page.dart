@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
@@ -16,41 +17,23 @@ import '../widgets/auth_text_field.dart';
 /// It handles form validation and interacts with the [authControllerProvider]
 /// to initiate the forgot password process. On success, it navigates to the
 /// OTP verification page.
-class ForgotPasswordPage extends ConsumerStatefulWidget {
+class ForgotPasswordPage extends HookConsumerWidget {
   /// Creates a [ForgotPasswordPage].
   const ForgotPasswordPage({super.key});
 
   @override
-  ConsumerState<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
-}
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final formKey = useMemoized(GlobalKey<FormBuilderState>.new);
+    final emailFocusNode = useFocusNode();
+    final emailController = useTextEditingController();
 
-class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
-  late GlobalKey<FormBuilderState> _formKey;
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        emailFocusNode.requestFocus();
+      });
+      return null;
+    }, []);
 
-  late FocusNode _emailFocusNode;
-
-  late TextEditingController _emailController;
-
-  @override
-  void initState() {
-    _formKey = GlobalKey<FormBuilderState>();
-    _emailFocusNode = FocusNode();
-    _emailController = TextEditingController();
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _emailFocusNode.requestFocus();
-    });
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _emailFocusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(final BuildContext context) {
     final state = ref.watch(authControllerProvider);
     ref.listen<AuthState>(authControllerProvider, (
       final previous,
@@ -61,7 +44,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           context: context,
           message: context.t.auth.forgotPasswordSuccess,
         );
-        VerifyForgotPasswordOTPRoute(email: _emailController.text).go(context);
+        VerifyForgotPasswordOTPRoute(email: emailController.text).go(context);
       }
       if (next is AuthError) {
         NotificationService.error(context: context, message: next.message);
@@ -69,7 +52,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     });
     return Scaffold(
       body: FormBuilder(
-        key: _formKey,
+        key: formKey,
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
@@ -103,8 +86,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               FormBuilderTextField(
                 key: const Key('reset_email_field'),
                 name: 'email',
-                controller: _emailController,
-                focusNode: _emailFocusNode,
+                controller: emailController,
+                focusNode: emailFocusNode,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
@@ -121,9 +104,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                   value,
                   context,
                 ),
-                onSubmitted: (final value) {
-                  if (_emailFocusNode.hasFocus) {
-                    _emailFocusNode.unfocus();
+                onSubmitted: (final value) async {
+                  if (emailFocusNode.hasFocus) {
+                    emailFocusNode.unfocus();
                   }
                 },
               ),
@@ -135,8 +118,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                   child: CustomButton(
                     key: const Key('send_reset_button'),
                     onPressed: () {
-                      if (_formKey.currentState!.saveAndValidate()) {
-                        final email = _emailController.text;
+                      if (formKey.currentState!.saveAndValidate()) {
+                        final email = emailController.text;
                         ref
                             .read(authControllerProvider.notifier)
                             .forgotPassword(
@@ -177,7 +160,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 /// The page handles form validation for the new password and confirmation,
 /// and interacts with the [authControllerProvider] to perform the reset.
 /// On success, it navigates to the login page.
-class ResetPasswordPage extends ConsumerStatefulWidget {
+class ResetPasswordPage extends HookConsumerWidget {
   /// Creates a [ResetPasswordPage].
   ///
   /// [resetToken] is the token required to authorize the password reset.
@@ -187,50 +170,26 @@ class ResetPasswordPage extends ConsumerStatefulWidget {
   final String resetToken;
 
   @override
-  ConsumerState<ResetPasswordPage> createState() => _ResetPasswordPageState();
-
-  @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('resetToken', resetToken));
   }
-}
-
-class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
-  late GlobalKey<FormBuilderState> _formKey;
-
-  late TextEditingController _passwordController;
-
-  late TextEditingController _confirmPasswordController;
-
-  late FocusNode _passwordFocusNode;
-
-  late FocusNode _confirmPasswordFocusNode;
 
   @override
-  void initState() {
-    _passwordController = TextEditingController();
-    _confirmPasswordController = TextEditingController();
-    _formKey = GlobalKey<FormBuilderState>();
-    _passwordFocusNode = FocusNode();
-    _confirmPasswordFocusNode = FocusNode();
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _passwordFocusNode.requestFocus();
-    });
-  }
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final formKey = useMemoized(GlobalKey<FormBuilderState>.new);
+    final passwordController = useTextEditingController();
+    final confirmPasswordController = useTextEditingController();
+    final passwordFocusNode = useFocusNode();
+    final confirmPasswordFocusNode = useFocusNode();
 
-  @override
-  void dispose() {
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    _passwordFocusNode.dispose();
-    _confirmPasswordFocusNode.dispose();
-    super.dispose();
-  }
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        passwordFocusNode.requestFocus();
+      });
+      return null;
+    }, []);
 
-  @override
-  Widget build(final BuildContext context) {
     final state = ref.watch(authControllerProvider);
     ref.listen<AuthState>(authControllerProvider, (
       final previous,
@@ -249,7 +208,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
     });
     return Scaffold(
       body: FormBuilder(
-        key: _formKey,
+        key: formKey,
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
@@ -267,9 +226,9 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                 ),
               ),
               AuthTextField(
-                controller: _passwordController,
+                controller: passwordController,
                 name: 'password',
-                focusNode: _passwordFocusNode,
+                focusNode: passwordFocusNode,
                 keyboardType: TextInputType.visiblePassword,
                 label: context.t.auth.password,
                 validator: (final value) => InputConverter.validatePassword(
@@ -277,19 +236,19 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                   context,
                 ),
                 onFieldSubmitted: (final value) async {
-                  if (_passwordFocusNode.hasFocus) {
-                    _passwordFocusNode.unfocus();
+                  if (passwordFocusNode.hasFocus) {
+                    passwordFocusNode.unfocus();
                   }
                   FocusScope.of(context).requestFocus(
-                    _confirmPasswordFocusNode,
+                    confirmPasswordFocusNode,
                   );
                 },
               ),
               AuthTextField(
-                controller: _confirmPasswordController,
+                controller: confirmPasswordController,
                 name: 'confirm_password',
                 label: context.t.auth.confirmPassword,
-                focusNode: _confirmPasswordFocusNode,
+                focusNode: confirmPasswordFocusNode,
                 keyboardType: TextInputType.visiblePassword,
                 validator:
                     (
@@ -297,11 +256,11 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                     ) => InputConverter.validateConfirmPassword(
                       value,
                       context,
-                      _passwordController.text,
+                      passwordController.text,
                     ),
                 onFieldSubmitted: (final value) async {
-                  if (_confirmPasswordFocusNode.hasFocus) {
-                    _confirmPasswordFocusNode.unfocus();
+                  if (confirmPasswordFocusNode.hasFocus) {
+                    confirmPasswordFocusNode.unfocus();
                   }
                 },
                 autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -312,13 +271,13 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                   width: double.infinity,
                   child: CustomButton(
                     onPressed: () async {
-                      if (_formKey.currentState!.saveAndValidate()) {
+                      if (formKey.currentState!.saveAndValidate()) {
                         await ref
                             .read(authControllerProvider.notifier)
                             .resetPassword(
-                              resetToken: widget.resetToken,
-                              password: _passwordController.text,
-                              confirmPassword: _confirmPasswordController.text,
+                              resetToken: resetToken,
+                              password: passwordController.text,
+                              confirmPassword: confirmPasswordController.text,
                             );
                       }
                     },

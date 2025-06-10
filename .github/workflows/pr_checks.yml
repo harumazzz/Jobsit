@@ -23,6 +23,12 @@ jobs:
         channel: 'stable'
         cache: true
         
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
     - name: Get dependencies
       run: flutter pub get
       
@@ -37,11 +43,6 @@ jobs:
       
     - name: Build Android APK
       run: flutter build apk --release
-      
-    - name: Build Web
-      run: |
-        flutter config --enable-web
-        flutter build web --release
         
     - name: Build info summary
       run: |
@@ -49,4 +50,3 @@ jobs:
         echo "✅ Analysis passed (warnings treated as errors)"
         echo "✅ Tests passed"
         echo "✅ Android APK built successfully"
-        echo "✅ Web build completed"

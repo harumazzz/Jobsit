@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
@@ -16,50 +17,19 @@ import '../widgets/auth_text_field.dart';
 /// Allows users to sign in using their email and password, or navigate to
 /// registration and password recovery. It also provides options for social
 /// logins (Google, Facebook - currently placeholders).
-class LoginPage extends ConsumerStatefulWidget {
+class LoginPage extends HookConsumerWidget {
   /// Creates a [LoginPage].
   const LoginPage({super.key});
 
   @override
-  ConsumerState<LoginPage> createState() => _LoginPageState();
-}
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final emailController = useTextEditingController();
+    final passwordController = useTextEditingController();
+    final emailFocusNode = useFocusNode();
+    final passwordFocusNode = useFocusNode();
+    final formKey = useMemoized(GlobalKey<FormBuilderState>.new);
+    final savePassword = useState(false);
 
-class _LoginPageState extends ConsumerState<LoginPage> {
-  late TextEditingController _emailController;
-
-  late TextEditingController _passwordController;
-
-  late FocusNode _emailFocusNode;
-
-  late FocusNode _passwordFocusNode;
-
-  late GlobalKey<FormBuilderState> _formKey;
-
-  late bool _savePassword;
-
-  @override
-  void initState() {
-    _emailController = TextEditingController();
-    _passwordController = TextEditingController();
-    _emailFocusNode = FocusNode();
-    _passwordFocusNode = FocusNode();
-    _formKey = GlobalKey<FormBuilderState>();
-    _savePassword = false;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _emailFocusNode.dispose();
-    _passwordFocusNode.dispose();
-    _formKey.currentState?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(final BuildContext context) {
     final state = ref.watch(authControllerProvider);
     ref.listen<AuthState>(authControllerProvider, (
       final previous,
@@ -83,9 +53,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           break;
       }
     });
+
     return Scaffold(
       body: FormBuilder(
-        key: _formKey,
+        key: formKey,
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: SingleChildScrollView(
@@ -100,7 +71,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 FormBuilderTextField(
                   key: const Key('email_field'),
                   name: 'email',
-                  focusNode: _emailFocusNode,
+                  focusNode: emailFocusNode,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
@@ -113,16 +84,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       horizontal: 20,
                     ),
                   ),
-                  controller: _emailController,
+                  controller: emailController,
                   validator: (final value) => InputConverter.validateEmail(
                     value,
                     context,
                   ),
                   onSubmitted: (_) async {
-                    if (_emailFocusNode.hasFocus) {
-                      _emailFocusNode.unfocus();
+                    if (emailFocusNode.hasFocus) {
+                      emailFocusNode.unfocus();
                     }
-                    FocusScope.of(context).requestFocus(_passwordFocusNode);
+                    FocusScope.of(context).requestFocus(passwordFocusNode);
                   },
                 ),
                 const SizedBox(height: 20),
@@ -130,16 +101,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   key: const Key('password_field'),
                   name: 'password',
                   label: context.t.auth.password,
-                  controller: _passwordController,
-                  focusNode: _passwordFocusNode,
+                  controller: passwordController,
+                  focusNode: passwordFocusNode,
                   keyboardType: TextInputType.visiblePassword,
                   validator: (final value) => InputConverter.validatePassword(
                     value,
                     context,
                   ),
                   onFieldSubmitted: (final value) async {
-                    if (_passwordFocusNode.hasFocus) {
-                      _passwordFocusNode.unfocus();
+                    if (passwordFocusNode.hasFocus) {
+                      passwordFocusNode.unfocus();
                     }
                   },
                 ),
@@ -151,27 +122,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       mainAxisSize: MainAxisSize.min,
                       spacing: 10,
                       children: [
-                        StatefulBuilder(
-                          builder:
-                              // ignore: lines_longer_than_80_chars
-                              (final context, final setState) => Checkbox.adaptive(
-                                value: _savePassword,
-                                onChanged: (final value) {
-                                  if (value == null) {
-                                    return;
-                                  }
-                                  setState(() {
-                                    _savePassword = value;
-                                  });
-                                },
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                // ignore: lines_longer_than_80_chars
-                                activeColor: Theme.of(context).colorScheme.primary,
-                                // ignore: lines_longer_than_80_chars
-                                checkColor: Theme.of(context).colorScheme.onPrimary,
-                              ),
+                        Checkbox.adaptive(
+                          value: savePassword.value,
+                          onChanged: (final value) {
+                            if (value == null) {
+                              return;
+                            }
+                            savePassword.value = value;
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          activeColor: Theme.of(context).colorScheme.primary,
+                          checkColor: Theme.of(context).colorScheme.onPrimary,
                         ),
                         Text(context.t.auth.savePassword),
                       ],
@@ -193,12 +156,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     child: CustomButton(
                       key: const Key('login_button'),
                       onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
+                        if (formKey.currentState!.validate()) {
                           await ref
                               .read(authControllerProvider.notifier)
                               .login(
-                                email: _emailController.text,
-                                password: _passwordController.text,
+                                email: emailController.text,
+                                password: passwordController.text,
                               );
                         }
                       },

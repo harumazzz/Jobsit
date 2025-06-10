@@ -2,7 +2,7 @@ name: Dependency Updates
 
 on:
   schedule:
-    - cron: '0 10 * * MON'  # Run every Monday at 10 AM UTC
+    - cron: '0 6 * * 1'  # Run weekly on Monday at 6 AM UTC
   workflow_dispatch:
 
 jobs:
@@ -23,64 +23,66 @@ jobs:
         channel: 'stable'
         cache: true
         
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
     - name: Check for dependency updates
       run: |
+        echo "Checking for outdated dependencies..."
         flutter pub deps
-        flutter pub upgrade --dry-run > upgrade-preview.txt
-        cat upgrade-preview.txt
+        flutter pub outdated || true
+        
     - name: Update dependencies
       run: |
+        echo "Updating dependencies..."
         flutter pub upgrade
+        
+    - name: Get updated dependencies
+      run: flutter pub get
         
     - name: Run code generation
       run: dart run build_runner build --delete-conflicting-outputs
         
     - name: Run tests after update
       run: |
-        flutter test test/
+        echo "Running tests to verify dependency updates..."
+        flutter test
+        
+    - name: Check for analysis issues
+      run: |
+        echo "Checking for analysis issues after updates..."
         flutter analyze --fatal-infos
         
-    - name: Build to verify compatibility
+    - name: Build Android APK to verify compatibility
       run: |
-        flutter config --enable-web
-        flutter build web --release --web-renderer html
-        
-    - name: Check for changes
-      id: changes
-      run: |
-        if [[ -n $(git status --porcelain) ]]; then
-          echo "changes=true" >> $GITHUB_OUTPUT
-        else
-          echo "changes=false" >> $GITHUB_OUTPUT
-        fi
+        echo "Building Android APK to verify updates..."
+        flutter build apk --release
         
     - name: Create Pull Request
-      if: steps.changes.outputs.changes == 'true'
       uses: peter-evans/create-pull-request@v5
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        commit-message: 'chore: update Flutter dependencies'
-        title: 'chore: Automated dependency updates'
+        commit-message: 'chore: update dependencies'
+        title: 'chore: automated dependency updates'
         body: |
-          ## Automated Dependency Updates 🤖
+          ## Automated Dependency Updates
           
-          This PR contains automated dependency updates.
+          This PR was automatically created to update Flutter dependencies.
           
-          ### Changes Made:
-          - Updated Flutter dependencies to latest compatible versions
-          - Verified all tests pass
-          - Confirmed web build works correctly
+          ### Changes
+          - Updated all dependencies to latest compatible versions
+          - Verified tests still pass
+          - Verified code analysis passes
+          - Verified Android APK build succeeds
           
-          ### Testing:
-          - ✅ Widget tests pass
-          - ✅ Code analysis passes
-          - ✅ Web build successful
+          ### Next Steps
+          - Review the changes
+          - Test the application manually if needed
+          - Merge when ready
           
-          Please review the changes and merge if everything looks good.
-        branch: automated-dependency-updates
+          **Created by**: Dependency Update Workflow
+        branch: dependency-updates
         delete-branch: true
-        
-    - name: Notify if no updates
-      if: steps.changes.outputs.changes == 'false'
-      run: |
-        echo "No dependency updates available"

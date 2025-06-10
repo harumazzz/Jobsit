@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/input_converter.dart';
@@ -16,7 +16,7 @@ import '../providers/auth_provider.dart';
 /// This page is typically used after registration. It requires an [email]
 /// to which the OTP was sent. It handles OTP input, validation, and
 /// resending OTP functionality.
-class OtpVerificationPage extends ConsumerStatefulWidget {
+class OtpVerificationPage extends HookConsumerWidget {
   /// Creates an [OtpVerificationPage].
   ///
   /// [email] The email address to which the OTP was sent.
@@ -26,49 +26,23 @@ class OtpVerificationPage extends ConsumerStatefulWidget {
   final String email;
 
   @override
-  // ignore: lines_longer_than_80_chars
-  ConsumerState<OtpVerificationPage> createState() => _OtpVerificationPageState();
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final otpController = useTextEditingController();
+    final otpFocusNode = useFocusNode();
+    final formKey = useMemoized(GlobalKey<FormBuilderState>.new);
 
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(StringProperty('email', email));
-  }
-}
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        otpFocusNode.requestFocus();
+        await ref
+            .read(authControllerProvider.notifier)
+            .sendMail(
+              email: email,
+            );
+      });
+      return null;
+    }, []);
 
-class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
-  late TextEditingController _otpController;
-
-  late FocusNode _otpFocusNode;
-
-  late GlobalKey<FormBuilderState> _formKey;
-
-  @override
-  void initState() {
-    _otpController = TextEditingController();
-    _otpFocusNode = FocusNode();
-    _formKey = GlobalKey<FormBuilderState>();
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _otpFocusNode.requestFocus();
-      await ref
-          .read(authControllerProvider.notifier)
-          .sendMail(
-            email: widget.email,
-          );
-    });
-  }
-
-  @override
-  void dispose() {
-    _otpController.dispose();
-    _otpFocusNode.dispose();
-    _formKey.currentState?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(final BuildContext context) {
     ref.listen<AuthState>(authControllerProvider, (
       final previous,
       final next,
@@ -86,9 +60,10 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
         NotificationService.error(context: context, message: next.message);
       }
     });
+
     return Scaffold(
       body: FormBuilder(
-        key: _formKey,
+        key: formKey,
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Center(
@@ -103,8 +78,8 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
                   Text(context.t.auth.enterOtp),
                   const SizedBox(height: 30),
                   _OtpField(
-                    controller: _otpController,
-                    focusNode: _otpFocusNode,
+                    controller: otpController,
+                    focusNode: otpFocusNode,
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -117,11 +92,11 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
                         highlightColor: Colors.transparent,
                         hoverColor: Colors.transparent,
                         onTap: () async {
-                          _otpFocusNode.unfocus();
+                          otpFocusNode.unfocus();
                           await ref
                               .read(authControllerProvider.notifier)
                               .resendMail(
-                                email: widget.email,
+                                email: email,
                               );
                         },
                         child: Text(
@@ -137,12 +112,12 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
                     child: CustomButton(
                       key: const Key('verify_button'),
                       onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          _otpFocusNode.unfocus();
+                        if (formKey.currentState!.validate()) {
+                          otpFocusNode.unfocus();
                           await ref
                               .read(authControllerProvider.notifier)
                               .verifyEmail(
-                                otp: _otpController.text,
+                                otp: otpController.text,
                               );
                         }
                       },
@@ -156,6 +131,12 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('email', email));
   }
 }
 
@@ -287,7 +268,7 @@ class OtpVerifiedPage extends StatelessWidget {
 /// Requires the [email] address to which the OTP was sent. It handles
 /// OTP input, validation, and resending OTP functionality related to
 /// password reset.
-class ForgotPasswordOTP extends ConsumerStatefulWidget {
+class ForgotPasswordOTP extends HookConsumerWidget {
   /// Creates a [ForgotPasswordOTP] page.
   ///
   /// [email] The email address associated with the forgot password request.
@@ -297,48 +278,23 @@ class ForgotPasswordOTP extends ConsumerStatefulWidget {
   final String email;
 
   @override
-  ConsumerState<ForgotPasswordOTP> createState() => _ForgotPasswordOTPState();
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final otpController = useTextEditingController();
+    final otpFocusNode = useFocusNode();
+    final formKey = useMemoized(GlobalKey<FormBuilderState>.new);
 
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(StringProperty('email', email));
-  }
-}
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        otpFocusNode.requestFocus();
+        await ref
+            .read(authControllerProvider.notifier)
+            .sendMail(
+              email: email,
+            );
+      });
+      return null;
+    }, []);
 
-class _ForgotPasswordOTPState extends ConsumerState<ForgotPasswordOTP> {
-  late TextEditingController _otpController;
-
-  late FocusNode _otpFocusNode;
-
-  late GlobalKey<FormBuilderState> _formKey;
-
-  @override
-  void initState() {
-    _otpController = TextEditingController();
-    _otpFocusNode = FocusNode();
-    _formKey = GlobalKey<FormBuilderState>();
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _otpFocusNode.requestFocus();
-      await ref
-          .read(authControllerProvider.notifier)
-          .sendMail(
-            email: widget.email,
-          );
-    });
-  }
-
-  @override
-  void dispose() {
-    _otpController.dispose();
-    _otpFocusNode.dispose();
-    _formKey.currentState?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(final BuildContext context) {
     ref.listen<AuthState>(authControllerProvider, (
       final previous,
       final next,
@@ -350,9 +306,10 @@ class _ForgotPasswordOTPState extends ConsumerState<ForgotPasswordOTP> {
         NotificationService.error(context: context, message: next.message);
       }
     });
+
     return Scaffold(
       body: FormBuilder(
-        key: _formKey,
+        key: formKey,
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Center(
@@ -367,8 +324,8 @@ class _ForgotPasswordOTPState extends ConsumerState<ForgotPasswordOTP> {
                   Text(context.t.auth.enterOtp),
                   const SizedBox(height: 30),
                   _OtpField(
-                    controller: _otpController,
-                    focusNode: _otpFocusNode,
+                    controller: otpController,
+                    focusNode: otpFocusNode,
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -381,11 +338,11 @@ class _ForgotPasswordOTPState extends ConsumerState<ForgotPasswordOTP> {
                         highlightColor: Colors.transparent,
                         hoverColor: Colors.transparent,
                         onTap: () async {
-                          _otpFocusNode.unfocus();
+                          otpFocusNode.unfocus();
                           await ref
                               .read(authControllerProvider.notifier)
                               .forgotPassword(
-                                email: widget.email,
+                                email: email,
                               );
                         },
                         child: Text(
@@ -400,12 +357,12 @@ class _ForgotPasswordOTPState extends ConsumerState<ForgotPasswordOTP> {
                     width: double.infinity,
                     child: CustomButton(
                       onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          _otpFocusNode.unfocus();
+                        if (formKey.currentState!.validate()) {
+                          otpFocusNode.unfocus();
                           await ref
                               .read(authControllerProvider.notifier)
                               .verifyOtp(
-                                otp: _otpController.text,
+                                otp: otpController.text,
                               );
                         }
                       },
@@ -419,5 +376,11 @@ class _ForgotPasswordOTPState extends ConsumerState<ForgotPasswordOTP> {
         ),
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('email', email));
   }
 }

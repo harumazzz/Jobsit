@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 import '../../../../core/network/api_constant.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -215,14 +215,13 @@ class AvatarSection extends StatelessWidget {
         width: 86,
         height: 86,
         fit: BoxFit.cover,
-        placeholder: (final context, final url) => Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
+        placeholder: (final context, final url) => Shimmer(
+          interval: const Duration(seconds: 1),
           child: Container(
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.grey[300],
               borderRadius: BorderRadius.circular(8),
             ),
           ),
