@@ -1,0 +1,52 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-checks:
+    name: PR Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.2'
+        channel: 'stable'
+        cache: true
+        
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
+    - name: Get dependencies
+      run: flutter pub get
+      
+    - name: Generate code with build_runner
+      run: dart run build_runner build --delete-conflicting-outputs
+      
+    - name: Analyze code (warnings as errors)
+      run: flutter analyze --fatal-infos --fatal-warnings
+      
+    - name: Run tests
+      run: flutter test
+      
+    - name: Build Android APK
+      run: flutter build apk --release
+        
+    - name: Build info summary
+      run: |
+        echo "✅ Code generation completed"
+        echo "✅ Analysis passed (warnings treated as errors)"
+        echo "✅ Tests passed"
+        echo "✅ Android APK built successfully"

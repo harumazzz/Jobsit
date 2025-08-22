@@ -1,0 +1,88 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Run weekly on Monday at 6 AM UTC
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.2'
+        channel: 'stable'
+        cache: true
+        
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
+    - name: Check for dependency updates
+      run: |
+        echo "Checking for outdated dependencies..."
+        flutter pub deps
+        flutter pub outdated || true
+        
+    - name: Update dependencies
+      run: |
+        echo "Updating dependencies..."
+        flutter pub upgrade
+        
+    - name: Get updated dependencies
+      run: flutter pub get
+        
+    - name: Run code generation
+      run: dart run build_runner build --delete-conflicting-outputs
+        
+    - name: Run tests after update
+      run: |
+        echo "Running tests to verify dependency updates..."
+        flutter test
+        
+    - name: Check for analysis issues
+      run: |
+        echo "Checking for analysis issues after updates..."
+        flutter analyze --fatal-infos
+        
+    - name: Build Android APK to verify compatibility
+      run: |
+        echo "Building Android APK to verify updates..."
+        flutter build apk --release
+        
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'chore: update dependencies'
+        title: 'chore: automated dependency updates'
+        body: |
+          ## Automated Dependency Updates
+          
+          This PR was automatically created to update Flutter dependencies.
+          
+          ### Changes
+          - Updated all dependencies to latest compatible versions
+          - Verified tests still pass
+          - Verified code analysis passes
+          - Verified Android APK build succeeds
+          
+          ### Next Steps
+          - Review the changes
+          - Test the application manually if needed
+          - Merge when ready
+          
+          **Created by**: Dependency Update Workflow
+        branch: dependency-updates
+        delete-branch: true
